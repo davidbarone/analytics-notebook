@@ -320,5 +320,11 @@ Column.prototype.mode = function () {
         }
         result.push(arr[i].value);
     }
-    return result;
+    // Only return mode if <= 5 mode values. Otherwise
+    // not relevant
+    if (result.length <= 5) {
+        return result;
+    } else {
+        return undefined;
+    }
 }

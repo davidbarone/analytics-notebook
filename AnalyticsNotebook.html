@@ -12,11 +12,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/d3js/5.15.1/d3.min.js"></script>
 
     <!-- Notebook components -->
-    <link rel="stylesheet" href="./css/AnalyticsNotebook.css" />
-    <script src="./src/AnalyticsNotebook.js"></script>
-    <script src="./src/DataFrame.js"></script>
-    <script src="./src/Column.js"></script>
-    <script src="./src/Visuals.js"></script>
+    <link rel="stylesheet" href="./AnalyticsNotebook.css" />
+    <script src="./AnalyticsNotebook.js"></script>
+    <script src="./DataFrame.js"></script>
+    <script src="./Column.js"></script>
+    <script src="./Visual.js"></script>
+    <script src="./UI.js"></script>
+
+    <!-- Reactive -->
+    <script src="./Reactive/Dep.js"></script>
+    <script src="./Reactive/Observer.js"></script>
+    <script src="./Reactive/Watcher.js"></script>
 
     <script type="text/javascript">
       var notebooks = [];
@@ -268,30 +274,28 @@
         });
 
         // redirect console.log to console pane in DOM
-        var consolePane = document.getElementById("console");
-        console.log = function (message) {
-          if (typeof message == "object") {
-            consolePane.innerHTML +=
-              (JSON && JSON.stringify ? JSON.stringify(message) : message) +
-              "<br />";
-          } else {
-            consolePane.innerHTML += `${message}<br />`;
-          }
-        };
-        window.onerror = function (message, url, lineNo, columnNo, error) {
-          if (typeof message == "object") {
-            consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${
-              JSON && JSON.stringify ? JSON.stringify(message) : message
-            }<br /></div>`;
-          } else {
-            consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
-          }
-          return true;
-        };
-        window.onunhandledrejection = function (e) {
-          consolePane.innerHTML += `<div style="color:red;">${e.reason.message}<br /></div>`;
-          return true;
-        };
+        /*
+            var consolePane = document.getElementById('console');
+            console.log = function (message) {
+                if (typeof message == 'object') {
+                    consolePane.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
+                } else {
+                    consolePane.innerHTML += `${message}<br />`;
+                }
+            }
+            window.onerror = function (message, url, lineNo, columnNo, error) {
+                if (typeof message == 'object') {
+                    consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${(JSON && JSON.stringify ? JSON.stringify(message) : message)}<br /></div>`;
+                } else {
+                    consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
+                }
+                return true;
+            }
+            window.onunhandledrejection = function (e) {
+                consolePane.innerHTML += `<div style="color:red;">${e.reason.message}<br /></div>`;
+                return true;
+            }
+            */
 
         resizePanelContents = function (el) {
           var elPanes = document.querySelectorAll("div.visual.leaf");
