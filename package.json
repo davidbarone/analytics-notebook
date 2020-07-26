@@ -1,0 +1,24 @@
+{
+  "name": "analytics-notebook",
+  "version": "1.0.0",
+  "description": "Analytical and statistical notebook application.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidbarone/analytics-notebook.git"
+  },
+  "keywords": [
+    "analytics",
+    "notebook",
+    "javascript"
+  ],
+  "author": "david barone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidbarone/analytics-notebook/issues"
+  },
+  "homepage": "https://github.com/davidbarone/analytics-notebook#readme"
+}
