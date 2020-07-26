@@ -1,5 +1,8 @@
 /**
- *  DataFrame - Manages all manipulation of data.
+ * DataFrame - Manages all manipulation of data.
+ *
+ * A DataFrame is similar to an Array object. It should be thought of as an array of objects
+ * or a two dimensional array, similar to a table.
  */
 class DataFrame {
   data = [];
@@ -8,10 +11,20 @@ class DataFrame {
     this.data.push.apply(this.data, arguments);
   }
 
+  /**
+   * Creates a new DataFrame object from a plain Javascript Array object.
+   * @param {Array} arr - The array to create a DataFrame object from.
+   * @returns {DataFrame}
+   */
   static create(arr) {
     return new DataFrame(...arr);
   }
 
+  /**
+   * Fetches data from a Url. The data must be JSON data.
+   * @param {string} url - The Url to fetch data from.
+   * @returns {DataFrame}
+   */
   static async fetch(url) {
     console.log("starting read...");
     var result = await fetch(url, {
@@ -24,16 +37,41 @@ class DataFrame {
     return new DataFrame(...data);
   }
 
+  /**
+   * Transforms a DataFrame object using a mapping function.
+   * @param {DataFrame~mapFunction} mapFunction - The function to map the data. The function accepts a single parameter 'row' representing the current row. The function must return an object representing the transformed row.
+   * @returns {DataFrame} - The transformed DataFrame.
+   */
   map(mapFunction) {
     this.data = [...this.data.map(mapFunction)];
     return this;
   }
 
+  /**
+   * This callback is displayed as part of the DataFrame.filter method.
+   * @callback DataFrame~mapFunction
+   * @param {Object} row - The current row in the DataFrame.
+   * @returns {Object} - The transformed row.
+   */
+
+  /**
+   * Filters a DataFrame object using a filter function.
+   * @param {Function} filterFunction - The function to filter the data. The function accepts a single parameter 'row' representing the current row. The function must return a boolean.
+   * @returns {DataFrame} - The filtered DataFrame.
+   */
   filter(filterFunction) {
     this.data = [...this.data.filter(filterFunction)];
     return this;
   }
 
+  /**
+   * Groups a DataFrame object using a grouping function and an optional aggregation function. The group function is mandatory and specifies the group values.
+   * If the aggregation function is ommitted, the result is simply the distinct group values. If an aggregation function is specified, then additional
+   * aggregated values for each group can be included.
+   * @param {*} groupingFunction
+   * @param {*} aggregateFunction
+   * @returns {DataFrame}
+   */
   group(groupingFunction, aggregateFunction) {
     let groups = {};
     this.data.forEach(function (o) {

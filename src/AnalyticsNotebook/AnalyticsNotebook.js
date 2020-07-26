@@ -1,107 +1,15 @@
-var documentation = {
-  title: "Analytics Notebook API Reference",
-  description: `The Analytics Notebook is a data manipulation, analytical, and presentational tool which enables analysts and developers
-to quickly gain a variety of insights from datasets. The interface consists of a code panel into which a script
-can be entered and executed, and an output panel where the script output is rendered. Multiple panes can be created
-in the output to generate complex reports and dashboards. Javascript is used for creating the scripts, and a library
-of helper functions is available in the Analytics Notebook API for generating all kinds of analytical output from tables
-to charts to statistical output.`,
-  operations: [],
-};
-
 class sw {
   // Generates a help file
   static help() {
-    UI.clear();
-    let html = "<div class = 'help'>";
-    html += `<h2 id="top">${sw.documentation.title}</h2>`;
-    html += `<p>${sw.documentation.description}</p>`;
-
-    // Get the index:
-    html += "<h3>Index of Functions</h3>";
-
-    // Get classes
-    let classes = sw.documentation.operations
-      .map((o) => o.class)
-      .filter((value, index, self) => {
-        return self.indexOf(value) === index;
-      });
-
-    // Display Index
-    classes.forEach((c) => {
-      html += `<h4>${c}</h4>`;
-      let operations = sw.documentation.operations.filter((o) => o.class === c);
-      operations.sort((a, b) => {
-        return a.name > b.name ? 1 : -1;
-      });
-
-      operations.forEach((o) => {
-        html += `<a href='#${o.name}'>${o.name}</a> `;
-      });
-    });
-
-    // The full list of functions
-    html += "<h3>List of Functions</h3>";
-
-    let operations = sw.documentation.operations;
-    operations.sort((a, b) => {
-      return a.name > b.name ? 1 : -1;
-    });
-
-    operations.forEach((o) => {
-      html += `
-<div id=${o.name} class="helpOperation">
-    <div class="helpOperationHeader">
-        <span>${o.class + (o.static ? "." : ".prototype.") + o.name}()</span>
-        <span>Async: ${o.async}</span>
-        <span>Returns: ${o.returns}</span>
-    </div>
-    <div class="helpOperationBody">
-        <a href="#top" style="font-size: small">Top</a>
-        <div>${o.description}</div>`;
-
-      let signatures = o.signatures;
-      signatures.forEach((s) => {
-        html += `<div class="helpOperationSignature">`;
-
-        let signature = `.${o.name}(${s
-          .map((sig) => sig.parameterName)
-          .join(", ")})`;
-        html += `<div>${signature}</div>`;
-
-        // each parameter
-        s.forEach((p) => {
-          html += `<div class="description"><b>${p.parameterName}</b> <i>${p.parameterType}</i>: ${p.parameterDescription}</div>`;
-        });
-
-        html += `</div>`;
-      });
-
-      // Examples
-      let examples = o.examples;
-      if (examples) {
-        html += "<h3>Examples</h3>";
-        examples.forEach((e) => {
-          html += `<h4>${e.name}</h4><p>${e.description}</p><pre class=code>${e.code}</pre>`;
-        });
-      }
-
-      html += `</div>`;
-      html += `</div>`;
-    });
-    html += "</div>";
-
-    UI.content(html);
+    var win = window.open(
+      "./docs/index.html",
+      "Help",
+      "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=780,height=200,top=" +
+        (screen.height - 400) +
+        ",left=" +
+        (screen.width - 840)
+    );
   }
-
-  /*
-                static group(data, keyFunction) {
-                    return data.reduce(function (acc, cur, idx, src) {
-                (acc[keyFunction(cur)] = acc[keyFunction(cur)] || []).push(cur);
-                        return acc;
-                    }, {});
-                };
-    */
 
   static concatTypedArrays(a, b) {
     // a, b TypedArray of same type
@@ -111,8 +19,6 @@ class sw {
     return c;
   }
 }
-
-sw.documentation = documentation;
 
 ////////////////////////////////////////////////////
 // Extensions / Mixins

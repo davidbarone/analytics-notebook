@@ -4,7 +4,8 @@
   "description": "Analytical and statistical notebook application.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "jsdoc -c ./jsdoc.conf.json ./README.md"
   },
   "repository": {
     "type": "git",

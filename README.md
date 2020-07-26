@@ -6,10 +6,21 @@ dashboards to be developed.
 
 ## Documentation
 
-jsDoc has been used to generate documentation. To get started, you'll need to install via npm:
+jsDoc has been used to generate documentation. Having done a bit of research, this project appeared to be the most comprehensive and well used documentation
+library out there. More information can be found from the home page: https://jsdoc.app/.
+
+To get started with jsDoc, you'll need to install via npm:
 
 ```javascript
 npm install -g jsdocs
 ```
 
 (I noticed on my PC that I had to also allow PowerShell scripts to run).
+
+I've added a 'docs' script, so the entire documentation can be easily rebuilt using:
+
+```javascript
+npm run docs
+```
+
+The documentation should be created in the /docs folder.
