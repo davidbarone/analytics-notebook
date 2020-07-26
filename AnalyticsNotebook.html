@@ -12,12 +12,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/d3js/5.15.1/d3.min.js"></script>
 
     <!-- Notebook components -->
-    <link rel="stylesheet" href="./AnalyticsNotebook.css" />
-    <script src="./AnalyticsNotebook.js"></script>
-    <script src="./DataFrame.js"></script>
-    <script src="./Column.js"></script>
-    <script src="./Visual.js"></script>
-    <script src="./UI.js"></script>
+    <link
+      rel="stylesheet"
+      href="./css/AnalyticsNotebook/AnalyticsNotebook.css"
+    />
+    <script src="./src/AnalyticsNotebook/AnalyticsNotebook.js"></script>
+    <script src="./src/AnalyticsNotebook/DataFrame.js"></script>
+    <script src="./src/AnalyticsNotebook/Column.js"></script>
+    <script src="./src/AnalyticsNotebook/Visual.js"></script>
+    <script src="./src/AnalyticsNotebook/UI.js"></script>
 
     <!-- Reactive -->
     <script src="./Reactive/Dep.js"></script>
@@ -31,8 +34,8 @@
       var showNotebookLoadSave = false;
 
       // IO URLS
-      var urlCategories = "https://api.bidev.sanitarium.com.au/dwh/categories";
-      var urlNotebooks = "https://api.bidev.sanitarium.com.au/dwh/notebooks";
+      var urlCategories = "https://[enter endpoint...]";
+      var urlNotebooks = "https://[enter endpoint...]";
 
       function runCode() {
         // clear output + console
