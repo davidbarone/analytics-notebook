@@ -39,6 +39,10 @@ class UI {
     visuals.forEach((v) => {});
     UI.content();
   }
+
+  static layout() {
+    alert("ersd");
+  }
 }
 
 ////////////////////////////////////////////////////

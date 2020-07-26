@@ -1,4 +1,5 @@
 {
+  "mainpagetitle": "Analytics Notebook",
   "plugins": [],
   "recurseDepth": 10,
   "opts": {
@@ -6,8 +7,8 @@
     "destination": "./docs/"
   },
   "source": {
-    "include": ["src"],
     "includePattern": ".+\\.js(doc|x)?$",
+    "include": ["src"],
     "excludePattern": "node_modules"
   },
   "sourceType": "module",
