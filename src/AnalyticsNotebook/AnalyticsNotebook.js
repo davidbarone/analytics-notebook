@@ -1,6 +1,7 @@
 class sw {
   // Generates a help file
   static help() {
+    /*
     var win = window.open(
       "./docs/index.html",
       "Help",
@@ -9,6 +10,10 @@ class sw {
         ",left=" +
         (screen.width - 840)
     );
+*/
+    UI.layout("root");
+    document.getElementById("root").innerHTML =
+      '<object type="text/html" style="width: 100%; height: 100%" data="./docs/index.html" ></object>';
   }
 
   static concatTypedArrays(a, b) {
