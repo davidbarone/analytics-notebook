@@ -1,23 +1,79 @@
 /**
- * Controls output to the output pane.
+ * @typedef {String} PanelAlignment
+ */
+
+/**
+ * @enum {PanelAlignment}
+ */
+var PANEL_ALIGNMENT = {
+  /**
+   * Child panels will be aligned horizontally within the parent.
+   */
+  HORIZONTAL: "Horizontal",
+  /**
+   * Child panels will be aligned vertically within the parent.
+   */
+  VERTICAL: "Vertical",
+};
+
+/**
+ * @typedef {String} PanelFit
+ */
+
+/**
+ * @enum {PanelFit}
+ */
+var PANEL_FIT = {
+  /**
+   * Child visuals will not be resized. Scroll bars will be displayed if content overflows the panel.
+   */
+  NONE: "None",
+
+  /**
+   * Child visuals will be resized so the width fits the panel.
+   */
+  WIDTH: "Width",
+
+  /**
+   * Child visuals will be resized so the height fits the panel.
+   */
+  HEIGHT: "Height",
+
+  /**
+   * Child visuals will be resized so both the width and height fits the panel.
+   */
+  BOTH: "Both",
+};
+
+/**
+ * Controls rendering to the output section.
  */
 class UI {
-  // Each panel element holds an array of Visual objects
-  // allowing for the panel to be redrawn if necessary.
+  /**
+   * The collection of panels in the current output. Each panel can hold zero or more visuals.
+   */
   static panels = {};
 
   /**
-   * Clears the output pane.
+   * Clears / resets the output completely.
    * @example <caption>Clearing the UI output pane</caption>
-   * UI.clear();
+   * UI.reset();
    */
   static reset() {
     let elOutput = document.getElementById("output");
     elOutput.innerHTML = "";
     UI.panels = {};
+
+    // Create default panel. This can be overridden by UI.layout
+    UI.layout("root");
   }
 
-  clear(id = null) {
+  /**
+   * Clears a single panel. Typically used internally to redraw parts of the output when
+   * data is being interactively sliced.
+   * @param {String} id - The id of the panel to clear.
+   */
+  static clear(id) {
     // Note: all content goes into an inner div within visual
     // called div.visual.inner
 
@@ -48,15 +104,49 @@ class UI {
   }
 
   /**
-   * Creates a layout using panels. Each pane can have the following properties:
-   * size
-   * fit: none, width, height, both
-   * id:
-   * @param {Array} panels - An array specifying the panels to add.
-   * @param {String} direction - The direction the panels are aligned. Must be 'horizontal' or 'vertical'.
-   * @param {String} parentId - The parent id of the element to place the panels in.
+   * A definition of a single panel in the output pane.
+   * @typedef {Object} UI~Panel
+   * @property {String} id - The id of the panel. Must be globally unique.
+   * @property {Number} size - The relative size of the panel. The number has no dimensions and is relative to its sibling sizes.
+   * @property {PanelAlignment} alignment - The alignment of child panels within this panel.
+   * @property {PanelFit} fit - Specifies how child items / visuals are fitted within this panel.
+   * @property {UI~Panel[]} children - Optional array of child panel objects
    */
-  static layout(panels, direction = "horizontal", parentId = null) {
+
+  /**
+   * Creates a layout using panels. Panels are containers for visuals. A panel layout is typically
+   * used to create a dashboard or report.
+   * @param {UI~Panel[]} panels - An array of panels. A single panel can also be specified.
+   * @param {String} parentId - The parent id of the element to place the panels in.
+   * @example <caption>Creating a simple layout</caption>
+   * UI.layout({
+   *   id: 'root',
+   *   direction: 'vertical',
+   *   children: [
+   *     {
+   *       id: 'top',
+   *       size: 1
+   *     },
+   *     {
+   *       id: 'middle',
+   *       size: 1
+   *     },
+   *     {
+   *       id: 'bottom',
+   *       size: 2,
+   *       children: [
+   *         {
+   *           id: 'bottom-left'
+   *         },
+   *         {
+   *           id: 'bottom-right'
+   *         }
+   *       ]
+   *     }
+   *   ]
+   * });
+   */
+  static layout(panels, parentId = null) {
     /* 
       Calculation of panel borders
       ----------------------------
@@ -93,14 +183,24 @@ class UI {
       - - Add top to first child
       */
 
-    let el = document.getElementById(parentId);
+    // Parent
+    let direction = "horizontal"; // default
     let root = false;
-
-    if (!el) {
-      // default to main output
-      el = document.getElementById("output");
+    if (!parentId) {
+      // root
+      parentId = "output";
       root = true;
+      UI.panels = {};
+    } else {
+      if (!UI.panels[parentId]) {
+        throw `Parent id ${parentId} not found.`;
+      }
+
+      // parent direction
+      direction = UI.panels[parentId].direction;
     }
+
+    let el = document.getElementById(parentId);
 
     // clear the contents of the parent and reset style
     el.innerHTML = "";
@@ -125,13 +225,16 @@ class UI {
           id: p,
           size: 1,
           fit: "both",
+          direction: "horizontal",
+          children: [],
         };
       } else if (typeof p === "object") {
         return {
           ...{
-            id: "_",
             size: 1,
             fit: "both",
+            direction: "horizontal",
+            children: [],
           },
           ...p,
         };
@@ -144,6 +247,17 @@ class UI {
 
     let first = true;
     panels.forEach((p) => {
+      // Cache the panel object
+      if (!p.id) {
+        throw "Panel id not set.";
+      }
+
+      if (UI.panels[p.id]) {
+        throw `Panel id ${p.id} already used. Id values must be unique.`;
+      }
+
+      UI.panels[p.id] = p;
+
       let div = document.createElement("div");
       div.classList.add("visual", "leaf");
 
@@ -182,12 +296,14 @@ class UI {
       placeholder.style.height = "100%";
       placeholder.style.boxSizing = "border-box";
 
-      // add to metadata for re-rendering
-      UI.panels[p.id] = [];
-
       // Finally render the new pane with a placeholder.
       div.appendChild(placeholder);
       el.appendChild(div);
+
+      // Recursive bit
+      if (p.children && p.children.length > 0) {
+        UI.layout(p.children, p.id);
+      }
     });
   }
 
@@ -196,7 +312,7 @@ class UI {
    * @param {*} content
    * @param {*} id
    */
-  content(content, id = null) {
+  static content(content, id = null) {
     // Note: all content goes into an inner div within visual
     // called div.visual.inner
 

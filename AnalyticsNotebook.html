@@ -37,8 +37,7 @@
 
       function runCode() {
         // clear output + console
-        let elOutput = document.getElementById("output");
-        elOutput.innerHTML = "";
+        UI.reset();
         let elConsole = document.getElementById("console");
         elConsole.innerHTML = "";
         var code = document.getElementById("code").value;
@@ -182,6 +181,9 @@
 
       // on DOM loaded
       document.addEventListener("DOMContentLoaded", async function () {
+        // Create default root panel in output
+        UI.reset();
+
         if (showNotebookLoadSave) {
           // Get categories
           await getCategories();
@@ -276,28 +278,31 @@
 
         // redirect console.log to console pane in DOM
         /*
-            var consolePane = document.getElementById('console');
-            console.log = function (message) {
-                if (typeof message == 'object') {
-                    consolePane.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
-                } else {
-                    consolePane.innerHTML += `${message}<br />`;
-                }
-            }
-            window.onerror = function (message, url, lineNo, columnNo, error) {
-                if (typeof message == 'object') {
-                    consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${(JSON && JSON.stringify ? JSON.stringify(message) : message)}<br /></div>`;
-                } else {
-                    consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
-                }
-                return true;
-            }
-            window.onunhandledrejection = function (e) {
-                consolePane.innerHTML += `<div style="color:red;">${e.reason.message}<br /></div>`;
-                return true;
-            }
-            */
-
+        var consolePane = document.getElementById("console");
+        console.log = function (message) {
+          if (typeof message == "object") {
+            consolePane.innerHTML +=
+              (JSON && JSON.stringify ? JSON.stringify(message) : message) +
+              "<br />";
+          } else {
+            consolePane.innerHTML += `${message}<br />`;
+          }
+        };
+        window.onerror = function (message, url, lineNo, columnNo, error) {
+          if (typeof message == "object") {
+            consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${
+              JSON && JSON.stringify ? JSON.stringify(message) : message
+            }<br /></div>`;
+          } else {
+            consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
+          }
+          return true;
+        };
+        window.onunhandledrejection = function (e) {
+          consolePane.innerHTML += `<div style="color:red;">${e.reason.message}<br /></div>`;
+          return true;
+        };
+*/
         resizePanelContents = function (el) {
           var elPanes = document.querySelectorAll("div.visual.leaf");
           elPanes.forEach((el) => {
