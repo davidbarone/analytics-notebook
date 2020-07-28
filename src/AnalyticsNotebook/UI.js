@@ -63,6 +63,7 @@ class UI {
     let elOutput = document.getElementById("output");
     elOutput.innerHTML = "";
     UI.panels = {};
+    Visual.visuals = [];
 
     // Create default panel. This can be overridden by UI.layout
     UI.layout("root");

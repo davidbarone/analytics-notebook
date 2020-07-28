@@ -43,8 +43,7 @@ class DataFrame {
    * @returns {DataFrame} - The transformed DataFrame.
    */
   map(mapFunction) {
-    this.data = [...this.data.map(mapFunction)];
-    return this;
+    return DataFrame.create([...this.data.map(mapFunction)]);
   }
 
   /**
@@ -60,8 +59,7 @@ class DataFrame {
    * @returns {DataFrame} - The filtered DataFrame.
    */
   filter(filterFunction) {
-    this.data = [...this.data.filter(filterFunction)];
-    return this;
+    return DataFrame.create([...this.data.filter(filterFunction)]);
   }
 
   /**
@@ -88,8 +86,7 @@ class DataFrame {
         return { ...JSON.parse(group), ...agg };
       }
     });
-    this.data = data;
-    return this;
+    return DataFrame.create(data);
   }
 
   pivot(groupingFunction, pivotFunction, aggregateFunction) {
@@ -122,13 +119,11 @@ class DataFrame {
       return { ...JSON.parse(group), ...pivotObj };
     });
 
-    this.data = data;
-    return this;
+    return DataFrame.create(data);
   }
 
   head(top) {
-    this.data = [...this.data.splice(0, top)];
-    return this;
+    return DataFrame.create([...this.data.splice(0, top)]);
   }
 
   sort(sortFunction, descending) {
@@ -190,12 +185,13 @@ class DataFrame {
 
     // Do select now
     let data = [...results.map((r) => selectFunction(r.left, r.right))];
-    this.data = data;
-    return this;
+    return DataFrame.create(data);
   }
 
-  column(columnName) {
-    return new Column(...this.data.map((r) => r[columnName]));
+  list(columnName) {
+    console.log(this.data);
+    console.log("x");
+    return new List([...this.data.map((r) => r[columnName])]);
   }
 
   describe() {
@@ -245,8 +241,7 @@ class DataFrame {
       };
     });
 
-    this.data = data;
-    return this;
+    return DataFrame.create(data);
   }
 
   remove(columnNames) {
@@ -256,8 +251,7 @@ class DataFrame {
       });
     });
 
-    this.data = data;
-    return this;
+    return DataFrame.create(data);
   }
 
   select(columnNames) {
@@ -270,8 +264,7 @@ class DataFrame {
       data.push(obj);
     });
 
-    this.data = data;
-    return this;
+    return DataFrame.create(data);
   }
 
   slice(slicers) {
@@ -301,5 +294,12 @@ class DataFrame {
   visual(renderer, options) {
     let visual = new Visual(this, renderer, options);
     return visual;
+  }
+
+  /**
+   * Clones the DataFrame object.
+   */
+  clone() {
+    return DataFrame.create(this.data);
   }
 }

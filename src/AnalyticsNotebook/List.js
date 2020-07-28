@@ -26,7 +26,7 @@ class List {
    * @returns {Number} Returns the sum of a list.
    */
   sum() {
-    return this.values().reduce((acc, cur) => acc + cur, 0);
+    return this.values().arr.reduce((acc, cur) => acc + cur, 0);
   }
 
   /**
@@ -37,7 +37,7 @@ class List {
    * @returns {Number} Returns the minimum value in a list.
    */
   min() {
-    return this.values().reduce((acc, cur) => (acc <= cur ? acc : cur));
+    return this.values().arr.reduce((acc, cur) => (acc <= cur ? acc : cur));
   }
 
   /**
@@ -48,7 +48,7 @@ class List {
    * @returns {Number} Returns the maximum value in a list.
    */
   min() {
-    return this.values().reduce((acc, cur) => (acc <= cur ? acc : cur));
+    return this.values().arr.reduce((acc, cur) => (acc <= cur ? acc : cur));
   }
 
   /**
@@ -60,7 +60,8 @@ class List {
    */
   mean() {
     return (
-      this.values().reduce((acc, cur) => acc + cur, null) / this.values.length
+      this.values().arr.reduce((acc, cur) => acc + cur, null) /
+      this.values().arr.length
     );
   }
 
@@ -86,7 +87,8 @@ class List {
    * UI.content(titanic.list("age").values());
    */
   values() {
-    return new Column(...this.arr.filter((i) => i));
+    console.log(this.arr);
+    return new List(...this.arr.filter((i) => i));
   }
 
   /**
@@ -99,7 +101,7 @@ class List {
   unique() {
     let results = [];
     results.pushUnique(...this.values());
-    return new Column(...results);
+    return new List(...results);
   }
 
   /**
