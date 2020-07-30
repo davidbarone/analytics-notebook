@@ -1,4 +1,4 @@
-# analytics-notebook
+# Analytics-Notebook
 
 The analytics-notebook is an analytical and statistical notebook application written in JavaScript, and is inspired by similar notebooks such as Jupyter notebooks, and https://observablehq.com/. Like the aforementioned applications, the intention for this application is to allow developers, analysts, researchers and statisticians to make sense out of data.
 
@@ -20,6 +20,7 @@ At the base of the code section there is a console window. This is similar to th
 ### Output Section
 
 The output section is used to render any output from the code. Output is typically
+
 - Static text
 - Raw unformatted data
 - Simple scalar values
@@ -27,6 +28,7 @@ The output section is used to render any output from the code. Output is typical
 - Charts and other graphical visuals
 
 Each distinct component displayed rendered to the output section is called a 'Visual'. There are broadly 2 kinds of visuals:
+
 - Data bound visuals
 - Static visuals
 
@@ -35,6 +37,7 @@ Data bound visuals are the most commonly used visual. These have a dataset (know
 ## API
 
 In order to work efficiently with the code and output sections, there is an API within the analytics-notebook. This API contains a number of classes and functions. The key classes are:
+
 - DataFrame - for manipulating tabular data.
 - List - for manipulating columnar data.
 - Visual - for creating visuals.
@@ -46,7 +49,7 @@ The DataFrame class can be thought of as a 2-dimensional table. DataFrames are t
 
 ### List
 
-A List object can be considered as a 1 dimensional list of values or a single column from a DataFrame. Lists objects are typically used to process a column, often to aggregate the values in some way.
+A List object can be considered as a 1 dimensional list of values or a single column from a DataFrame. Lists objects are typically used to process a column, often to aggregate the values in some way or to perform univariate analysis.
 
 ### Visual
 
@@ -59,6 +62,7 @@ The UI class is used for manipulating the output. Typically you don't need to us
 ```
 dataframe.visual({visual_renderer_function}, {options}).attach('root');
 ```
+
 ## Documentation
 
 This documentation you're reading has been compiled using jsDoc. More information can be found from the home page: https://jsdoc.app/. The documentation has also been styled using the ink-docstrap template (https://www.npmjs.com/package/ink-docstrap).
@@ -72,82 +76,114 @@ The following script performs some simple exploratory analysis on the 'Titanic' 
 ```javascript
 // Create single 'root' panel and allow vertical scrollbar.
 UI.layout({
-  id: 'root',
-  fit: 'width'
+  id: "root",
+  fit: "width",
 });
 
 // Add custom 'caption' renderer to render text nicely:
-Visual.renderer.caption = (dataFrame, options) => {
-  elDiv = document.createElement('div');
-  elDiv.style.marginTop = '20px';
-  elDiv.style.marginBottom = '20px';
-  elDiv.style.backgroundColor = '#ddeeff';
-  elDiv.style.border = '1px solid #aabbcc';
-  elDiv.style.fontWeight = 700;
-  elDiv.style.padding = '10px';
-  elDiv.innerHTML = options.html || '';
-  return elDiv;
-}
+Visual.renderer.caption = (dataFrame, options) => {
+  elDiv = document.createElement("div");
+  elDiv.style.marginTop = "20px";
+  elDiv.style.marginBottom = "20px";
+  elDiv.style.backgroundColor = "#ddeeff";
+  elDiv.style.border = "1px solid #aabbcc";
+  elDiv.style.fontWeight = 700;
+  elDiv.style.padding = "10px";
+  elDiv.innerHTML = options.html || "";
+  return elDiv;
+};
 
-Visual.caption = (html) => {
-  let viz = new Visual(undefined, Visual.renderer.caption, {html});
-  return viz;
-}
+Visual.caption = (html) => {
+  let viz = new Visual(undefined, Visual.renderer.caption, { html });
+  return viz;
+};
 
 // Get the titanic dataset:
-let data = DataFrame.examples.titanic();
+let data = DataFrame.examples.titanic();
 
 // Get first 5 rows:
-Visual.html('<header>Titanic Analysis</header>').attach('root');
-Visual.caption(`Number of rows: ${data.count()}`).attach('root');
-Visual.caption('Top 5 rows:').attach('root');
-data.head(5).visual(Visual.renderer.table).attach('root');
+Visual.html("<header>Titanic Analysis</header>").attach("root");
+Visual.caption(`Number of rows: ${data.count()}`).attach("root");
+Visual.caption("Top 5 rows:").attach("root");
+data.head(5).visual(Visual.renderer.table).attach("root");
 
 // Get descriptive statistics:
-Visual.caption('Let\'s get the data descriptive statistics:').attach('root');
-data.describe().visual(Visual.renderer.table).attach('root');
+Visual.caption("Let's get the data descriptive statistics:").attach("root");
+data.describe().visual(Visual.renderer.table).attach("root");
 
 // Some simple transformations and cleansing:
-Visual.caption('Let\'s remove unwanted columns:').attach('root');
-data = data.select('sex','pclass','age', 'fare', 'sibsp', 'parch', 'survived');
-data.head(5).visual(Visual.renderer.table).attach('root');
+Visual.caption("Let's remove unwanted columns:").attach("root");
+data = data.select(
+  "sex",
+  "pclass",
+  "age",
+  "fare",
+  "sibsp",
+  "parch",
+  "survived"
+);
+data.head(5).visual(Visual.renderer.table).attach("root");
 
-Visual.caption('Age appears to be a string value - lets convert to a float:').attach('root');
-data = data.cast({
-    age: 'float',
-    fare: 'float'
+Visual.caption(
+  "Age appears to be a string value - lets convert to a float:"
+).attach("root");
+data = data.cast({
+  age: "float",
+  fare: "float",
 });
 
-data.describe().visual(Visual.renderer.table).attach('root');
+data.describe().visual(Visual.renderer.table).attach("root");
 
-Visual.caption('Lets convert the sex field to a numeric variable and also rename and tidy up some of the other columns.').attach('root');
-data = data.map(r=> { return {
-  is_male: r.sex.toLowerCase()==='male' ? 1 : 0,
-  class: r.pclass,
-  fare: r.fare,
-  age: r.age,
-  relatives: r.sibsp + r.parch,
-  survived: r.survived
-}});
+Visual.caption(
+  "Lets convert the sex field to a numeric variable and also rename and tidy up some of the other columns."
+).attach("root");
+data = data.map((r) => {
+  return {
+    is_male: r.sex.toLowerCase() === "male" ? 1 : 0,
+    class: r.pclass,
+    fare: r.fare,
+    age: r.age,
+    relatives: r.sibsp + r.parch,
+    survived: r.survived,
+  };
+});
 
-data.head(5).visual(Visual.renderer.table).attach('root');
-data.describe().visual(Visual.renderer.table).attach('root');
+data.head(5).visual(Visual.renderer.table).attach("root");
+data.describe().visual(Visual.renderer.table).attach("root");
 
 // Simple visualisations:
-Visual.caption('Pie chart showing passengers by sex (male=1, female=0):').attach('root');
-data.visual(Visual.renderer.pie, {
-    fnCategories: (r)=> { return { is_male: r.is_male }},
-    fnValues: (g)=> { return { passengers: g.count() }}
-}).attach('root');
+Visual.caption(
+  "Pie chart showing passengers by sex (male=1, female=0):"
+).attach("root");
+data
+  .visual(Visual.renderer.pie, {
+    fnCategories: (r) => {
+      return { is_male: r.is_male };
+    },
+    fnValues: (g) => {
+      return { passengers: g.count() };
+    },
+  })
+  .attach("root");
 
-Visual.caption('Histogram of passenger ages:').attach('root');
-data.visual(Visual.renderer.hist, {
-    fnValues: (r) => { return { age: r.age }}
-}).attach('root');
+Visual.caption("Histogram of passenger ages:").attach("root");
+data
+  .visual(Visual.renderer.hist, {
+    fnValues: (r) => {
+      return { age: r.age };
+    },
+  })
+  .attach("root");
 
-Visual.caption('Scatterplot showing fare vs age variables:').attach('root');
-data.visual(Visual.renderer.scatter, {
-  fnXValues: (row)=>{ return { age: row.age }},
-  fnYValues: (row)=>{ return { fare: row.fare }}
-}).attach('root');
+Visual.caption("Scatterplot showing fare vs age variables:").attach("root");
+data
+  .visual(Visual.renderer.scatter, {
+    fnXValues: (row) => {
+      return { age: row.age };
+    },
+    fnYValues: (row) => {
+      return { fare: row.fare };
+    },
+  })
+  .attach("root");
 ```
