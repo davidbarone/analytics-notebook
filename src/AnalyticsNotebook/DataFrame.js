@@ -2,7 +2,8 @@
  * DataFrame - Manages all manipulation of data.
  *
  * A DataFrame is similar to an Array object. It should be thought of as an array of objects
- * or a two dimensional array, similar to a table.
+ * or a two dimensional array, similar to a table. The DataFrame class is the data workhorse.
+ * It should be used for retrieving, exploring, cleansing, and transforming data.
  */
 class DataFrame {
   data = [];
@@ -23,51 +24,72 @@ class DataFrame {
   /**
    * Fetches data from a Url. The data must be JSON data.
    * @param {string} url - The Url to fetch data from.
+   * @param {Object} options - Options used for the fetch.
    * @returns {DataFrame}
    */
-  static async fetch(url) {
+  static async fetch(url, options) {
     console.log("starting read...");
-    var result = await fetch(url, {
-      //credentials: 'include'
-    });
+    var result = await fetch(url, options);
 
     var data = await result.json();
     var count = data.length;
     console.log(`${count} rows read.`);
-    return new DataFrame(...data);
+    return new DataFrame(data);
   }
 
   /**
-   * Transforms a DataFrame object using a mapping function.
-   * @param {DataFrame~mapFunction} mapFunction - The function to map the data. The function accepts a single parameter 'row' representing the current row. The function must return an object representing the transformed row.
-   * @returns {DataFrame} - The transformed DataFrame.
-   */
-  map(mapFunction) {
-    return DataFrame.create([...this.data.map(mapFunction)]);
-  }
-
-  /**
-   * This callback is displayed as part of the DataFrame.filter method.
+   * This callback is a required parameter of the DataFrame map method.
    * @callback DataFrame~mapFunction
    * @param {Object} row - The current row in the DataFrame.
    * @returns {Object} - The transformed row.
    */
 
   /**
+   * Transforms a DataFrame object using a mapping function.
+   * @param {DataFrame~mapFunction} mapFunction - The function to map the data. The function accepts a single parameter 'row' representing the current row. The function must return an object representing the transformed row.
+   * @returns {DataFrame}
+   */
+  map(mapFunction) {
+    return DataFrame.create(this.data.map(mapFunction));
+  }
+
+  /**
+ * This callback is a required parameter of the DataFrame filter method.
+ * @callback DataFrame~filterFunction
+ * @param {Object} row - The current row in the DataFrame.
+ * @returns {boolean} - The function should returns a boolean value denoting the rows to be kept.
+ */
+
+  /**
    * Filters a DataFrame object using a filter function.
-   * @param {Function} filterFunction - The function to filter the data. The function accepts a single parameter 'row' representing the current row. The function must return a boolean.
-   * @returns {DataFrame} - The filtered DataFrame.
+   * @param {DataFrame~filterFunction} filterFunction - The function to filter the data. The function accepts a single parameter 'row' representing the current row. The function must return a boolean.
+   * @returns {DataFrame}
    */
   filter(filterFunction) {
-    return DataFrame.create([...this.data.filter(filterFunction)]);
+    return DataFrame.create(this.data.filter(filterFunction));
   }
+
+  /**
+   * This callback is a required parameter of the DataFrame group method.
+   * @callback DataFrame~groupingFunction
+   * @param {Object} row - The current row in the DataFrame.
+   * @returns {Object} - The callback should return an object representing the properties of the row that should be considered as the 'group' for the row.
+   * All the unique values returned for all rows in the DataFrame objects will form the group rows of the resulting DataFrame.
+   */
+
+  /**
+   * This callback is a required parameter of the DataFrame group method.
+   * @callback DataFrame~aggregateFunction
+   * @param {DataFrame} group - The current group in the DataFrame.
+   * @returns {Object} - The callback should return an object representing any aggregrated values of the group. A single object must be returned.
+   */
 
   /**
    * Groups a DataFrame object using a grouping function and an optional aggregation function. The group function is mandatory and specifies the group values.
    * If the aggregation function is ommitted, the result is simply the distinct group values. If an aggregation function is specified, then additional
    * aggregated values for each group can be included.
-   * @param {*} groupingFunction
-   * @param {*} aggregateFunction
+   * @param {DataFrame~groupingFunction} groupingFunction
+   * @param {DataFrame~aggregateFunction} aggregateFunction
    * @returns {DataFrame}
    */
   group(groupingFunction, aggregateFunction) {
@@ -89,6 +111,20 @@ class DataFrame {
     return DataFrame.create(data);
   }
 
+  /**
+   * This callback is a required parameter of the DataFrame pivot function.
+   * @callback DataFrame~pivotFunction
+   * @param {DataFrame} group - The current group in the DataFrame.
+   * @returns {String} - The pivot function should return back a string value. This value will be projected as a column header.
+   */
+
+  /**
+   * Pivots rows into columns using a pivot function.
+   * @param {DataFrame~groupingFunction} groupingFunction - The data grouping function.
+   * @param {DataFrame~pivotFunction} pivotFunction - The data pivoting function.
+   * @param {DataFrame~aggregateFunction} aggregateFunction - The data aggregation function.
+   * @returns {DataFrame}
+   */
   pivot(groupingFunction, pivotFunction, aggregateFunction) {
     // Get distinct values for the pivot function
     let pivot = [];
@@ -122,17 +158,34 @@ class DataFrame {
     return DataFrame.create(data);
   }
 
+  /**
+   * Gets the top 'n' rows of a DataFrame object.
+   * @param {Number} top - Top 'n' rows to select.
+   */
   head(top) {
-    return DataFrame.create([...this.data.splice(0, top)]);
+    let arr = [...this.data];
+    return DataFrame.create(arr.splice(0, top));
   }
 
+  /**
+   * Returns the number of rows in the DataFrame.
+   */
+  count() {
+    return this.data.length;
+  }
+
+  /**
+   * Sorts the rows in a DataFrame object based on a sort function.
+   * @param {*} sortFunction 
+   * @param {*} descending 
+   */
   sort(sortFunction, descending) {
     let reverse = descending ? -1 : 1;
     let fn = (a, b) => {
       return sortFunction(a) > sortFunction(b) ? 1 * reverse : -1 * reverse;
     };
     this.data.sort(fn);
-    return this;
+    return DataFrame.create(this.data);
   }
 
   join(dataFrame, type, joinFunction, selectFunction) {
@@ -189,8 +242,6 @@ class DataFrame {
   }
 
   list(columnName) {
-    console.log(this.data);
-    console.log("x");
     return new List([...this.data.map((r) => r[columnName])]);
   }
 
@@ -199,12 +250,12 @@ class DataFrame {
     let props = Object.getOwnPropertyNames(first);
     let results = [];
     props.forEach((p) => {
-      let column = this.column(p);
+      let column = this.list(p);
       results.push({
         name: p,
         type: column.type(),
         count: column.count(),
-        distinct: column.distinct().count(),
+        unique: column.unique().count(),
         fill: column.values().count() / column.count(),
         mode: column.values().mode(),
         mean: column.values().sum() / column.values().count(),
@@ -254,7 +305,7 @@ class DataFrame {
     return DataFrame.create(data);
   }
 
-  select(columnNames) {
+  select(...columnNames) {
     let data = [];
     this.data.forEach((row) => {
       let obj = {};

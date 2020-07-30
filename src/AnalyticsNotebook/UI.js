@@ -9,11 +9,11 @@ var PANEL_ALIGNMENT = {
   /**
    * Child panels will be aligned horizontally within the parent.
    */
-  HORIZONTAL: "Horizontal",
+  HORIZONTAL: "horizontal",
   /**
    * Child panels will be aligned vertically within the parent.
    */
-  VERTICAL: "Vertical",
+  VERTICAL: "vertical",
 };
 
 /**
@@ -27,22 +27,22 @@ var PANEL_FIT = {
   /**
    * Child visuals will not be resized. Scroll bars will be displayed if content overflows the panel.
    */
-  NONE: "None",
+  NONE: "none",
 
   /**
    * Child visuals will be resized so the width fits the panel.
    */
-  WIDTH: "Width",
+  WIDTH: "width",
 
   /**
    * Child visuals will be resized so the height fits the panel.
    */
-  HEIGHT: "Height",
+  HEIGHT: "height",
 
   /**
    * Child visuals will be resized so both the width and height fits the panel.
    */
-  BOTH: "Both",
+  BOTH: "both",
 };
 
 /**
@@ -100,7 +100,7 @@ class UI {
   static refresh(panel) {
     let visuals = panels[panel];
 
-    visuals.forEach((v) => {});
+    visuals.forEach((v) => { });
     UI.content();
   }
 
@@ -225,16 +225,16 @@ class UI {
         return {
           id: p,
           size: 1,
-          fit: "both",
-          direction: "horizontal",
+          fit: PANEL_FIT.BOTH,
+          direction: PANEL_ALIGNMENT.HORIZONTAL,
           children: [],
         };
       } else if (typeof p === "object") {
         return {
           ...{
             size: 1,
-            fit: "both",
-            direction: "horizontal",
+            fit: PANEL_FIT.BOTH,
+            direction: PANEL_ALIGNMENT.HORIZONTAL,
             children: [],
           },
           ...p,
@@ -264,13 +264,13 @@ class UI {
 
       // Add special border css class on top/left most panes.
       if (root) {
-        if (direction === "horizontal") {
+        if (direction === PANEL_ALIGNMENT.HORIZONTAL) {
           div.classList.add("top");
           if (first) {
             div.classList.add("left");
           }
         }
-        if (direction === "vertical") {
+        if (direction === PANEL_ALIGNMENT.VERTICAL) {
           div.classList.add("left");
           if (first) {
             div.classList.add("top");
@@ -281,7 +281,7 @@ class UI {
 
       div.id = p.id;
 
-      if (direction === "vertical") {
+      if (direction === PANEL_ALIGNMENT.VERTICAL) {
         div.style.height = `${(p.size * 100) / total}%`;
         div.style.width = "100%";
       } else {

@@ -1,10 +1,10 @@
 /**
- * A List object represents a single column from a DataFrame. Various aggregation functions operate on List objects.
- */
+ * A List object represents a single column from a DataFrame. Univariate analysis can be performed on a List object. 
+  */
 class List {
   arr = [];
   constructor(arr) {
-    this.arr = arr;
+    this.arr = [...arr];
   }
 
   /**
@@ -47,8 +47,8 @@ class List {
    * UI.content(titanic.column("survived").max());
    * @returns {Number} Returns the maximum value in a list.
    */
-  min() {
-    return this.values().arr.reduce((acc, cur) => (acc <= cur ? acc : cur));
+  max() {
+    return this.values().arr.reduce((acc, cur) => (acc > cur ? acc : cur));
   }
 
   /**
@@ -74,7 +74,7 @@ class List {
    * @returns {Number} Returns the corresponding percentile value.
    */
   percentile(percentile) {
-    const sorted = this.values().sort((a, b) => (a > b ? 1 : -1));
+    const sorted = this.values().arr.sort((a, b) => (a > b ? 1 : -1));
     const pos = Math.ceil((sorted.length - 1) * (percentile / 100));
     return sorted[pos];
   }
@@ -87,8 +87,7 @@ class List {
    * UI.content(titanic.list("age").values());
    */
   values() {
-    console.log(this.arr);
-    return new List(...this.arr.filter((i) => i));
+    return new List(this.arr.filter((i) => i || i == 0));
   }
 
   /**
@@ -100,8 +99,8 @@ class List {
    */
   unique() {
     let results = [];
-    results.pushUnique(...this.values());
-    return new List(...results);
+    results.pushUnique(this.values().arr);
+    return new List(results);
   }
 
   /**
@@ -113,8 +112,8 @@ class List {
    */
   type() {
     let type = "undefined";
-    if (this.length > 0) {
-      type = typeof this[0];
+    if (this.arr.length > 0) {
+      type = typeof this.arr[0];
     }
     return type;
   }
@@ -129,7 +128,7 @@ class List {
   mode() {
     let obj = {};
     let arr = [];
-    this.values().forEach((row) => {
+    this.values().arr.forEach((row) => {
       if (!obj[row]) {
         obj[row] = 0;
       }

@@ -12,6 +12,23 @@ body {
     flex-direction: column;
 }
 
+div#waiting {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  left: 0px;
+  top: 0px;
+  cursor: wait;
+  background: #000;
+  opacity: .5;
+  z-index:999;
+  display: none;
+}
+
+div#waiting.show {
+ display: block
+}
+
 header {
     margin: 0;
     background-color: #234567;

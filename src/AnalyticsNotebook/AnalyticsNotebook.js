@@ -65,7 +65,7 @@ Array.prototype.toDataFrame = function () {
 // This useful transposer is utilised by the
 // Visuals.pie method.
 ////////////////////////////////////////////////////
-Array.prototype.pushUnique = function (...arr) {
+Array.prototype.pushUnique = function ([...arr]) {
   arr.forEach((a) => {
     this.indexOf(a) === -1 ? this.push(a) : {};
   });
@@ -83,21 +83,40 @@ Array.prototype.remove = function (item) {
   if (index !== -1) this.splice(index, 1);
 };
 
-////////////////////////////////////////////////////
-// Element.prototype.fit
-//
-// Fits content into an element using the zoom
-// css3 property.
-////////////////////////////////////////////////////
+/**
+ * Fits content into a panel element using the zoom css3 property.
+ */
 Element.prototype.fit = function () {
+
+  // Get the metadata for the panel:
+  let panel = UI.panels[this.id];
+  let fit = panel.fit;
   if (this.id !== "output") {
     var elInner = this.firstChild;
     if (elInner) {
-      // temporarily reset zoom to 1
-      elInner.style.zoom = 1;
-      aspectW = this.clientWidth / elInner.scrollWidth;
-      aspectH = this.clientHeight / elInner.scrollHeight;
-      let zoom = aspectW < aspectH ? aspectW : aspectH;
+      // temporarily reset zoom to 10
+      let zoom = 1;
+      if (fit !== PANEL_FIT.NONE) {
+        // For all 'resize' fit modes, start with zoom 10, so content grows/shrinks
+        // If fit = none, then NO resizing at all
+        zoom = 1;
+      }
+      elInner.style.zoom = zoom;
+
+      if (fit === PANEL_FIT.WIDTH || fit === PANEL_FIT.BOTH) {
+        aspectW = this.clientWidth / elInner.scrollWidth;
+        if (aspectW < zoom) {
+          zoom = aspectW;
+        }
+      }
+
+      if (fit === PANEL_FIT.HEIGHT || fit === PANEL_FIT.BOTH) {
+        aspectH = this.clientHeight / elInner.scrollHeight;
+        if (aspectH < zoom) {
+          zoom = aspectH;
+        }
+      }
+
       elInner.style.zoom = zoom;
 
       // fine adjustments to cater for minor rounding issues
