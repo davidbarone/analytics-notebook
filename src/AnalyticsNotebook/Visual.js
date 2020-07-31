@@ -68,6 +68,7 @@ class Visual {
 
   /**
    * Registry of renderer functions. These include data-bound and non-data bound renderers.
+   * @namespace Visual.renderer
    */
-  static renderer = {}
+  static renderer = {};
 }
