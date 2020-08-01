@@ -63,6 +63,8 @@ The UI class is used for manipulating the output. Typically you don't need to us
 dataframe.visual({visual_renderer_function}, {options}).attach('root');
 ```
 
+The one method from the UI class which you will typically use (once per script) is the UI.layout() function. This function is used to design the grid layout for the output so that visuals can be positioned in the style of a dashboard.
+
 ## Documentation
 
 This documentation you're reading has been compiled using jsDoc. More information can be found from the home page: https://jsdoc.app/. The documentation has also been styled using the ink-docstrap template (https://www.npmjs.com/package/ink-docstrap).

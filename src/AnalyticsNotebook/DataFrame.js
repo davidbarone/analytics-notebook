@@ -54,11 +54,11 @@ class DataFrame {
   }
 
   /**
- * This callback is a required parameter of the DataFrame filter method.
- * @callback DataFrame~filterFunction
- * @param {Object} row - The current row in the DataFrame.
- * @returns {boolean} - The function should returns a boolean value denoting the rows to be kept.
- */
+   * This callback is a required parameter of the DataFrame filter method.
+   * @callback DataFrame~filterFunction
+   * @param {Object} row - The current row in the DataFrame.
+   * @returns {boolean} - The function should returns a boolean value denoting the rows to be kept.
+   */
 
   /**
    * Filters a DataFrame object using a filter function.
@@ -128,13 +128,13 @@ class DataFrame {
   pivot(groupingFunction, pivotFunction, aggregateFunction) {
     // Get distinct values for the pivot function
     let pivot = [];
-    this.forEach(function (r) {
+    this.data.forEach(function (r) {
       let value = pivotFunction(r);
       if (pivot.indexOf(value) === -1) pivot.push(value);
     });
 
     let groups = {};
-    this.forEach(function (o) {
+    this.data.forEach(function (o) {
       var group = JSON.stringify(groupingFunction(o));
       groups[group] = groups[group] || [];
       groups[group].push(o);
@@ -146,7 +146,7 @@ class DataFrame {
       let pivotObj = {};
       pivot.forEach((p) => {
         let items = DataFrame.create(groups[group]).filter(
-          (r) => fnPivot(r) === p
+          (r) => pivotFunction(r) === p
         );
         let value = aggregateFunction(items);
         pivotObj[p] = value;
@@ -176,8 +176,8 @@ class DataFrame {
 
   /**
    * Sorts the rows in a DataFrame object based on a sort function.
-   * @param {*} sortFunction 
-   * @param {*} descending 
+   * @param {*} sortFunction
+   * @param {*} descending
    */
   sort(sortFunction, descending) {
     let reverse = descending ? -1 : 1;

@@ -1,7 +1,15 @@
 /**
  * Default table renderer function.
- * @param {*} dataFrame
- * @param {*} options
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
+ * @example <caption>Creating a table visual</caption>
+ * let data = DataFrame
+ *   .examples
+ *   .iris()
+ *   .head(20)
+ *   .visual(Visual.renderer.table)
+ *   .attach('root');
  */
 Visual.renderer.table = function (dataFrame, options) {
   let first = dataFrame.data[0];
@@ -30,6 +38,12 @@ Visual.renderer.table = function (dataFrame, options) {
   return elDiv;
 };
 
+/**
+ * Create an interactive slicer control allowing other visuals sharing the same DataFrame object to be interactively filtered.
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
+ */
 Visual.renderer.slicer = function (dataFrame, options) {
   let elDiv = document.createElement("div");
   if (options.title) {
@@ -63,7 +77,6 @@ Visual.renderer.slicer = function (dataFrame, options) {
   let selectedValue = null;
   if (slicer) {
     //values = values.filter(v => { slicer.includes(v) });
-    //alert(values.length);
     selectedValue = values[0];
   }
 
@@ -88,8 +101,29 @@ Visual.renderer.slicer = function (dataFrame, options) {
 
 /**
  * Renders a bar or grouped bar chart.
- * @param {DataFrame} dataFrame - The data to bind to the chart.
+ * @param {DataFrame} dataFrame - The data bound to the visual.
  * @param {Object} options - Configuration of the chart.
+ * @returns {Node}
+ * @example <caption>Creating a grouped bar chart</caption>
+ * DataFrame
+ *   .examples
+ *   .titanic()
+ *   .visual(
+ *     Visual.renderer.bar,
+ *     {
+ *       title: 'Passengers on the Titanic by Embarked port & Sex',
+ *       margin: {
+ *         top: 40,
+ *         right: 40,
+ *         bottom: 40,
+ *         left: 40
+ *       },
+ *       fnCategories: row => { return { embarked: row.embarked }},
+ *       fnSubGroups: row => { return { sex: row.sex }},
+ *       fnValues: group => { return { passengers: group.count() }},
+ *     }
+ *   )
+ *   .attach('root');
  */
 Visual.renderer.bar = function (dataFrame, options) {
   options = {
@@ -134,7 +168,6 @@ Visual.renderer.bar = function (dataFrame, options) {
     )[0];
   }
   let subGroups = [];
-  console.log(dataFrame.data);
 
   // Data must be aggregated to display on the chart:
   if (options.fnSubGroups) {
@@ -145,7 +178,7 @@ Visual.renderer.bar = function (dataFrame, options) {
     )[0];
     subGroups = dataFrame
       .map((row) => options.fnSubGroups(row))
-      .column(subGroupName)
+      .list(subGroupName)
       .unique();
     let valueName = Object.getOwnPropertyNames(
       options.fnValues(dataFrame.head(1))
@@ -156,21 +189,15 @@ Visual.renderer.bar = function (dataFrame, options) {
       (a) => options.fnValues(a)[valueName]
     );
   } else {
-    alert("no sub groups");
     // just value(s) specified. These are already column headers.
     // if no subGroups function specified, the subGroups are the names of the values function
-    console.log("aa");
     subGroups = Object.getOwnPropertyNames(options.fnValues(dataFrame.head(1)));
-    console.log(dataFrame.data);
     dataFrame = dataFrame.group(options.fnCategories, options.fnValues);
   }
 
-  console.log(dataFrame.data);
-
   // set the dimensions and margins of the graph
-  var margin = { top: 30, right: 30, bottom: 70, left: 60 },
-    width = options.width - margin.left - margin.right,
-    height = options.height - margin.top - margin.bottom;
+  let width = options.width - options.margin.left - options.margin.right,
+    height = options.height - options.margin.top - options.margin.bottom;
 
   // append the svg object to the body of the page
   var svg = d3
@@ -178,14 +205,17 @@ Visual.renderer.bar = function (dataFrame, options) {
     .attr("width", options.width)
     .attr("height", options.height)
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr(
+      "transform",
+      "translate(" + options.margin.left + "," + options.margin.top + ")"
+    );
 
   // border
   if (options.border) {
     var border = svg
       .append("rect")
-      .attr("x", -margin.left)
-      .attr("y", -margin.top)
+      .attr("x", -options.margin.left)
+      .attr("y", -options.margin.top)
       .attr("height", options.height)
       .attr("width", options.width)
       .style("stroke", options.border.color)
@@ -202,8 +232,8 @@ Visual.renderer.bar = function (dataFrame, options) {
   if (options.title) {
     svg
       .append("text")
-      .attr("x", options.width / 2 - margin.left)
-      .attr("y", 0 - margin.top / 2)
+      .attr("x", options.width / 2 - options.margin.left)
+      .attr("y", 0 - options.margin.top / 2)
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("text-decoration", "underline")
@@ -217,7 +247,7 @@ Visual.renderer.bar = function (dataFrame, options) {
     .domain(
       dataFrame.map(function (d) {
         return d[categoryName];
-      })
+      }).data
     )
     .padding(0.2);
   svg
@@ -232,8 +262,8 @@ Visual.renderer.bar = function (dataFrame, options) {
   if (options.axes.x.title) {
     svg
       .append("text") // text label for the x axis
-      .attr("x", (width + margin.left + margin.right) / 2)
-      .attr("y", height + margin.top + margin.bottom - 12)
+      .attr("x", (width + options.margin.left + options.margin.right) / 2)
+      .attr("y", height + options.margin.top + options.margin.bottom - 12)
       .style("text-anchor", "middle")
       .style("font-size", "12px")
       .text(options.axes.x.title);
@@ -241,7 +271,7 @@ Visual.renderer.bar = function (dataFrame, options) {
 
   // Add Y axis
   let maxValue = 0;
-  subGroups.forEach((g) => {
+  subGroups.arr.forEach((g) => {
     let value = d3.max(dataFrame.data, function (d) {
       return +d[g];
     });
@@ -256,14 +286,14 @@ Visual.renderer.bar = function (dataFrame, options) {
   // Another scale for subgroup position?
   var xSubgroup = d3
     .scaleBand()
-    .domain(subGroups)
+    .domain(subGroups.arr)
     .range([0, x.bandwidth()])
     .padding([0.05]);
 
   // color palette = one color per subgroup
   var color = d3
     .scaleOrdinal()
-    .domain(subGroups)
+    .domain(subGroups.arr)
     .range(["#e41a1c", "#377eb8", "#4daf4a"]);
 
   // Bars
@@ -278,7 +308,7 @@ Visual.renderer.bar = function (dataFrame, options) {
     })
     .selectAll("rect")
     .data(function (d) {
-      return subGroups.map(function (key) {
+      return subGroups.arr.map(function (key) {
         return { key: key, value: d[key] };
       });
     })
@@ -303,8 +333,9 @@ Visual.renderer.bar = function (dataFrame, options) {
 
 /**
  * Renderer that renders static content. The dataFrame object is ignored.
- * @param {*} dataFrame
- * @param {*} options
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
  */
 Visual.renderer.html = function (dataFrame, options) {
   let elDiv = document.createElement("div");
@@ -315,8 +346,25 @@ Visual.renderer.html = function (dataFrame, options) {
 
 /**
  * Renders a pie chart.
- * @param {*} dataFrame
- * @param {*} options
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
+ * @example <caption>Displaying a pie chart</caption>
+ * DataFrame
+ *   .examples
+ *   .titanic()
+ *   .visual(
+ *     Visual.renderer.pie,
+ *     {
+ *       fnCategories: (r) => {
+ *         return { sex: r.sex };
+ *       },
+ *       fnValues: (g) => {
+ *         return { passengers: g.count() };
+ *       },
+ *     }
+ *   )
+ *   .attach("root");
  */
 Visual.renderer.pie = function (dataFrame, options) {
   options = {
@@ -413,9 +461,24 @@ Visual.renderer.pie = function (dataFrame, options) {
 };
 
 /**
- * Renders a histogram.
- * @param {*} dataFrame
- * @param {*} options
+ * Renders a histogram. Histograms display the display the frequency distribution of a continuous variable using bins.
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
+ * @example <caption>Displaying a histogram</caption>
+ * DataFrame
+ *   .examples
+ *   .titanic()
+ *   .cast({age: 'float'})
+ *   .visual(
+ *     Visual.renderer.hist,
+ *     {
+ *       fnValues: (r) => {
+ *         return { age: r.age };
+ *       }
+ *     }
+ *   )
+ *   .attach("root");
  */
 Visual.renderer.hist = function (dataFrame, options) {
   options = {
@@ -509,6 +572,28 @@ Visual.renderer.hist = function (dataFrame, options) {
   return svg.node().parentNode;
 };
 
+/**
+ * Displays a scatter plot allowing 2 continuous variables to be compared.
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
+ * DataFrame
+ *   .examples
+ *   .titanic()
+ *   .cast({age: 'float', fare: 'float'})
+ *   .visual(
+ *     Visual.renderer.scatter,
+ *     {
+ *       fnXValues: (r) => {
+ *         return { age: r.age };
+ *       },
+ *       fnYValues: (r) => {
+ *         return { fare: r.fare };
+ *       }
+ *     }
+ *   )
+ *   .attach("root");
+ */
 Visual.renderer.scatter = function (dataFrame, options) {
   //Visual.renderer.scatter = function (data, xColumnName, yColumnName, options) {
 
@@ -619,9 +704,9 @@ Visual.renderer.scatter = function (dataFrame, options) {
 /**
  * Draws a boxplot diagram. Boxplot diagrams are useful for showing the 5-number summary of a continuous variable.
  * The function will automatically include a boxplot for every numeric variable in the DataFrame object.
- * @param {*} dataFrame - The data
- * @param {*} options - The configuration of the boxplot
- * @memberof Visual.renderer
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
+ * @returns {Node}
  * @example <caption>Displaying a boxplot diagram for continuous variables in the iris dataset</caption>
  * DataFrame
  *   .examples
@@ -632,8 +717,8 @@ Visual.renderer.scatter = function (dataFrame, options) {
 Visual.renderer.box = function (dataFrame, options) {
   options = {
     ...{
-      height: 300,
-      width: 400,
+      height: 250,
+      width: 200,
       margin: {
         top: 10,
         right: 30,
@@ -772,8 +857,8 @@ Visual.renderer.box = function (dataFrame, options) {
 
 /**
  * Creates scatterplot matrix showing relationship between numerical variables in a DataFrame object.
- * @param {*} dataFrame - The DataFrame object
- * @param {*} options - The configuration options.
+ * @param {DataFrame} dataFrame - The data bound to the visual.
+ * @param {Object} options - Configuration of the visual.
  * @example <caption>Creating a scatterplot matrix</caption>
  * DataFrame
  *   .examples

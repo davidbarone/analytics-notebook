@@ -67,7 +67,10 @@ class Visual {
   }
 
   /**
-   * Registry of renderer functions. These include data-bound and non-data bound renderers.
+   * Registry of renderer functions. These include data-bound and non-data bound renderers. Renderer functions are generally not called directly, but
+   * are used by other functions, for example the DataFrame.visual() function. Renderer functions are called during the screen rendering process, and
+   * 2 arguments are passed to render functions. A DataFrame object which is the data to be rendered, and an options object which provides
+   * customisation rules for the renderer. The format of the options object is renderer-specific.
    * @namespace Visual.renderer
    */
   static renderer = {};

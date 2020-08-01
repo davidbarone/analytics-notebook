@@ -689,6 +689,11 @@ Visuals.pairs = function (data) {
   return table;
 };
 
+/**
+ * Create an interactive slicer control allowing other visuals sharing the same DataFrame object to be interactively filtered.
+ * @param {*} dataFrame - The DataFrame object containing the data
+ * @param {*} columnName
+ */
 Visuals.slicer = function (data, columnName) {
   elSelect = document.createElement("select");
   let values = data.column(columnName).distinct();
