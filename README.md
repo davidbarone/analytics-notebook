@@ -2,7 +2,9 @@
 
 The analytics-notebook is an analytical and statistical notebook application written in JavaScript, and is inspired by similar notebooks such as Jupyter notebooks, and https://observablehq.com/. Like the aforementioned applications, the intention for this application is to allow developers, analysts, researchers and statisticians to make sense out of data.
 
-This application differs slightly from other notebooks in that instead of having multiple code blocks or cells entered inline within the output, analytics-notebook has a single code section and a single output section. The output section can be divided up into multiple visual 'panels' using the API, and visuals can be directed to these panels.
+This application differs slightly from other notebooks in that instead of having multiple code blocks or cells entered inline within the output, analytics-notebook has a single code section and a single output section. The output section can be divided up into multiple visual 'panels' using the API, and visuals can be directed to these panels. A screenshot of the application is shown below:
+
+![anaytics-notebook](https://github.com/davidbarone/analytics-notebook/blob/master/images/example1.png?raw=true)
 
 ## Application Layout
 
