@@ -1,12 +1,7 @@
 /**
- * Example datasets.
- */
-DataFrame.examples = {};
-
-/**
  * Iris dataset
  */
-DataFrame.examples.iris = function () {
+let iris = function () {
   let json = [
     {
       sepal_length_cm: 5.1,
@@ -1069,7 +1064,7 @@ DataFrame.examples.iris = function () {
  * by a variety of researchers. One of the original sources is Eaton & Haas (1994) Titanic: Triumph and Tragedy,
  * Patrick Stephens Ltd, which includes a passenger list created by many researchers and edited by Michael A. Findlay.
  */
-DataFrame.examples.titanic = function () {
+let titanic = function () {
   let json = [
     {
       pclass: 1,
@@ -22020,4 +22015,9 @@ DataFrame.examples.titanic = function () {
   ];
 
   return DataFrame.create(json);
+};
+
+export default {
+  iris,
+  titanic,
 };

@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "docs": "jsdoc -c ./jsdoc.conf.json -t node_modules/ink-docstrap/template --readme ./README.md"
+    "docs": "jsdoc -c ./jsdoc.conf.json -t node_modules/ink-docstrap/template --readme ./README.md",
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development",
+    "docslite": "node ./scripts/docslite.js"
   },
   "repository": {
     "type": "git",
@@ -14,7 +17,8 @@
   "keywords": [
     "analytics",
     "notebook",
-    "javascript"
+    "javascript",
+    "davidbarone"
   ],
   "author": "david barone",
   "license": "MIT",
@@ -22,8 +26,16 @@
     "url": "https://github.com/davidbarone/analytics-notebook/issues"
   },
   "homepage": "https://github.com/davidbarone/analytics-notebook#readme",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "css-loader": "^4.2.0",
+    "html-webpack-plugin": "^4.3.0",
+    "jsdoc-to-markdown": "^6.0.1",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
     "ink-docstrap": "^1.3.2",
-    "jsdoc": "^3.6.5"
+    "jsdoc": "^3.6.5",
+    "showdown": "^1.9.1"
   }
 }

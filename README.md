@@ -191,3 +191,24 @@ data
   })
   .attach("root");
 ```
+
+## Development / Source Code
+
+The source code for this project is available from: https://github.com/davidbarone/analytics-notebook. It's built using webpack, so you'll need the npm toolchain set up. You'll also need the following packages installed in the global namespace:
+
+- jsDoc
+
+### Scripts
+
+A number of scripts have been created for basic tasks:
+
+- docs: Creates a full document web site using jsDoc and the in-docstrap template. Suitable for highest quality documentation.
+- docslite: Creates a single-file documentation page via jsDoc-to-markdown and Showdown. This documentation is useful when you need a 'bundled' solution.
+- build: Builds site in production mode.
+- build-dev: Builds site in development mode.
+
+---
+
+David Barone 04-Aug-2020
+
+---

@@ -1,59 +1,11 @@
-/**
- * @typedef {String} PanelAlignment
- */
-
-/**
- * @enum {PanelAlignment}
- */
-var PANEL_ALIGNMENT = {
-  /**
-   * Child panels will be aligned horizontally within the parent.
-   */
-  HORIZONTAL: "horizontal",
-  /**
-   * Child panels will be aligned vertically within the parent.
-   */
-  VERTICAL: "vertical",
-};
-
-/**
- * @typedef {String} PanelFit
- */
-
-/**
- * @enum {PanelFit}
- */
-var PANEL_FIT = {
-  /**
-   * Child visuals will not be resized. Scroll bars will be displayed if content overflows the panel.
-   */
-  NONE: "none",
-
-  /**
-   * Child visuals will be resized so the width fits the panel.
-   */
-  WIDTH: "width",
-
-  /**
-   * Child visuals will be resized so the height fits the panel.
-   */
-  HEIGHT: "height",
-
-  /**
-   * Child visuals will be resized so both the width and height fits the panel.
-   */
-  BOTH: "both",
-};
+import Visual from "./Visual.js";
+import PANEL_ALIGNMENT from "./PanelAlignment.js";
+import PANEL_FIT from "./PanelFit.js";
 
 /**
  * Controls rendering to the output section.
  */
 class UI {
-  /**
-   * The collection of panels in the current output. Each panel can hold zero or more visuals.
-   */
-  static panels = {};
-
   /**
    * Clears / resets the output completely.
    * @example <caption>Clearing the UI output pane</caption>
@@ -100,7 +52,7 @@ class UI {
   static refresh(panel) {
     let visuals = panels[panel];
 
-    visuals.forEach((v) => { });
+    visuals.forEach((v) => {});
     UI.content();
   }
 
@@ -366,3 +318,10 @@ class UI {
     el.fit();
   }
 }
+
+/**
+ * The collection of panels in the current output. Each panel can hold zero or more visuals.
+ */
+UI.panels = {};
+
+export default UI;

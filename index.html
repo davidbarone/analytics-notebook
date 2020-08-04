@@ -1,395 +1,79 @@
 <!DOCTYPE html>
 
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
 
-<head>
-  <meta charset="utf-8" />
+    <title>Analytics Notebook</title>
+    <meta name="description" content="Analytics Notebook" />
+    <meta name="author" content="David Barone" />
 
-  <title>Analytics Notebook</title>
-  <meta name="description" content="Analytics Notebook" />
-  <meta name="author" content="David Barone" />
+    <!-- d3 library from google cdn -->
+    <script src="https://ajax.googleapis.com/ajax/libs/d3js/5.15.1/d3.min.js"></script>
+  </head>
 
-  <!-- d3 library from google cdn -->
-  <script src="https://ajax.googleapis.com/ajax/libs/d3js/5.15.1/d3.min.js"></script>
+  <body>
+    <!-- waiting dialog-->
+    <div id="waiting"></div>
 
-  <!-- Notebook components -->
-  <link rel="stylesheet" href="./css/AnalyticsNotebook.css" />
-  <script src="./src/AnalyticsNotebook/AnalyticsNotebook.js"></script>
-  <script src="./src/AnalyticsNotebook/DataFrame.js"></script>
-  <script src="./src/AnalyticsNotebook/DataFrame.examples.js"></script>
-  <script src="./src/AnalyticsNotebook/List.js"></script>
-  <script src="./src/AnalyticsNotebook/Visual.js"></script>
-  <script src="./src/AnalyticsNotebook/Visual.renderer.js"></script>
-  <script src="./src/AnalyticsNotebook/UI.js"></script>
+    <header>Analytics Notebook</header>
+    <button
+      id="slider"
+      class="slider"
+      title="toggle display of configuration pane."
+    >
+      &lt;
+    </button>
 
-  <!-- Reactive -->
-  <script src="./src/Reactive/Dep.js"></script>
-  <script src="./src/Reactive/Observer.js"></script>
-  <script src="./src/Reactive/Watcher.js"></script>
-
-  <script type="text/javascript">
-    var notebooks = [];
-    var dragging = false; //set to true when vertical drag bar between config + output panes being moved.
-    var draggingH = false; //set to true when vertical drag bar between config + output panes being moved.
-    var showNotebookLoadSave = false;
-
-    // IO URLS
-    var urlCategories = "https://[enter endpoint...]";
-    var urlNotebooks = "https://[enter endpoint...]";
-
-    function runCode() {
-
-      document.getElementById('waiting').classList.add('show');
-
-      setTimeout(() => {
-        // clear output + console
-        UI.reset();
-        let elConsole = document.getElementById("console");
-        elConsole.innerHTML = "";
-        var code = document.getElementById("code").value;
-        code = `async function notebookCode() {${code}}; notebookCode();`;
-        var scriptElem = document.createElement("script");
-        scriptElem.text = code;
-        document.head.appendChild(scriptElem);
-        // and immediately remove script upon completion
-        document.head.removeChild(scriptElem);
-        document.getElementById('waiting').classList.remove('show');
-      }, 0);
-    }
-
-    function slider() {
-      var button = document.getElementById("slider");
-      var config = document.getElementById("config");
-      var output = document.getElementById("output");
-      var text = button.innerText;
-      if (text === ">") {
-        // show
-        button.innerText = "<";
-        config.style.width = "500px";
-      } else {
-        // hide
-        button.innerText = ">";
-        config.style.width = "0px";
-      }
-      resizePanelContents();
-    }
-
-    async function getCategories() {
-      var url = urlCategories;
-      var result = await fetch(url, {
-        credentials: "include",
-      });
-      var data = await result.json();
-      elCategories = document.getElementById("categories");
-      elCategories.innerHTML = "";
-      var option = document.createElement("option");
-      option.text = "[Please select...]";
-      option.value = null;
-      elCategories.add(option);
-      data.forEach((c) => {
-        var option = document.createElement("option");
-        option.text = c;
-        option.value = c.toLowerCase();
-        elCategories.add(option);
-      });
-    }
-
-    async function getNotebooks(category) {
-      var url = `${urlNotebooks}/${category}`;
-      var result = await fetch(url, {
-        credentials: "include",
-      });
-      notebooks = await result.json();
-      elNotebooks = document.getElementById("notebooks");
-      elNotebooks.innerHTML = "";
-      var option = document.createElement("option");
-      option.text = "[Please select...]";
-      option.value = null;
-      elNotebooks.add(option);
-      notebooks.forEach((n) => {
-        var option = document.createElement("option");
-        option.text = n.notebook;
-        option.value = n.notebook.toLowerCase();
-        elNotebooks.add(option);
-      });
-    }
-
-    function loadNotebook() {
-      // Get name
-      let elNotebook = document.getElementById("notebooks");
-      let name = elNotebook.options[elNotebook.selectedIndex].text;
-      let selectedNotebook = notebooks.filter((n) => {
-        return n.notebook.toLowerCase() === name.toLowerCase();
-      })[0];
-      let elCode = document.getElementById("code");
-      elCode.value = selectedNotebook.script;
-      let elSaveAs = document.getElementById("saveAs");
-      elSaveAs.value = name;
-    }
-
-    function saveNotebook() {
-      let elCategory = document.getElementById("categories");
-      let category = elCategory.options[elCategory.selectedIndex].text;
-      let notebook = document.getElementById("saveAs").value;
-      let overwrite = document.getElementById("overwrite").checked;
-      let code = document.getElementById("code").value;
-      var url = `${urlNotebooks}/${category}/${notebook}/${overwrite}`;
-      fetch(url, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "text/plain",
-        },
-        body: code,
-      }).then(
-        async (response) => {
-          if (!response.ok) {
-            response.text().then((text) => alert(text));
-          } else {
-            alert("Saved successfully");
-            await getNotebooks(category);
-            document.getElementById(
-              "notebooks"
-            ).value = notebook.toLowerCase();
-          }
-        },
-        (error) => {
-          alert(error);
-        }
-      );
-    }
-
-    function deleteNotebook() {
-      let category = document.getElementById("categories").value;
-      let notebook = document.getElementById("notebooks").value;
-
-      if (
-        confirm(`Are you sure you wish to delete notebook: [${notebook}]?`)
-      ) {
-        var url = `${urlNotebooks}/${category}/${notebook}`;
-        fetch(url, {
-          method: "DELETE",
-          credentials: "include",
-        }).then(
-          (response) => {
-            if (!response.ok) {
-              response.text().then((text) => alert(text));
-            } else {
-              alert("Notebook deleted");
-              getNotebooks(category);
-              document.getElementById("saveAs").value = "";
-            }
-          },
-          (error) => {
-            alert(error);
-          }
-        );
-      }
-    }
-
-    // on DOM loaded
-    document.addEventListener("DOMContentLoaded", async function () {
-      // Create default root panel in output
-      UI.reset();
-
-      if (showNotebookLoadSave) {
-        // Get categories
-        await getCategories();
-
-        document
-          .getElementById("categories")
-          .addEventListener("change", function () {
-            getNotebooks(document.getElementById("categories").value);
-          });
-
-        document
-          .getElementById("load")
-          .addEventListener("click", function (evt) {
-            document.getElementById("code").innerHTML = "";
-            loadNotebook();
-            evt.preventDefault();
-          });
-
-        document
-          .getElementById("save")
-          .addEventListener("click", function (evt) {
-            saveNotebook();
-            evt.preventDefault();
-          });
-
-        document
-          .getElementById("delete")
-          .addEventListener("click", function (evt) {
-            deleteNotebook();
-            evt.preventDefault();
-          });
-      } else {
-        elFile = document.getElementById("file");
-        elFile.style.display = "none";
-      }
-
-      // When window resizes, adjust all pane contents if set to 'fit'
-      window.addEventListener("resize", (evt) => {
-        resizePanelContents();
-      });
-
-      document
-        .getElementById("dragBar")
-        .addEventListener("mousedown", function (evt) {
-          evt.preventDefault();
-          let elDragBar = document.getElementById("dragBar");
-          if (evt.target === elDragBar) {
-            dragging = true;
-          }
-        });
-
-      document
-        .getElementById("dragBarH")
-        .addEventListener("mousedown", function (evt) {
-          evt.preventDefault();
-          let elDragBarH = document.getElementById("dragBarH");
-          if (evt.target === elDragBarH) {
-            draggingH = true;
-          }
-        });
-
-      document.addEventListener("mousemove", function (evt) {
-        if (dragging) {
-          let elConfig = document.getElementById("config");
-          let leftOffset = elConfig.parentNode.offsetLeft;
-          elConfig.style.width = evt.clientX - leftOffset + "px";
-          resizePanelContents();
-        } else if (draggingH) {
-          let elConsole = document.getElementById("console");
-          let height =
-            elConsole.parentNode.clientHeight +
-            elConsole.parentNode.offsetTop -
-            evt.clientY;
-          elConsole.style.height = height + "px";
-          resizePanelContents();
-        } else {
-          return false;
-        }
-      });
-
-      document.addEventListener("mouseup", function (evt) {
-        dragging = false;
-        draggingH = false;
-      });
-
-      // Handler for keydown - check for ctrl/enter to run code
-      document.getElementById("code").addEventListener("keydown", (evt) => {
-        if (evt.keyCode == 13 && evt.ctrlKey) {
-          runCode();
-        }
-      });
-
-      // redirect console.log to console pane in DOM
-      var consolePane = document.getElementById("console");
-      console.log = function (message) {
-        if (typeof message == "object") {
-          consolePane.innerHTML +=
-            (JSON && JSON.stringify ? JSON.stringify(message) : message) +
-            "<br />";
-        } else {
-          consolePane.innerHTML += `${message}<br />`;
-        }
-      };
-      window.onerror = function (message, url, lineNo, columnNo, error) {
-        if (typeof message == "object") {
-          consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${
-            JSON && JSON.stringify ? JSON.stringify(message) : message
-            }<br /></div>`;
-        } else {
-          consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
-        }
-        return true;
-      };
-      window.onunhandledrejection = function (e) {
-        consolePane.innerHTML += `<div style="color:red;">${e.reason.message}<br /></div>`;
-        return true;
-      };
-
-      resizePanelContents = function (el) {
-        var elPanes = document.querySelectorAll("div.visual.leaf");
-        elPanes.forEach((el) => {
-          el.fit();
-        });
-      };
-
-      // Parse url - if category + notebook passed in, set + run
-      let queryString = location.search;
-      let urlParams = new URLSearchParams(queryString);
-      if (
-        showNotebookLoadSave &&
-        urlParams.has("category") &&
-        urlParams.has("notebook")
-      ) {
-        let category = urlParams.get("category").toLowerCase();
-        let notebook = urlParams.get("notebook").toLowerCase();
-        let elCategories = document.getElementById("categories");
-        elCategories.value = category;
-        await getNotebooks(category);
-        document.getElementById("notebooks").value = notebook;
-        loadNotebook();
-        runCode();
-        slider();
-      }
-      if (urlParams.has("script")) {
-        elCode = document.getElementById("code");
-        code.innerHTML = urlParams.get("script");
-        runCode();
-      }
-    });
-  </script>
-</head>
-
-<body>
-
-  <!-- waiting dialog-->
-  <div id='waiting'></div>
-
-  <header>Analytics Notebook</header>
-  <button id="slider" class="slider" title="toggle display of configuration pane." onclick="slider()">
-    &lt;
-  </button>
-
-  <main>
-    <div id="config">
-      <div>
-        <button onclick="runCode()">Run</button>
-        <button style="float: right;" onclick="sw.help()">?</button>
+    <main>
+      <div id="config">
+        <div>
+          <button id="run">Run</button>
+          <button id="help" style="float: right;">
+            ?
+          </button>
+        </div>
+        <textarea
+          id="code"
+          rows="20"
+          placeholder="Click 'run' or ctrl-enter to execute."
+          onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"
+        ></textarea>
+        <div id="file">
+          <form>
+            <div class="field">
+              <label>Category:</label>
+              <select id="categories"> </select>
+            </div>
+            <div class="field">
+              <label>Notebook:</label>
+              <select id="notebooks">
+                <option></option>
+              </select>
+              <button id="load">Load</button>
+              <button id="delete">Delete</button>
+            </div>
+            <div class="field">
+              <label>Save as:</label>
+              <input type="text" id="saveAs" />
+              <button id="save">Save</button>
+              <input id="overwrite" type="checkbox" />Overwrite?
+            </div>
+          </form>
+        </div>
+        <div id="dragBarH"></div>
+        <div id="console"></div>
       </div>
-      <textarea id="code" rows="20" placeholder="Click 'run' or ctrl-enter to execute."
-        onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"></textarea>
-      <div id="file">
-        <form>
-          <div class="field">
-            <label>Category:</label>
-            <select id="categories"> </select>
-          </div>
-          <div class="field">
-            <label>Notebook:</label>
-            <select id="notebooks">
-              <option></option>
-            </select>
-            <button id="load">Load</button>
-            <button id="delete">Delete</button>
-          </div>
-          <div class="field">
-            <label>Save as:</label>
-            <input type="text" id="saveAs" />
-            <button id="save">Save</button>
-            <input id="overwrite" type="checkbox" />Overwrite?
-          </div>
-        </form>
-      </div>
-      <div id="dragBarH"></div>
-      <div id="console"></div>
-    </div>
-    <div id="dragBar"></div>
-    <div id="output"></div>
-  </main>
-</body>
-
+      <div id="dragBar"></div>
+      <div id="output"></div>
+    </main>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", async function () {
+        window.DataFrame = AnalyticsNotebook.DataFrame;
+        window.List = AnalyticsNotebook.List;
+        window.Visual = AnalyticsNotebook.Visual;
+        window.UI = AnalyticsNotebook.UI;
+      });
+    </script>
+  </body>
 </html>

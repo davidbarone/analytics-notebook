@@ -11,7 +11,7 @@
  *   .visual(Visual.renderer.table)
  *   .attach('root');
  */
-Visual.renderer.table = function (dataFrame, options) {
+let table = function (dataFrame, options) {
   let first = dataFrame.data[0];
   let columns = Object.getOwnPropertyNames(first);
 
@@ -44,7 +44,7 @@ Visual.renderer.table = function (dataFrame, options) {
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  */
-Visual.renderer.slicer = function (dataFrame, options) {
+let slicer = function (dataFrame, options) {
   let elDiv = document.createElement("div");
   if (options.title) {
     let elTitle = document.createElement("h5");
@@ -125,7 +125,7 @@ Visual.renderer.slicer = function (dataFrame, options) {
  *   )
  *   .attach('root');
  */
-Visual.renderer.bar = function (dataFrame, options) {
+let bar = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -337,7 +337,7 @@ Visual.renderer.bar = function (dataFrame, options) {
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  */
-Visual.renderer.html = function (dataFrame, options) {
+let html = function (dataFrame, options) {
   let elDiv = document.createElement("div");
   let html = options.html || "";
   elDiv.innerHTML = html;
@@ -366,7 +366,7 @@ Visual.renderer.html = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-Visual.renderer.pie = function (dataFrame, options) {
+let pie = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -400,9 +400,9 @@ Visual.renderer.pie = function (dataFrame, options) {
     .data.toObject(categoryName, valueName);
 
   // set the dimensions and margins of the graph
-  var width = options.width;
-  height = options.height;
-  margin = 10;
+  let width = options.width;
+  let height = options.height;
+  let margin = 10;
 
   // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
   var radius = Math.min(width, height) / 2 - margin;
@@ -480,7 +480,7 @@ Visual.renderer.pie = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-Visual.renderer.hist = function (dataFrame, options) {
+let hist = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -577,6 +577,7 @@ Visual.renderer.hist = function (dataFrame, options) {
  * @param {DataFrame} dataFrame - The data bound to the visual.
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
+ * @example <caption>Displaying a scatterplot</caption>
  * DataFrame
  *   .examples
  *   .titanic()
@@ -594,7 +595,7 @@ Visual.renderer.hist = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-Visual.renderer.scatter = function (dataFrame, options) {
+let scatter = function (dataFrame, options) {
   //Visual.renderer.scatter = function (data, xColumnName, yColumnName, options) {
 
   options = {
@@ -714,7 +715,7 @@ Visual.renderer.scatter = function (dataFrame, options) {
  *   .visual(Visual.renderer.box)
  *   .attach('root');
  */
-Visual.renderer.box = function (dataFrame, options) {
+let box = function (dataFrame, options) {
   options = {
     ...{
       height: 250,
@@ -866,7 +867,7 @@ Visual.renderer.box = function (dataFrame, options) {
  *   .visual(Visual.renderer.pairs)
  *   .attach('root');
  */
-Visual.renderer.pairs = function (dataFrame, options) {
+let pairs = function (dataFrame, options) {
   let columns = [];
   let properties = Object.getOwnPropertyNames(dataFrame.data[0]);
   properties.forEach((p) => {
@@ -916,4 +917,15 @@ Visual.renderer.pairs = function (dataFrame, options) {
   });
 
   return table;
+};
+
+export default {
+  html,
+  table,
+  bar,
+  pie,
+  scatter,
+  hist,
+  pairs,
+  box,
 };

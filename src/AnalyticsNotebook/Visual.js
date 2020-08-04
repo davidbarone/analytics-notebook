@@ -1,3 +1,7 @@
+import renderer from "./Visual.renderer.js";
+import Watcher from "../reactive/Watcher.js";
+import Observer from "../reactive/Observer.js";
+
 /**
  * A visual represents any visual component rendered in the output, for example tables and charts.
  */
@@ -16,13 +20,6 @@ class Visual {
     walk(this);
     Visual.visuals.push(this);
   }
-
-  // object that contains the assignments of visual <-> panel
-  // Each property is an array of visuals. Id = Panel.id.
-  static watchers = [];
-
-  // Registry of all visuals pushed
-  static visuals = [];
 
   /**
    * Attaches the visual to a panel in the output.
@@ -65,13 +62,22 @@ class Visual {
     let visual = new Visual(undefined, Visual.renderer.html, { html });
     return visual;
   }
-
-  /**
-   * Registry of renderer functions. These include data-bound and non-data bound renderers. Renderer functions are generally not called directly, but
-   * are used by other functions, for example the DataFrame.visual() function. Renderer functions are called during the screen rendering process, and
-   * 2 arguments are passed to render functions. A DataFrame object which is the data to be rendered, and an options object which provides
-   * customisation rules for the renderer. The format of the options object is renderer-specific.
-   * @namespace Visual.renderer
-   */
-  static renderer = {};
 }
+
+// object that contains the assignments of visual <-> panel
+// Each property is an array of visuals. Id = Panel.id.
+Visual.watchers = [];
+
+// Registry of all visuals pushed
+Visual.visuals = [];
+
+/**
+ * Registry of renderer functions. These include data-bound and non-data bound renderers. Renderer functions are generally not called directly, but
+ * are used by other functions, for example the DataFrame.visual() function. Renderer functions are called during the screen rendering process, and
+ * 2 arguments are passed to render functions. A DataFrame object which is the data to be rendered, and an options object which provides
+ * customisation rules for the renderer. The format of the options object is renderer-specific.
+ * @namespace Visual.renderer
+ */
+Visual.renderer = renderer;
+
+export default Visual;

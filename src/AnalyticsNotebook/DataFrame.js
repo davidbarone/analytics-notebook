@@ -1,3 +1,5 @@
+import examples from "./DataFrame.examples.js";
+
 /**
  * DataFrame - Manages all manipulation of data.
  *
@@ -6,9 +8,9 @@
  * It should be used for retrieving, exploring, cleansing, and transforming data.
  */
 class DataFrame {
-  data = [];
-  slicers = {};
   constructor() {
+    this.data = [];
+    this.slicers = {};
     this.data.push.apply(this.data, arguments);
   }
 
@@ -354,3 +356,7 @@ class DataFrame {
     return DataFrame.create(this.data);
   }
 }
+
+DataFrame.examples = examples;
+
+export default DataFrame;

@@ -1,9 +1,9 @@
 /**
- * A List object represents a single column from a DataFrame. Univariate analysis can be performed on a List object. 
-  */
+ * A List object represents a single column from a DataFrame. Univariate analysis can be performed on a List object.
+ */
 class List {
-  arr = [];
   constructor(arr) {
+    this.arr = [];
     this.arr = [...arr];
   }
 
@@ -162,3 +162,5 @@ class List {
     }
   }
 }
+
+export default List;

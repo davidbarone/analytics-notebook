@@ -3,38 +3,39 @@
 // for full implementation
 
 class Dep {
-    constructor() {
-        this.subs = new Set()
+  constructor() {
+    this.subs = new Set();
+  }
+
+  addSub(sub) {
+    this.subs.add(sub);
+  }
+
+  depend() {
+    if (Dep.target) {
+      Dep.target.addDep(this);
     }
+  }
 
-    addSub(sub) {
-        this.subs.add(sub);
-    }
+  notify() {
+    this.subs.forEach((sub) => sub.update());
+  }
 
-    depend() {
-        if (Dep.target) {
-            Dep.target.addDep(this)
-        }
-    }
+  static pushTarget(_target) {
+    if (Dep.target) Dep.targetStack.push(Dep.target);
+    Dep.target = _target;
+  }
 
-    notify() {
-        this.subs.forEach(sub => sub.update())
-    }
-
-    // Static properties/methods
-
-    // the current target watcher being evaluated.
-    // this is globally unique because there could be only one
-    // watcher being evaluated at any time.
-    static target = null;
-    static targetStack = []
-
-    static pushTarget(_target) {
-        if (Dep.target) Dep.targetStack.push(Dep.target)
-        Dep.target = _target
-    }
-
-    static popTarget() {
-        Dep.target = Dep.targetStack.pop()
-    }
+  static popTarget() {
+    Dep.target = Dep.targetStack.pop();
+  }
 }
+
+// Static properties/methods
+// the current target watcher being evaluated.
+// this is globally unique because there could be only one
+// watcher being evaluated at any time.
+Dep.target = null;
+Dep.targetStack = [];
+
+export default Dep;
