@@ -206,6 +206,7 @@ A number of scripts have been created for basic tasks:
 - docslite: Creates a single-file documentation page via jsDoc-to-markdown and Showdown. This documentation is useful when you need a 'bundled' solution.
 - build: Builds site in production mode.
 - build-dev: Builds site in development mode.
+- serve: runs the Webpack Dev Server with Hot Module Replacement (HMR).
 
 ---
 
