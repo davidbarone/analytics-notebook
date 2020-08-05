@@ -25,6 +25,12 @@ div#waiting {
   display: none;
 }
 
+div#waiting.init {
+  opacity: 1;
+  display: block;
+  background: #fff;
+}
+
 div#waiting.show {
   display: block;
 }

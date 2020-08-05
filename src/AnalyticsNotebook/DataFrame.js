@@ -28,6 +28,69 @@ class DataFrame {
    * @param {string} url - The Url to fetch data from.
    * @param {Object} options - Options used for the fetch.
    * @returns {DataFrame}
+   * @example <caption>Fetching data from an external API</caption>
+   * UI.layout({
+   *   id: 'root',
+   *   direction: 'horizontal',
+   *   children: [
+   *     {
+   *       id: 'left',
+   *       direction: 'vertical',
+   *       children: [
+   *         {id: 'top-left'}, {id: 'bottom-left'}
+   *       ]
+   *     },
+   *     {
+   *       id: 'right'
+   *     }
+   *   ]
+   * });
+   *
+   * // Get country population / area data from https://restcountries
+   *
+   * let data = await DataFrame.fetch('https://restcountries.eu/rest/v2/all');
+   * let countries = data.select('name','capital','region','subregion','population','area');
+   * Visual.html("<h1>First 10 countries</h1>").attach('right');
+   * countries.head(10).visual(Visual.renderer.table).attach('right');
+   *
+   * // Get 10 largest countries and display in bar chart
+   *
+   * let largest = countries.sort(c=>c.area, true).head(10);
+   * largest.visual(Visual.renderer.bar, {
+   *   border: {
+   *     width: 2,
+   *     color: "gray",
+   *     background: "#e0e8ef",
+   *     radius: 8
+   *   },
+   *   margin: {
+   *     top: 40,
+   *     left: 80,
+   *     right: 20,
+   *     bottom: 60
+   *   },
+   *   title: "Population by Continent",
+   *   fnCategories: c=> { return {region: c.region}},
+   *   fnValues: (c)=> { return {
+   *     population: c.list("population").mean(),
+   *     area: c.list("area").sum()
+   *   }}
+   * }).attach('top-left');
+   *
+   * // Pie chart showing population by region.
+   *
+   * Visual.html("<h1>Population by Region</h1>").attach('bottom-left');
+   * countries.visual(Visual.renderer.pie, {
+   *   border: {
+   *     width: 2,
+   *     color: "gray",
+   *     background: "#ddd",
+   *     radius: 8
+   *   },
+   *   title: "Population by Continent",
+   *   fnCategories: c=> { return { region: c.region }},
+   *   fnValues: (c)=> { return { population: c.list("population").sum() }}
+   * }).attach('bottom-left');
    */
   static async fetch(url, options) {
     console.log("starting read...");
@@ -36,7 +99,7 @@ class DataFrame {
     var data = await result.json();
     var count = data.length;
     console.log(`${count} rows read.`);
-    return new DataFrame(data);
+    return DataFrame.create(data);
   }
 
   /**

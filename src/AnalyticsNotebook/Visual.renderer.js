@@ -179,7 +179,7 @@ let bar = function (dataFrame, options) {
     subGroups = dataFrame
       .map((row) => options.fnSubGroups(row))
       .list(subGroupName)
-      .unique();
+      .unique().arr;
     let valueName = Object.getOwnPropertyNames(
       options.fnValues(dataFrame.head(1))
     )[0];
@@ -271,7 +271,7 @@ let bar = function (dataFrame, options) {
 
   // Add Y axis
   let maxValue = 0;
-  subGroups.arr.forEach((g) => {
+  subGroups.forEach((g) => {
     let value = d3.max(dataFrame.data, function (d) {
       return +d[g];
     });
@@ -286,14 +286,14 @@ let bar = function (dataFrame, options) {
   // Another scale for subgroup position?
   var xSubgroup = d3
     .scaleBand()
-    .domain(subGroups.arr)
+    .domain(subGroups)
     .range([0, x.bandwidth()])
     .padding([0.05]);
 
   // color palette = one color per subgroup
   var color = d3
     .scaleOrdinal()
-    .domain(subGroups.arr)
+    .domain(subGroups)
     .range(["#e41a1c", "#377eb8", "#4daf4a"]);
 
   // Bars
@@ -308,7 +308,7 @@ let bar = function (dataFrame, options) {
     })
     .selectAll("rect")
     .data(function (d) {
-      return subGroups.arr.map(function (key) {
+      return subGroups.map(function (key) {
         return { key: key, value: d[key] };
       });
     })

@@ -7,6 +7,10 @@ module.exports = {
     filename: "AnalyticsNotebook.js",
     library: "AnalyticsNotebook",
   },
+  devServer: {
+    contentBase: "./dist",
+    hot: true,
+  },
   module: {
     rules: [
       {

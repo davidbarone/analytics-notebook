@@ -14,7 +14,7 @@
 
   <body>
     <!-- waiting dialog-->
-    <div id="waiting"></div>
+    <div id="waiting" class="init"></div>
 
     <header>Analytics Notebook</header>
     <button
@@ -68,11 +68,26 @@
       <div id="output"></div>
     </main>
     <script type="text/javascript">
-      document.addEventListener("DOMContentLoaded", async function () {
+      // Bootstrap code
+      function ready(fn) {
+        if (document.readyState != "loading") {
+          fn();
+        } else {
+          document.addEventListener("DOMContentLoaded", fn);
+        }
+      }
+
+      ready(function () {
+        // start up your app
         window.DataFrame = AnalyticsNotebook.DataFrame;
         window.List = AnalyticsNotebook.List;
         window.Visual = AnalyticsNotebook.Visual;
         window.UI = AnalyticsNotebook.UI;
+
+        // On startup, the div#waiting is hiding the rest of the document
+        // whilst script modules load.
+        let elWaiting = document.getElementById("waiting");
+        elWaiting.classList.remove("init");
       });
     </script>
   </body>

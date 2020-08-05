@@ -8,6 +8,7 @@
     "docs": "jsdoc -c ./jsdoc.conf.json -t node_modules/ink-docstrap/template --readme ./README.md",
     "build": "webpack --mode production",
     "build-dev": "webpack --mode development",
+    "serve": "webpack-dev-server --mode=development",
     "docslite": "node ./scripts/docslite.js"
   },
   "repository": {
@@ -30,12 +31,13 @@
   "devDependencies": {
     "css-loader": "^4.2.0",
     "html-webpack-plugin": "^4.3.0",
+    "ink-docstrap": "^1.3.2",
+    "jsdoc": "^3.6.5",
     "jsdoc-to-markdown": "^6.0.1",
+    "showdown": "^1.9.1",
     "style-loader": "^1.2.1",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
-    "ink-docstrap": "^1.3.2",
-    "jsdoc": "^3.6.5",
-    "showdown": "^1.9.1"
+    "webpack-dev-server": "^3.11.0"
   }
 }

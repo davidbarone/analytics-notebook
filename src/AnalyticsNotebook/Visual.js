@@ -48,9 +48,11 @@ class Visual {
     let id = this.panelId;
     UI.clear(id);
     Visual.visuals.forEach((c) => {
-      let content = c.renderer(c.dataFrame, c.options);
-      let id = c.panelId;
-      UI.content(content, id);
+      if (c.panelId === id) {
+        let content = c.renderer(c.dataFrame, c.options);
+        let id = c.panelId;
+        UI.content(content, id);
+      }
     });
   }
 
