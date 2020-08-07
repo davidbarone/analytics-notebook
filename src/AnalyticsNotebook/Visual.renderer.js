@@ -576,6 +576,13 @@ let hist = function (dataFrame, options) {
  * Displays a scatter plot allowing 2 continuous variables to be compared.
  * @param {DataFrame} dataFrame - The data bound to the visual.
  * @param {Object} options - Configuration of the visual.
+ * @param {number} options.height - The height of the scatterplot.
+ * @param {number} options.width - The width of the scatterplot.
+ * @param {Object} options.margin - The margins for the scatterplot.
+ * @param {number} options.margin.top - The top margin for the scatterplot.
+ * @param {number} options.margin.right - The right margin for the scatterplot.
+ * @param {number} options.margin.bottom - The bottom margin for the scatterplot.
+ * @param {number} options.margin.left - The bottom margin for the scatterplot.
  * @returns {Node}
  * @example <caption>Displaying a scatterplot</caption>
  * DataFrame

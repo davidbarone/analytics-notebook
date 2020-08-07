@@ -361,6 +361,7 @@ A number of scripts have been created for basic tasks:
 - build: Builds site in production mode.
 - build-dev: Builds site in development mode.
 - serve: runs the Webpack Dev Server with Hot Module Replacement (HMR).
+- test: runs the test suite (using Jest) with code coverage metrics included
 
 ---
 
