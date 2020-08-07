@@ -594,6 +594,23 @@ let hist = function (dataFrame, options) {
  *     }
  *   )
  *   .attach("root");
+ *
+ * @example <caption>Incorporating a 3rd dimension using color</caption>
+ * let iris = DataFrame.examples.iris();
+ * iris
+ *   .visual(
+ *     Visual.renderer.scatter,
+ *     {
+ *       fnXValues: (r) => {
+ *         return { sepal_length_cm: r.sepal_length_cm };
+ *       },
+ *       fnYValues: (r) => {
+ *         return { sepal_width_cm: r.sepal_width_cm };
+ *       },
+ *       fnColor: (r) => r.class==="Iris-setosa" ? "green" : r.class==="Iris-versicolor" ? "red" : "blue"
+ *     }
+ *   )
+ *   .attach("root");
  */
 let scatter = function (dataFrame, options) {
   //Visual.renderer.scatter = function (data, xColumnName, yColumnName, options) {
@@ -611,6 +628,8 @@ let scatter = function (dataFrame, options) {
       title: "",
       fnXValues: null,
       fnYValues: null,
+      fnSize: null,
+      fnColor: null,
       axes: {
         x: {
           display: true,
@@ -653,12 +672,17 @@ let scatter = function (dataFrame, options) {
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   // Add X axis
-  let minXValue = d3.min(dataFrame.data, function (d) {
-    return +d[xColumnName];
-  });
-  let maxXValue = d3.max(dataFrame.data, function (d) {
-    return +d[xColumnName];
-  });
+  let minXValue =
+    options.axes.x.min ||
+    d3.min(dataFrame.data, function (d) {
+      return +d[xColumnName];
+    });
+
+  let maxXValue =
+    options.axes.x.max ||
+    d3.max(dataFrame.data, function (d) {
+      return +d[xColumnName];
+    });
 
   var x = d3.scaleLinear().domain([minXValue, maxXValue]).range([0, width]);
 
@@ -670,12 +694,16 @@ let scatter = function (dataFrame, options) {
   }
 
   // Add Y axis
-  let minYValue = d3.min(dataFrame.data, function (d) {
-    return +d[yColumnName];
-  });
-  let maxYValue = d3.max(dataFrame.data, function (d) {
-    return +d[yColumnName];
-  });
+  let minYValue =
+    options.axes.y.min ||
+    d3.min(dataFrame.data, function (d) {
+      return +d[yColumnName];
+    });
+  let maxYValue =
+    options.axes.y.max ||
+    d3.max(dataFrame.data, function (d) {
+      return +d[yColumnName];
+    });
 
   var y = d3.scaleLinear().domain([minYValue, maxYValue]).range([height, 0]);
 
@@ -696,8 +724,12 @@ let scatter = function (dataFrame, options) {
     .attr("cy", function (d) {
       return y(d[yColumnName]);
     })
-    .attr("r", 1.5)
-    .style("fill", "#69b3a2");
+    .attr("r", function (d) {
+      return options.fnSize ? options.fnSize(d) : 5;
+    })
+    .style("fill", function (d) {
+      return options.fnColor ? options.fnColor(d) : "#69b3a2";
+    });
 
   return svg.node().parentNode;
 };

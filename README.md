@@ -192,6 +192,160 @@ data
   .attach("root");
 ```
 
+### Anscombe's Quartet
+
+This notebook illustrates Anscombe's Quartet (https://en.wikipedia.org/wiki/Anscombe%27s_quartet):
+
+```javascript
+UI.layout({
+  id: "root",
+  direction: "vertical",
+  children: [
+    {
+      id: "top",
+      direction: "horizontal",
+      size: 10,
+      children: [
+        {
+          id: "top-left",
+        },
+        {
+          id: "top-right",
+        },
+      ],
+    },
+    {
+      id: "bottom",
+      direction: "horizontal",
+      size: 10,
+      children: [
+        {
+          id: "bottom-left",
+        },
+        {
+          id: "bottom-right",
+        },
+      ],
+    },
+  ],
+});
+let anscombe = DataFrame.examples.anscombe();
+let q1 = anscombe.filter((r) => r.dataset === "1");
+let q2 = anscombe.filter((r) => r.dataset === "2");
+let q3 = anscombe.filter((r) => r.dataset === "3");
+let q4 = anscombe.filter((r) => r.dataset === "4");
+console.log(q4);
+q1.visual(Visual.renderer.scatter, {
+  fnXValues: (r) => {
+    return { x: r.x };
+  },
+  fnYValues: (r) => {
+    return { y: r.y };
+  },
+  axes: {
+    x: {
+      display: true,
+      min: 1,
+      max: 20,
+    },
+    y: {
+      display: true,
+      min: 1,
+      max: 16,
+    },
+  },
+}).attach("top-left");
+Visual.html(`mean(x): ${q1.list("x").mean()}`).attach("top-left");
+Visual.html(`var(x): ${q1.list("x").var()}`).attach("top-left");
+Visual.html(`y mean: ${q1.list("y").mean()}`).attach("top-left");
+Visual.html(`var(y): ${q1.list("y").var()}`).attach("top-left");
+Visual.html(`corr(x,y): ${q1.list("x").corr(q1.list("y"))}`).attach("top-left");
+
+q2.visual(Visual.renderer.scatter, {
+  fnXValues: (r) => {
+    return { x: r.x };
+  },
+  fnYValues: (r) => {
+    return { y: r.y };
+  },
+  axes: {
+    x: {
+      display: true,
+      min: 1,
+      max: 20,
+    },
+    y: {
+      display: true,
+      min: 1,
+      max: 16,
+    },
+  },
+}).attach("top-right");
+Visual.html(`mean(x): ${q2.list("x").mean()}`).attach("top-right");
+Visual.html(`var(x): ${q2.list("x").var()}`).attach("top-right");
+Visual.html(`y mean: ${q2.list("y").mean()}`).attach("top-right");
+Visual.html(`var(y): ${q2.list("y").var()}`).attach("top-right");
+Visual.html(`corr(x,y): ${q2.list("x").corr(q2.list("y"))}`).attach(
+  "top-right"
+);
+
+q3.visual(Visual.renderer.scatter, {
+  fnXValues: (r) => {
+    return { x: r.x };
+  },
+  fnYValues: (r) => {
+    return { y: r.y };
+  },
+  axes: {
+    x: {
+      display: true,
+      min: 1,
+      max: 20,
+    },
+    y: {
+      display: true,
+      min: 1,
+      max: 16,
+    },
+  },
+}).attach("bottom-left");
+Visual.html(`mean(x): ${q3.list("x").mean()}`).attach("bottom-left");
+Visual.html(`var(x): ${q3.list("x").var()}`).attach("bottom-left");
+Visual.html(`y mean: ${q3.list("y").mean()}`).attach("bottom-left");
+Visual.html(`var(y): ${q3.list("y").var()}`).attach("bottom-left");
+Visual.html(`corr(x,y): ${q3.list("x").corr(q3.list("y"))}`).attach(
+  "bottom-left"
+);
+
+q4.visual(Visual.renderer.scatter, {
+  fnXValues: (r) => {
+    return { x: r.x };
+  },
+  fnYValues: (r) => {
+    return { y: r.y };
+  },
+  axes: {
+    x: {
+      display: true,
+      min: 1,
+      max: 20,
+    },
+    y: {
+      display: true,
+      min: 1,
+      max: 16,
+    },
+  },
+}).attach("bottom-right");
+Visual.html(`mean(x): ${q4.list("x").mean()}`).attach("bottom-right");
+Visual.html(`var(x): ${q4.list("x").var()}`).attach("bottom-right");
+Visual.html(`y mean: ${q4.list("y").mean()}`).attach("bottom-right");
+Visual.html(`var(y): ${q4.list("y").var()}`).attach("bottom-right");
+Visual.html(`corr(x,y): ${q4.list("x").corr(q4.list("y"))}`).attach(
+  "bottom-right"
+);
+```
+
 ## Development / Source Code
 
 The source code for this project is available from: https://github.com/davidbarone/analytics-notebook. It's built using webpack, so you'll need the npm toolchain set up. You'll also need the following packages installed in the global namespace:
