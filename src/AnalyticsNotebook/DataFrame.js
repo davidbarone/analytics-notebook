@@ -7,9 +7,20 @@
  */
 class DataFrame {
   constructor() {
+    let self = this;
     this.data = [];
     this.slicers = {};
     this.data.push.apply(this.data, arguments);
+
+    // Return Proxy, so that we can handle indexing, i.e.: DataFrame[n]
+    return new Proxy(this, {
+      get(target, prop, receiver) {
+        if (Number(prop) == prop && !(prop in target)) {
+          return self.data[prop];
+        }
+        return target[prop];
+      },
+    });
   }
 
   /**
@@ -510,6 +521,22 @@ class DataFrame {
     });
 
     return DataFrame.create(results);
+  }
+
+  /**
+   * This callback is a required parameter of the DataFrame map method.
+   * @callback DataFrame~forEachCallback
+   * @param {object} currentValue - The current row in the DataFrame.
+   * @param {number} [index] - The index of the current row in the DataFrame.
+   * @param {Array} [array] - The array that the forEach was called on.
+   */
+
+  /**
+   * Executes a callback function for each row in the DataFrame object.
+   * @param {DataFrame~forEachCallback} forEachCallback
+   */
+  forEach(forEachCallback) {
+    this.data.forEach(forEachCallback);
   }
 }
 

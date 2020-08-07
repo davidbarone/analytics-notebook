@@ -4,7 +4,7 @@
   "description": "Analytical and statistical notebook application.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --collectCoverage",
     "docs": "jsdoc -c ./jsdoc.conf.json -t node_modules/ink-docstrap/template --readme ./README.md",
     "build": "webpack --mode production",
     "build-dev": "webpack --mode development",
@@ -29,9 +29,12 @@
   "homepage": "https://github.com/davidbarone/analytics-notebook#readme",
   "dependencies": {},
   "devDependencies": {
+    "@babel/preset-env": "^7.11.0",
+    "babel-jest": "^26.2.2",
     "css-loader": "^4.2.0",
     "html-webpack-plugin": "^4.3.0",
     "ink-docstrap": "^1.3.2",
+    "jest": "^26.2.2",
     "jsdoc": "^3.6.5",
     "jsdoc-to-markdown": "^6.0.1",
     "showdown": "^1.9.1",
