@@ -1,5 +1,3 @@
-import examples from "./DataFrame.examples.js";
-
 /**
  * DataFrame - Manages all manipulation of data.
  *
@@ -26,7 +24,7 @@ class DataFrame {
   /**
    * Fetches data from a Url. The data must be JSON data.
    * @param {string} url - The Url to fetch data from.
-   * @param {Object} options - Options used for the fetch.
+   * @param {object} options - Options used for the fetch.
    * @returns {DataFrame}
    * @example <caption>Fetching data from an external API</caption>
    * UI.layout({
@@ -105,8 +103,8 @@ class DataFrame {
   /**
    * This callback is a required parameter of the DataFrame map method.
    * @callback DataFrame~mapFunction
-   * @param {Object} row - The current row in the DataFrame.
-   * @returns {Object} - The transformed row.
+   * @param {object} row - The current row in the DataFrame.
+   * @returns {object} The transformed row.
    */
 
   /**
@@ -121,8 +119,8 @@ class DataFrame {
   /**
    * This callback is a required parameter of the DataFrame filter method.
    * @callback DataFrame~filterFunction
-   * @param {Object} row - The current row in the DataFrame.
-   * @returns {boolean} - The function should returns a boolean value denoting the rows to be kept.
+   * @param {object} row - The current row in the DataFrame.
+   * @returns {boolean} The function should returns a boolean value denoting the rows to be kept.
    */
 
   /**
@@ -137,8 +135,8 @@ class DataFrame {
   /**
    * This callback is a required parameter of the DataFrame group method.
    * @callback DataFrame~groupingFunction
-   * @param {Object} row - The current row in the DataFrame.
-   * @returns {Object} - The callback should return an object representing the properties of the row that should be considered as the 'group' for the row.
+   * @param {object} row - The current row in the DataFrame.
+   * @returns {object} The callback should return an object representing the properties of the row that should be considered as the 'group' for the row.
    * All the unique values returned for all rows in the DataFrame objects will form the group rows of the resulting DataFrame.
    */
 
@@ -146,7 +144,7 @@ class DataFrame {
    * This callback is a required parameter of the DataFrame group method.
    * @callback DataFrame~aggregateFunction
    * @param {DataFrame} group - The current group in the DataFrame.
-   * @returns {Object} - The callback should return an object representing any aggregrated values of the group. A single object must be returned.
+   * @returns {object} The callback should return an object representing any aggregrated values of the group. A single object must be returned.
    */
 
   /**
@@ -180,7 +178,7 @@ class DataFrame {
    * This callback is a required parameter of the DataFrame pivot function.
    * @callback DataFrame~pivotFunction
    * @param {DataFrame} group - The current group in the DataFrame.
-   * @returns {String} - The pivot function should return back a string value. This value will be projected as a column header.
+   * @returns {string} The pivot function should return back a string value. This value will be projected as a column header.
    */
 
   /**
@@ -189,6 +187,18 @@ class DataFrame {
    * @param {DataFrame~pivotFunction} pivotFunction - The data pivoting function.
    * @param {DataFrame~aggregateFunction} aggregateFunction - The data aggregation function.
    * @returns {DataFrame}
+   * @example <caption>Pivoting the Anscombe's Quartet built-in dataset</caption>
+   * let df = DataFrame
+   *   .examples
+   *   .anscombe()
+   *   .pivot(
+   *     g => { return { observation: g.observation }},
+   *     p => p.dataset,
+   *     a => { return JSON.stringify({ x: a.list('x').mean(), y: a.list('y').mean() })}
+   *   )
+   *   .remove('observation')
+   *   .visual(Visual.renderer.table)
+   *   .attach('root');
    */
   pivot(groupingFunction, pivotFunction, aggregateFunction) {
     // Get distinct values for the pivot function
@@ -226,6 +236,7 @@ class DataFrame {
   /**
    * Gets the top 'n' rows of a DataFrame object.
    * @param {Number} top - Top 'n' rows to select.
+   * @returns {DataFrame}
    */
   head(top) {
     let arr = [...this.data];
@@ -234,6 +245,7 @@ class DataFrame {
 
   /**
    * Returns the number of rows in the DataFrame.
+   * @returns {number} The number of rows in the DataFrame object.
    */
   count() {
     return this.data.length;
@@ -243,6 +255,7 @@ class DataFrame {
    * Sorts the rows in a DataFrame object based on a sort function.
    * @param {*} sortFunction
    * @param {*} descending
+   * @returns {DataFrame} The sorted DataFrame object
    */
   sort(sortFunction, descending) {
     let reverse = descending ? -1 : 1;
@@ -253,6 +266,14 @@ class DataFrame {
     return DataFrame.create(this.data);
   }
 
+  /**
+   * Joins 2 DataFrame objects.
+   * @param {*} dataFrame
+   * @param {*} type
+   * @param {*} joinFunction
+   * @param {*} selectFunction
+   * @returns {DataFrame}
+   */
   join(dataFrame, type, joinFunction, selectFunction) {
     let results = [];
     let left = [...this.data];
@@ -306,10 +327,19 @@ class DataFrame {
     return DataFrame.create(data);
   }
 
+  /**
+   * Returns a single column from a DataFrame object.
+   * @param {string} columnName
+   * @returns {List}
+   */
   list(columnName) {
     return new List([...this.data.map((r) => r[columnName])]);
   }
 
+  /**
+   * Returns descriptive statistics about the specified DataFrame object.
+   * @returns {DataFrame}
+   */
   describe() {
     let first = this.data[0];
     let props = Object.getOwnPropertyNames(first);
@@ -329,11 +359,17 @@ class DataFrame {
         median: column.values().percentile(50),
         q3: column.values().percentile(75),
         max: column.values().max(),
+        std: column.std(),
       });
     });
     return new DataFrame(...results);
   }
 
+  /**
+   * Changes the types of columns in a DataFrame object.
+   * @param {object} types
+   * @returns {DataFrame}
+   */
   cast(types) {
     var columnsToCast = Object.getOwnPropertyNames(types);
     var convertedValues = {};
@@ -360,16 +396,28 @@ class DataFrame {
     return DataFrame.create(data);
   }
 
-  remove(columnNames) {
-    let data = [...this.data].forEach((row) => {
+  /**
+   * Removes selected columns from a DataFrame object.
+   * @param  {...string} columnNames - list of columns to remove.
+   * @returns {DataFrame}
+   */
+  remove(...columnNames) {
+    let data = [];
+    this.data.forEach((row) => {
       columnNames.forEach((c) => {
         delete row[c];
       });
+      data.push(row);
     });
 
     return DataFrame.create(data);
   }
 
+  /**
+   * Selects columns to keep in a dataset. Columns not specified are removed.
+   * @param  {...string} columnNames - List of columns to keep.
+   * @returns {DataFrame}
+   */
   select(...columnNames) {
     let data = [];
     this.data.forEach((row) => {
@@ -407,6 +455,12 @@ class DataFrame {
     this.temp = undefined;
   }
 
+  /**
+   * Creates a Visual object from a DataFrame object.
+   * @param {*} renderer - The renderer to use.
+   * @param {*} options - The configuration for the renderer. The configuration is renderer-specific.
+   * @returns {Visual}
+   */
   visual(renderer, options) {
     let visual = new Visual(this, renderer, options);
     return visual;
@@ -414,12 +468,56 @@ class DataFrame {
 
   /**
    * Clones the DataFrame object.
+   * @returns {DataFrame}
    */
   clone() {
     return DataFrame.create(this.data);
   }
+
+  /**
+   * Creates a correlation table for all numeric pairs in the DataFrame object.
+   * @returns {DataFrame} Correlation for all numerical variable pairs in the DataFrame object.
+   * @example <caption>Generating the correlation pairs for a DataFrame object</caption>
+   * let iris = DataFrame.examples.iris();
+   * let corr = iris.corr();
+   * console.log(corr);
+   *
+   * // Visualise
+   * corr.pivot(
+   *   g => { return { x: g.x }},
+   *   p => p.y,
+   *   a => a.list('corr').mean()
+   * ).visual(Visual.renderer.table).attach('root');
+   */
+  corr() {
+    let columns = [];
+    let properties = Object.getOwnPropertyNames(this.data[0]);
+    properties.forEach((p) => {
+      if (this.list(p).type() === "number") {
+        columns.push(p);
+      }
+    });
+
+    let results = [];
+    columns.forEach((x) => {
+      columns.forEach((y) => {
+        results.push({
+          x: x,
+          y: y,
+          corr: this.list(x).corr(this.list(y)),
+        });
+      });
+    });
+
+    return DataFrame.create(results);
+  }
 }
 
-DataFrame.examples = examples;
+/**
+ * Built-in example datasets.
+ * @memberof DataFrame
+ * @member examples
+ */
+DataFrame.examples = {};
 
 export default DataFrame;

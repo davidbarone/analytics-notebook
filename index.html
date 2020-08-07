@@ -8,6 +8,21 @@
     <meta name="description" content="Analytics Notebook" />
     <meta name="author" content="David Barone" />
 
+    <style>
+      div#waiting.init {
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        left: 0px;
+        top: 0px;
+        cursor: wait;
+        z-index: 999;
+        opacity: 1;
+        display: block;
+        background: #ccc;
+      }
+    </style>
+
     <!-- d3 library from google cdn -->
     <script src="https://ajax.googleapis.com/ajax/libs/d3js/5.15.1/d3.min.js"></script>
   </head>

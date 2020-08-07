@@ -1,7 +1,11 @@
+import DataFrame from "./DataFrame.js";
 /**
- * Iris dataset
+ * The Iris flower data set or Fisher's Iris data set is a multivariate data set introduced by the British statistician, eugenicist, and biologist Ronald Fisher in his 1936 paper The use of multiple measurements in taxonomic problems as an example of linear discriminant analysis. It is sometimes called Anderson's Iris data set because Edgar Anderson collected the data to quantify the morphologic variation of Iris flowers of three related species. Two of the three species were collected in the Gaspé Peninsula "all from the same pasture, and picked on the same day and measured at the same time by the same person with the same apparatus". Fisher's paper was published in the journal, the Annals of Eugenics, creating controversy about the continued use of the Iris dataset for teaching statistical techniques today.
+ * The data set consists of 50 samples from each of three species of Iris (Iris setosa, Iris virginica and Iris versicolor). Four features were measured from each sample: the length and the width of the sepals and petals, in centimeters. Based on the combination of these four features, Fisher developed a linear discriminant model to distinguish the species from each other.
+ * @example
+ * let df = DataFrame.examples.iris();
  */
-let iris = function () {
+DataFrame.examples.iris = function () {
   let json = [
     {
       sepal_length_cm: 5.1,
@@ -1063,8 +1067,10 @@ let iris = function () {
  * The principal source for data about Titanic passengers is the Encyclopedia Titanica. The datasets used here were begun
  * by a variety of researchers. One of the original sources is Eaton & Haas (1994) Titanic: Triumph and Tragedy,
  * Patrick Stephens Ltd, which includes a passenger list created by many researchers and edited by Michael A. Findlay.
+ * @example
+ * let df = DataFrame.examples.titanic();
  */
-let titanic = function () {
+DataFrame.examples.titanic = function () {
   let json = [
     {
       pclass: 1,
@@ -22017,7 +22023,281 @@ let titanic = function () {
   return DataFrame.create(json);
 };
 
-export default {
-  iris,
-  titanic,
+/**
+ * Anscombe's quartet comprises four data sets that have nearly identical simple descriptive statistics, yet have very different distributions and appear very different when graphed. Each dataset consists of eleven (x,y) points. They were constructed in 1973 by the statistician Francis Anscombe to demonstrate both the importance of graphing data before analyzing it and the effect of outliers and other influential observations on statistical properties. He described the article as being intended to counter the impression among statisticians that "numerical calculations are exact, but graphs are rough.
+ * @example
+ * let df = DataFrame.examples.anscombe();
+ */
+DataFrame.examples.anscombe = () => {
+  let json = [
+    {
+      dataset: "1",
+      observation: "1",
+      x: 10,
+      y: 8.04,
+    },
+    {
+      dataset: "1",
+      observation: "2",
+      x: 8,
+      y: 6.95,
+    },
+    {
+      dataset: "1",
+      observation: "3",
+      x: 13,
+      y: 7.58,
+    },
+    {
+      dataset: "1",
+      observation: "4",
+      x: 9,
+      y: 8.81,
+    },
+    {
+      dataset: "1",
+      observation: "5",
+      x: 11,
+      y: 8.33,
+    },
+    {
+      dataset: "1",
+      observation: "6",
+      x: 14,
+      y: 9.96,
+    },
+    {
+      dataset: "1",
+      observation: "7",
+      x: 6,
+      y: 7.24,
+    },
+    {
+      dataset: "1",
+      observation: "8",
+      x: 4,
+      y: 4.26,
+    },
+    {
+      dataset: "1",
+      observation: "9",
+      x: 12,
+      y: 10.84,
+    },
+    {
+      dataset: "1",
+      observation: "10",
+      x: 7,
+      y: 4.82,
+    },
+    {
+      dataset: "1",
+      observation: "11",
+      x: 5,
+      y: 5.68,
+    },
+    {
+      dataset: "2",
+      observation: "1",
+      x: 10,
+      y: 9.14,
+    },
+    {
+      dataset: "2",
+      observation: "2",
+      x: 8,
+      y: 8.14,
+    },
+    {
+      dataset: "2",
+      observation: "3",
+      x: 13,
+      y: 8.74,
+    },
+    {
+      dataset: "2",
+      observation: "4",
+      x: 9,
+      y: 8.77,
+    },
+    {
+      dataset: "2",
+      observation: "5",
+      x: 11,
+      y: 9.26,
+    },
+    {
+      dataset: "2",
+      observation: "6",
+      x: 14,
+      y: 8.1,
+    },
+    {
+      dataset: "2",
+      observation: "7",
+      x: 6,
+      y: 6.13,
+    },
+    {
+      dataset: "2",
+      observation: "8",
+      x: 4,
+      y: 3.1,
+    },
+    {
+      dataset: "2",
+      observation: "9",
+      x: 12,
+      y: 9.13,
+    },
+
+    {
+      dataset: "2",
+      observation: "10",
+      x: 7,
+      y: 7.26,
+    },
+    {
+      dataset: "2",
+      observation: "11",
+      x: 5,
+      y: 4.74,
+    },
+    {
+      dataset: "3",
+      observation: "1",
+      x: 10,
+      y: 7.46,
+    },
+    {
+      dataset: "3",
+      observation: "2",
+      x: 8,
+      y: 6.77,
+    },
+    {
+      dataset: "3",
+      observation: "3",
+      x: 13,
+      y: 12.74,
+    },
+    {
+      dataset: "3",
+      observation: "4",
+      x: 9,
+      y: 7.11,
+    },
+    {
+      dataset: "3",
+      observation: "5",
+      x: 11,
+      y: 7.81,
+    },
+    {
+      dataset: "3",
+      observation: "6",
+      x: 14,
+      y: 8.84,
+    },
+    {
+      dataset: "3",
+      observation: "7",
+      x: 6,
+      y: 6.08,
+    },
+    {
+      dataset: "3",
+      observation: "8",
+      x: 4,
+      y: 5.39,
+    },
+    {
+      dataset: "3",
+      observation: "9",
+      x: 12,
+      y: 8.15,
+    },
+    {
+      dataset: "3",
+      observation: "10",
+      x: 7,
+      y: 6.42,
+    },
+    {
+      dataset: "3",
+      observation: "11",
+      x: 5,
+      y: 5.73,
+    },
+    {
+      dataset: "4",
+      observation: "1",
+      x: 8,
+      y: 6.58,
+    },
+    {
+      dataset: "4",
+      observation: "2",
+      x: 8,
+      y: 5.76,
+    },
+    {
+      dataset: "4",
+      observation: "3",
+      x: 8,
+      y: 7.71,
+    },
+    {
+      dataset: "4",
+      observation: "4",
+      x: 8,
+      y: 8.84,
+    },
+    {
+      dataset: "4",
+      observation: "5",
+      x: 8,
+      y: 8.47,
+    },
+    {
+      dataset: "4",
+      observation: "6",
+      x: 8,
+      y: 7.04,
+    },
+    {
+      dataset: "4",
+      observation: "7",
+      x: 8,
+      y: 5.25,
+    },
+    {
+      dataset: "4",
+      observation: "8",
+      x: 19,
+      y: 12.5,
+    },
+    {
+      dataset: "4",
+      observation: "9",
+      x: 8,
+      y: 5.56,
+    },
+    {
+      dataset: "4",
+      observation: "10",
+      x: 8,
+      y: 7.91,
+    },
+    {
+      dataset: "4",
+      observation: "11",
+      x: 8,
+      y: 6.89,
+    },
+  ];
+
+  return DataFrame.create(json);
 };
+
+export default {};
