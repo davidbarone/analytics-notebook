@@ -178,6 +178,7 @@ class UI {
           id: p,
           size: 1,
           fit: PANEL_FIT.BOTH,
+          grow: false,
           direction: PANEL_ALIGNMENT.HORIZONTAL,
           children: [],
         };
@@ -186,6 +187,7 @@ class UI {
           ...{
             size: 1,
             fit: PANEL_FIT.BOTH,
+            grow: false,
             direction: PANEL_ALIGNMENT.HORIZONTAL,
             children: [],
           },

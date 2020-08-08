@@ -1,3 +1,5 @@
+import Visual from "./Visual.js";
+
 /**
  * Default table renderer function.
  * @param {DataFrame} dataFrame - The data bound to the visual.
@@ -8,10 +10,10 @@
  *   .examples
  *   .iris()
  *   .head(20)
- *   .visual(Visual.renderer.table)
+ *   .visual('table')
  *   .attach('root');
  */
-let table = function (dataFrame, options) {
+Visual.library.table = function (dataFrame, options) {
   let first = dataFrame.data[0];
   let columns = Object.getOwnPropertyNames(first);
 
@@ -44,7 +46,7 @@ let table = function (dataFrame, options) {
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  */
-let slicer = function (dataFrame, options) {
+Visual.library.slicer = function (dataFrame, options) {
   let elDiv = document.createElement("div");
   if (options.title) {
     let elTitle = document.createElement("h5");
@@ -109,7 +111,7 @@ let slicer = function (dataFrame, options) {
  *   .examples
  *   .titanic()
  *   .visual(
- *     Visual.renderer.bar,
+ *     'bar',
  *     {
  *       title: 'Passengers on the Titanic by Embarked port & Sex',
  *       margin: {
@@ -125,7 +127,7 @@ let slicer = function (dataFrame, options) {
  *   )
  *   .attach('root');
  */
-let bar = function (dataFrame, options) {
+Visual.library.bar = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -337,7 +339,7 @@ let bar = function (dataFrame, options) {
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  */
-let html = function (dataFrame, options) {
+Visual.library.html = function (dataFrame, options) {
   let elDiv = document.createElement("div");
   let html = options.html || "";
   elDiv.innerHTML = html;
@@ -354,7 +356,7 @@ let html = function (dataFrame, options) {
  *   .examples
  *   .titanic()
  *   .visual(
- *     Visual.renderer.pie,
+ *     'pie',
  *     {
  *       fnCategories: (r) => {
  *         return { sex: r.sex };
@@ -366,7 +368,7 @@ let html = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-let pie = function (dataFrame, options) {
+Visual.library.pie = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -471,7 +473,7 @@ let pie = function (dataFrame, options) {
  *   .titanic()
  *   .cast({age: 'float'})
  *   .visual(
- *     Visual.renderer.hist,
+ *     'hist',
  *     {
  *       fnValues: (r) => {
  *         return { age: r.age };
@@ -480,7 +482,7 @@ let pie = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-let hist = function (dataFrame, options) {
+Visual.library.hist = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -590,7 +592,7 @@ let hist = function (dataFrame, options) {
  *   .titanic()
  *   .cast({age: 'float', fare: 'float'})
  *   .visual(
- *     Visual.renderer.scatter,
+ *     'scatter',
  *     {
  *       fnXValues: (r) => {
  *         return { age: r.age };
@@ -606,7 +608,7 @@ let hist = function (dataFrame, options) {
  * let iris = DataFrame.examples.iris();
  * iris
  *   .visual(
- *     Visual.renderer.scatter,
+ *     'scatter',
  *     {
  *       fnXValues: (r) => {
  *         return { sepal_length_cm: r.sepal_length_cm };
@@ -619,9 +621,7 @@ let hist = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-let scatter = function (dataFrame, options) {
-  //Visual.renderer.scatter = function (data, xColumnName, yColumnName, options) {
-
+Visual.library.scatter = function (dataFrame, options) {
   options = {
     ...{
       height: 300,
@@ -751,10 +751,10 @@ let scatter = function (dataFrame, options) {
  * DataFrame
  *   .examples
  *   .iris()
- *   .visual(Visual.renderer.box)
+ *   .visual('box')
  *   .attach('root');
  */
-let box = function (dataFrame, options) {
+Visual.library.box = function (dataFrame, options) {
   options = {
     ...{
       height: 250,
@@ -903,10 +903,10 @@ let box = function (dataFrame, options) {
  * DataFrame
  *   .examples
  *   .iris()
- *   .visual(Visual.renderer.pairs)
+ *   .visual('pairs')
  *   .attach('root');
  */
-let pairs = function (dataFrame, options) {
+Visual.library.pairs = function (dataFrame, options) {
   let columns = [];
   let properties = Object.getOwnPropertyNames(dataFrame.data[0]);
   properties.forEach((p) => {
@@ -936,7 +936,7 @@ let pairs = function (dataFrame, options) {
     columns.forEach((c2) => {
       let cell = row.insertCell();
       // get scatterplot for 2 variables
-      let scat = Visual.renderer.scatter(dataFrame, {
+      let scat = Visual.library.scatter(dataFrame, {
         width: 100,
         height: 100,
         margin: { top: 10, right: 10, bottom: 10, left: 10 },
@@ -958,13 +958,4 @@ let pairs = function (dataFrame, options) {
   return table;
 };
 
-export default {
-  html,
-  table,
-  bar,
-  pie,
-  scatter,
-  hist,
-  pairs,
-  box,
-};
+export default {};

@@ -1,3 +1,5 @@
+import List from "./List.js";
+
 /**
  * DataFrame - Manages all manipulation of data.
  *
@@ -60,12 +62,12 @@ class DataFrame {
    * let data = await DataFrame.fetch('https://restcountries.eu/rest/v2/all');
    * let countries = data.select('name','capital','region','subregion','population','area');
    * Visual.html("<h1>First 10 countries</h1>").attach('right');
-   * countries.head(10).visual(Visual.renderer.table).attach('right');
+   * countries.head(10).visual('table').attach('right');
    *
    * // Get 10 largest countries and display in bar chart
    *
    * let largest = countries.sort(c=>c.area, true).head(10);
-   * largest.visual(Visual.renderer.bar, {
+   * largest.visual('bar', {
    *   border: {
    *     width: 2,
    *     color: "gray",
@@ -89,7 +91,7 @@ class DataFrame {
    * // Pie chart showing population by region.
    *
    * Visual.html("<h1>Population by Region</h1>").attach('bottom-left');
-   * countries.visual(Visual.renderer.pie, {
+   * countries.visual('pie', {
    *   border: {
    *     width: 2,
    *     color: "gray",
@@ -208,7 +210,7 @@ class DataFrame {
    *     a => { return JSON.stringify({ x: a.list('x').mean(), y: a.list('y').mean() })}
    *   )
    *   .remove('observation')
-   *   .visual(Visual.renderer.table)
+   *   .visual('table')
    *   .attach('root');
    */
   pivot(groupingFunction, pivotFunction, aggregateFunction) {
@@ -498,7 +500,7 @@ class DataFrame {
    *   g => { return { x: g.x }},
    *   p => p.y,
    *   a => a.list('corr').mean()
-   * ).visual(Visual.renderer.table).attach('root');
+   * ).visual('table').attach('root');
    */
   corr() {
     let columns = [];

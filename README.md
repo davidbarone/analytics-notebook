@@ -84,8 +84,8 @@ UI.layout({
   fit: "width",
 });
 
-// Add custom 'caption' renderer to render text nicely:
-Visual.renderer.caption = (dataFrame, options) => {
+// Add custom 'caption' type to visuals library:
+Visual.library.caption = (dataFrame, options) => {
   elDiv = document.createElement("div");
   elDiv.style.marginTop = "20px";
   elDiv.style.marginBottom = "20px";
@@ -98,7 +98,7 @@ Visual.renderer.caption = (dataFrame, options) => {
 };
 
 Visual.caption = (html) => {
-  let viz = new Visual(undefined, Visual.renderer.caption, { html });
+  let viz = new Visual(undefined, "caption", { html });
   return viz;
 };
 
@@ -109,11 +109,11 @@ let data = DataFrame.examples.titanic();
 Visual.html("<header>Titanic Analysis</header>").attach("root");
 Visual.caption(`Number of rows: ${data.count()}`).attach("root");
 Visual.caption("Top 5 rows:").attach("root");
-data.head(5).visual(Visual.renderer.table).attach("root");
+data.head(5).visual("table").attach("root");
 
 // Get descriptive statistics:
 Visual.caption("Let's get the data descriptive statistics:").attach("root");
-data.describe().visual(Visual.renderer.table).attach("root");
+data.describe().visual("table").attach("root");
 
 // Some simple transformations and cleansing:
 Visual.caption("Let's remove unwanted columns:").attach("root");
@@ -126,7 +126,7 @@ data = data.select(
   "parch",
   "survived"
 );
-data.head(5).visual(Visual.renderer.table).attach("root");
+data.head(5).visual("table").attach("root");
 
 Visual.caption(
   "Age appears to be a string value - lets convert to a float:"
@@ -136,7 +136,7 @@ data = data.cast({
   fare: "float",
 });
 
-data.describe().visual(Visual.renderer.table).attach("root");
+data.describe().visual("table").attach("root");
 
 Visual.caption(
   "Lets convert the sex field to a numeric variable and also rename and tidy up some of the other columns."
@@ -152,15 +152,15 @@ data = data.map((r) => {
   };
 });
 
-data.head(5).visual(Visual.renderer.table).attach("root");
-data.describe().visual(Visual.renderer.table).attach("root");
+data.head(5).visual("table").attach("root");
+data.describe().visual("table").attach("root");
 
 // Simple visualisations:
 Visual.caption(
   "Pie chart showing passengers by sex (male=1, female=0):"
 ).attach("root");
 data
-  .visual(Visual.renderer.pie, {
+  .visual("pie", {
     fnCategories: (r) => {
       return { is_male: r.is_male };
     },
@@ -172,7 +172,7 @@ data
 
 Visual.caption("Histogram of passenger ages:").attach("root");
 data
-  .visual(Visual.renderer.hist, {
+  .visual("hist", {
     fnValues: (r) => {
       return { age: r.age };
     },
@@ -181,7 +181,7 @@ data
 
 Visual.caption("Scatterplot showing fare vs age variables:").attach("root");
 data
-  .visual(Visual.renderer.scatter, {
+  .visual("scatter", {
     fnXValues: (row) => {
       return { age: row.age };
     },
@@ -230,120 +230,45 @@ UI.layout({
   ],
 });
 let anscombe = DataFrame.examples.anscombe();
-let q1 = anscombe.filter((r) => r.dataset === "1");
-let q2 = anscombe.filter((r) => r.dataset === "2");
-let q3 = anscombe.filter((r) => r.dataset === "3");
-let q4 = anscombe.filter((r) => r.dataset === "4");
-console.log(q4);
-q1.visual(Visual.renderer.scatter, {
-  fnXValues: (r) => {
-    return { x: r.x };
-  },
-  fnYValues: (r) => {
-    return { y: r.y };
-  },
-  axes: {
-    x: {
-      display: true,
-      min: 1,
-      max: 20,
-    },
-    y: {
-      display: true,
-      min: 1,
-      max: 16,
-    },
-  },
-}).attach("top-left");
-Visual.html(`mean(x): ${q1.list("x").mean()}`).attach("top-left");
-Visual.html(`var(x): ${q1.list("x").var()}`).attach("top-left");
-Visual.html(`y mean: ${q1.list("y").mean()}`).attach("top-left");
-Visual.html(`var(y): ${q1.list("y").var()}`).attach("top-left");
-Visual.html(`corr(x,y): ${q1.list("x").corr(q1.list("y"))}`).attach("top-left");
 
-q2.visual(Visual.renderer.scatter, {
-  fnXValues: (r) => {
-    return { x: r.x };
-  },
-  fnYValues: (r) => {
-    return { y: r.y };
-  },
-  axes: {
-    x: {
-      display: true,
-      min: 1,
-      max: 20,
-    },
-    y: {
-      display: true,
-      min: 1,
-      max: 16,
-    },
-  },
-}).attach("top-right");
-Visual.html(`mean(x): ${q2.list("x").mean()}`).attach("top-right");
-Visual.html(`var(x): ${q2.list("x").var()}`).attach("top-right");
-Visual.html(`y mean: ${q2.list("y").mean()}`).attach("top-right");
-Visual.html(`var(y): ${q2.list("y").var()}`).attach("top-right");
-Visual.html(`corr(x,y): ${q2.list("x").corr(q2.list("y"))}`).attach(
-  "top-right"
-);
+data = [
+  { dataset: anscombe.filter((r) => r.dataset === "1"), panel: "top-left" },
+  { dataset: anscombe.filter((r) => r.dataset === "2"), panel: "top-right" },
+  { dataset: anscombe.filter((r) => r.dataset === "3"), panel: "bottom-left" },
+  { dataset: anscombe.filter((r) => r.dataset === "4"), panel: "bottom-right" },
+];
 
-q3.visual(Visual.renderer.scatter, {
-  fnXValues: (r) => {
-    return { x: r.x };
-  },
-  fnYValues: (r) => {
-    return { y: r.y };
-  },
-  axes: {
-    x: {
-      display: true,
-      min: 1,
-      max: 20,
-    },
-    y: {
-      display: true,
-      min: 1,
-      max: 16,
-    },
-  },
-}).attach("bottom-left");
-Visual.html(`mean(x): ${q3.list("x").mean()}`).attach("bottom-left");
-Visual.html(`var(x): ${q3.list("x").var()}`).attach("bottom-left");
-Visual.html(`y mean: ${q3.list("y").mean()}`).attach("bottom-left");
-Visual.html(`var(y): ${q3.list("y").var()}`).attach("bottom-left");
-Visual.html(`corr(x,y): ${q3.list("x").corr(q3.list("y"))}`).attach(
-  "bottom-left"
-);
-
-q4.visual(Visual.renderer.scatter, {
-  fnXValues: (r) => {
-    return { x: r.x };
-  },
-  fnYValues: (r) => {
-    return { y: r.y };
-  },
-  axes: {
-    x: {
-      display: true,
-      min: 1,
-      max: 20,
-    },
-    y: {
-      display: true,
-      min: 1,
-      max: 16,
-    },
-  },
-}).attach("bottom-right");
-Visual.html(`mean(x): ${q4.list("x").mean()}`).attach("bottom-right");
-Visual.html(`var(x): ${q4.list("x").var()}`).attach("bottom-right");
-Visual.html(`y mean: ${q4.list("y").mean()}`).attach("bottom-right");
-Visual.html(`var(y): ${q4.list("y").var()}`).attach("bottom-right");
-Visual.html(`corr(x,y): ${q4.list("x").corr(q4.list("y"))}`).attach(
-  "bottom-right"
-);
+data.forEach((d) => {
+  d.dataset
+    .visual("scatter", {
+      fnXValues: (r) => {
+        return { x: r.x };
+      },
+      fnYValues: (r) => {
+        return { y: r.y };
+      },
+      axes: {
+        x: {
+          display: true,
+          min: 1,
+          max: 20,
+        },
+        y: {
+          display: true,
+          min: 1,
+          max: 16,
+        },
+      },
+    })
+    .attach(d.panel);
+  Visual.html(`mean(x): ${d.dataset.list("x").mean()}`).attach(d.panel);
+  Visual.html(`var(x): ${d.dataset.list("x").var()}`).attach(d.panel);
+  Visual.html(`y mean: ${d.dataset.list("y").mean()}`).attach(d.panel);
+  Visual.html(`var(y): ${d.dataset.list("y").var()}`).attach(d.panel);
+  Visual.html(
+    `corr(x,y): ${d.dataset.list("x").corr(d.dataset.list("y"))}`
+  ).attach(d.panel);
+});
 ```
 
 ## Development / Source Code

@@ -393,10 +393,15 @@ Element.prototype.fit = function () {
     if (elInner) {
       // temporarily reset zoom to 10
       let zoom = 1;
+
       if (fit !== PANEL_FIT.NONE) {
         // For all 'resize' fit modes, start with zoom 10, so content grows/shrinks
         // If fit = none, then NO resizing at all
-        zoom = 1;
+        if (panel.grow === true) {
+          zoom = 20;
+        } else {
+          zoom = 1;
+        }
       }
       elInner.style.zoom = zoom;
 

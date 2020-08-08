@@ -3,8 +3,19 @@
  */
 class List {
   constructor(arr) {
+    let self = this;
     this.arr = [];
     this.arr = [...arr];
+
+    // Return Proxy, so that we can handle indexing, i.e.: DataFrame[n]
+    return new Proxy(this, {
+      get(target, prop, receiver) {
+        if (Number(prop) == prop && !(prop in target)) {
+          return self.arr[prop];
+        }
+        return target[prop];
+      },
+    });
   }
 
   /**
@@ -221,18 +232,18 @@ class List {
     let rowCount = this.count();
 
     let numerator = 0;
-    let denominator = 0;
-    this.arr.forEach((x) => {
-      let i = this.arr.indexOf(x);
-      let y = list.arr[i];
-      if (y && x) {
-        numerator += ((x - xMean) / xStd) * ((y - yMean) / yStd);
-        denominator++;
-      }
-    });
+    let denominator = xStd * yStd;
 
-    let corr = numerator / (denominator - 1);
-    return Math.round(corr * 1000) / 1000;
+    for (let i = 0; i < rowCount; i++) {
+      let x = this[i];
+      let y = list[i];
+      if ((y || 0) && (x || 0)) {
+        numerator += (x - xMean) * (y - yMean);
+      }
+    }
+
+    let corr = numerator / denominator;
+    return Math.round(corr * 1000000) / 1000000;
   }
 }
 

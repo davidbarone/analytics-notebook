@@ -1,4 +1,3 @@
-import renderer from "./Visual.renderer.js";
 import Watcher from "../reactive/Watcher.js";
 import Observer from "../reactive/Observer.js";
 
@@ -9,13 +8,14 @@ class Visual {
   /**
    * Creates a new visual.
    * @param {DataFrame} dataFrame - Data being bound to the visual.
-   * @param {} renderer - The rendering function used to draw the visual.
+   * @param {string} type - The type of visual from the visual library.
    * @param {Object} options - configuration for the rendering. This is renderer-specific.
    */
-  constructor(dataFrame, renderer, options) {
+  constructor(dataFrame, type, options) {
     this.dataFrame = dataFrame;
+    this.type = type;
+    this.renderer = Visual.library[type];
     this.options = options;
-    this.renderer = renderer;
     this.panelId = null; // set by assign
     walk(this);
     Visual.visuals.push(this);
@@ -61,7 +61,7 @@ class Visual {
    * visuals for static content like text and abstract shapes which does not change
    */
   static html(html) {
-    let visual = new Visual(undefined, Visual.renderer.html, { html });
+    let visual = new Visual(undefined, "html", { html });
     return visual;
   }
 }
@@ -74,12 +74,11 @@ Visual.watchers = [];
 Visual.visuals = [];
 
 /**
- * Registry of renderer functions. These include data-bound and non-data bound renderers. Renderer functions are generally not called directly, but
+ * Registry of visual types / renderers. These include data-bound and non-data bound renderers. Renderer functions are generally not called directly, but
  * are used by other functions, for example the DataFrame.visual() function. Renderer functions are called during the screen rendering process, and
  * 2 arguments are passed to render functions. A DataFrame object which is the data to be rendered, and an options object which provides
  * customisation rules for the renderer. The format of the options object is renderer-specific.
- * @namespace Visual.renderer
  */
-Visual.renderer = renderer;
+Visual.library = {};
 
 export default Visual;

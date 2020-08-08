@@ -63,4 +63,53 @@ test("DataFrame.forEach() should work correctly", () => {
   expect(count).toBe(150);
 });
 
+test("DataFrame.filter() should correctly filter rows", () => {
+  expect(
+    DataFrame.examples
+      .iris()
+      .filter((r) => r.class === "Iris-setosa")
+      .count()
+  ).toBe(50);
+});
+
+test("DataFrame.group() should group correctly", () => {
+  let grouped = DataFrame.examples.iris().group(
+    (g) => {
+      return { class: g.class };
+    },
+    (a) => {
+      return { observations: a.count() };
+    }
+  );
+
+  expect(grouped.count()).toEqual(3); // 3 groups each with count property of 50
+  expect(grouped[0].observations).toBe(50);
+  expect(grouped[1].observations).toBe(50);
+  expect(grouped[2].observations).toBe(50);
+});
+
+test("DataFrame.pivot() should pivot correctly", () => {
+  let pivot = DataFrame.examples.anscombe().pivot(
+    (g) => {
+      return { observation: g.observation };
+    },
+    (p) => p.dataset,
+    (a) => {
+      return { x: a.list("x").mean(), y: a.list("y").mean() };
+    }
+  );
+
+  expect(pivot.count()).toEqual(11); // 11 grouping columns
+  expect(Object.getOwnPropertyNames(pivot[0]).length).toBe(5); // first row should have 5 columns
+  expect(
+    Object.getOwnPropertyNames(pivot[0]).indexOf("observation") >= 0
+  ).toBeTruthy();
+  expect(Object.getOwnPropertyNames(pivot[0]).indexOf("1") >= 0).toBeTruthy();
+  expect(Object.getOwnPropertyNames(pivot[0]).indexOf("2") >= 0).toBeTruthy();
+  expect(Object.getOwnPropertyNames(pivot[0]).indexOf("3") >= 0).toBeTruthy();
+  expect(Object.getOwnPropertyNames(pivot[0]).indexOf("4") >= 0).toBeTruthy();
+
+  expect(typeof pivot[0][1]).toBe("object");
+});
+
 export default {};
