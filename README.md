@@ -231,15 +231,16 @@ UI.layout({
 });
 let anscombe = DataFrame.examples.anscombe();
 
-data = [
-  { dataset: anscombe.filter((r) => r.dataset === "1"), panel: "top-left" },
-  { dataset: anscombe.filter((r) => r.dataset === "2"), panel: "top-right" },
-  { dataset: anscombe.filter((r) => r.dataset === "3"), panel: "bottom-left" },
-  { dataset: anscombe.filter((r) => r.dataset === "4"), panel: "bottom-right" },
+let data = [
+  { dataset: "1", panel: "top-left" },
+  { dataset: "2", panel: "top-right" },
+  { dataset: "3", panel: "bottom-left" },
+  { dataset: "4", panel: "bottom-right" },
 ];
 
 data.forEach((d) => {
-  d.dataset
+  let dataset = anscombe.filter((r) => r.dataset === d.dataset);
+  dataset
     .visual("scatter", {
       fnXValues: (r) => {
         return { x: r.x };
@@ -261,13 +262,13 @@ data.forEach((d) => {
       },
     })
     .attach(d.panel);
-  Visual.html(`mean(x): ${d.dataset.list("x").mean()}`).attach(d.panel);
-  Visual.html(`var(x): ${d.dataset.list("x").var()}`).attach(d.panel);
-  Visual.html(`y mean: ${d.dataset.list("y").mean()}`).attach(d.panel);
-  Visual.html(`var(y): ${d.dataset.list("y").var()}`).attach(d.panel);
-  Visual.html(
-    `corr(x,y): ${d.dataset.list("x").corr(d.dataset.list("y"))}`
-  ).attach(d.panel);
+  Visual.html(`mean(x): ${dataset.list("x").mean()}`).attach(d.panel);
+  Visual.html(`var(x): ${dataset.list("x").var()}`).attach(d.panel);
+  Visual.html(`y mean: ${dataset.list("y").mean()}`).attach(d.panel);
+  Visual.html(`var(y): ${dataset.list("y").var()}`).attach(d.panel);
+  Visual.html(`corr(x,y): ${dataset.list("x").corr(dataset.list("y"))}`).attach(
+    d.panel
+  );
 });
 ```
 
