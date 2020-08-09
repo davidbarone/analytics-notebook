@@ -1,5 +1,22 @@
 # Analytics-Notebook
 
+- [Analytics-Notebook](#analytics-notebook)
+  - [Application Layout](#application-layout)
+    - [Code Section](#code-section)
+    - [Output Section](#output-section)
+  - [Tutorial](#tutorial)
+  - [API](#api)
+    - [DataFrame](#dataframe)
+    - [List](#list)
+    - [Visual](#visual)
+    - [UI](#ui)
+  - [Documentation](#documentation)
+  - [Examples](#examples)
+    - [Titanic Exploratory Analysis](#titanic-exploratory-analysis)
+    - [Anscombe's Quartet](#anscombes-quartet)
+  - [Development / Source Code](#development--source-code)
+    - [Scripts](#scripts)
+
 The analytics-notebook is an analytical and statistical notebook application written in JavaScript, and is inspired by similar notebooks such as Jupyter notebooks, and https://observablehq.com/. Like the aforementioned applications, the intention for this application is to allow developers, analysts, researchers and statisticians to make sense out of data.
 
 This application differs slightly from other notebooks in that instead of having multiple code blocks or cells entered inline within the output, analytics-notebook has a single code section and a single output section. The output section can be divided up into multiple visual 'panels' using the API, and visuals can be directed to these panels. A screenshot of the application is shown below:
@@ -35,6 +52,117 @@ Each distinct component displayed rendered to the output section is called a 'Vi
 - Static visuals
 
 Data bound visuals are the most commonly used visual. These have a dataset (known as a DataFrame) attached to them. Furthermore, if the data changes (for example through some interactive visuals that can modify data - like the 'slicer' visual), then these visuals will automatically redraw. Static visuals are for things like headings, and free text. This information is normally static and does not have any data bound to it.
+
+## Tutorial
+
+Notebooks are created using JavaScript. The script is entered in the left-hand script section. To run the script, click the <b>Run</b> button, or else press <b>ctrl-enter</b>. To run a simple hello world, paste the following JavaScript code into the code section, and press ctrl-enter to run:
+
+```javascript
+alert("hello world!");
+```
+
+You will hopefully have received a hello world alert. Congratulations, you've just written your first (if not fairly pointless) notebook script.
+
+You can include any valid JavaScript code in your script. You can use variables, create expressions, objects, functions - basically any valid JavaScript is allowed. For example, paste the following into the script section:
+
+```javascript
+let a = 2;
+let b = 3;
+alert(`The sum of ${a} and ${b} is ${a + b}`);
+
+// -> 'The sum of 2 and 3 is 5'.
+```
+
+Alerts are not particularly useful. You'll want to direct results, tables, and visuals to the output pane to create reports, dashboards and other useful analytical output. Each output component is called a 'Visual'. Visuals are either data bound or static / non-data-bound.
+
+To create a static visual, we use the Visual.html method. Paste the following into the code section, and run:
+
+```javascript
+Visual.html("hello world!").attach("root");
+```
+
+This should write 'hello world' to the output section. The string in the quotes of the html() call can be any valid html. For example, this is also perfectly allowed:
+
+```javascript
+Visual.html(
+  "<div style='padding: 12px; border: 1px solid #ccc; background: #eee;'>hello world!</div>"
+).attach("root");
+```
+
+You may have noticed the above 2 examples included an attach() call. To actually place the visual into the output, you must include this function call. The value in brackets is the name of the panel to add the visual into. When you start a new notebook session, a default panel 'root' is always created for you.
+
+Dashboards and other 'Business Intelligence' type reports often layout content in a grid fashion. You can to the same by using the UI.layout function. For example, we can create 4 panels, and direct output to each panels using the example below:
+
+```javascript
+UI.layout({
+  id: "root",
+  direction: "horizontal",
+  children: [
+    {
+      id: "left",
+      direction: "vertical",
+      children: ["top-left", "bottom-left"],
+    },
+    {
+      id: "right",
+      direction: "vertical",
+      children: ["top-right", "bottom-right"],
+    },
+  ],
+});
+
+Visual.html("hello").attach("top-left");
+Visual.html("world").attach("top-right");
+Visual.html("from").attach("bottom-left");
+Visual.html("Analytics Notebook").attach("bottom-right");
+```
+
+Each panel can contain multiple visuals, and you can make the layout grid as complex as you like. The UI.layout function supports various other features which are beyond the scope of this simple tutorial.
+
+Static visuals are not going to take you very far though. The whole purpose of the analytics notebook is to enable analysts to obtain insights from data. for this, we need to use 'data bound' visuals.
+
+To create the data, we must use the DataFrame class. External data can be obtained from the web using DataFrame.fetch. However, for this tutorial, we're going to use a built-in dataset called 'iris'. Paste the following into the script section:
+
+```javascript
+let data = DataFrame.examples.iris();
+alert(data.count());
+console.log(data);
+```
+
+When you run this script, you should receive an alert of '150'. This is the number of rows in the dataset. You may have also noticed the panel in the bottom left corner has some data. This panel is the 'console' panel, and information can be directed to this panel using the console.log() function. You will see in the above script, that we are writing the data to the console. This is useful for debugging your scripts.
+
+Data on its own is not particularly useful. We need to visualise it. The simplest way to visualise data is via a table. Paste the following code into the script section:
+
+```javascript
+let data = DataFrame.examples.iris().head(10).visual("table").attach("root");
+```
+
+This script introduces a few more concepts. Firstly, we can see a .head() function call. The .head() function returns the top 'n' rows from a DataFrame object. The .visual() function creates a data bound visual from a DataFrame object. We need to provide the name of the visual type here. In this case we want to render a table, so use the type 'table'. There are a number of built-in visual types, and you can even customise the Analytics Notebook application and write your own custom visual types. Many visual types require additional configuration, but the 'table' visual type renders fine without any special configuration.
+
+You will also notice how the code 'chains' all the calls together. The above syntax is the idiomatic style recommended. The above script could however, be re-written as:
+
+```javascript
+let data = DataFrame.examples.iris();
+let head = data.head(10);
+let visual = head.visual("table");
+visual.attach("root");
+```
+
+Finally, we can add a bit of interaction. Some visuals can be used to slice and dice the data. The 'slicer' visual is such a type. In general, if a number of visuals share the same DataFrame object in a script, then if this DataFrame object is sliced or diced, then all the other visuals bound to it will automatically be sliced accordingly. Try running the following code:
+
+```javascript
+UI.layout({
+  id: "root",
+  fit: "width",
+});
+let data = DataFrame.examples.iris();
+data.visual("slicer", { columnName: "class" }).attach("root");
+data.visual("table").attach("root");
+```
+
+Here, you will be able to slice the table according to the 'class' field.
+
+Hopefully, this tutorial have given you a basic grasp of how to run scripts. We recommend you now read the API documentation to get a deeper understanding of how to write notebooks.
 
 ## API
 
@@ -269,117 +397,6 @@ data.forEach((d) => {
   );
 });
 ```
-
-## Tutorial
-
-Notebooks are created using JavaScript. The script is entered in the left-hand script section. To run the script, click the <b>Run</b> button, or else press <b>ctrl-enter</b>. To run a simple hello world, paste the following JavaScript code into the code section, and press ctrl-enter to run:
-
-```javascript
-alert("hello world!");
-```
-
-You will hopefully have received a hello world alert. Congratulations, you've just written your first (if not fairly pointless) notebook script.
-
-You can include any valid JavaScript code in your script. You can use variables, create expressions, objects, functions - basically any valid JavaScript is allowed. For example, paste the following into the script section:
-
-```javascript
-let a = 2;
-let b = 3;
-alert(`The sum of ${a} and ${b} is ${a + b}`);
-
-// -> 'The sum of 2 and 3 is 5'.
-```
-
-Alerts are not particularly useful. You'll want to direct results, tables, and visuals to the output pane to create reports, dashboards and other useful analytical output. Each output component is called a 'Visual'. Visuals are either data bound or static / non-data-bound.
-
-To create a static visual, we use the Visual.html method. Paste the following into the code section, and run:
-
-```javascript
-Visual.html("hello world!").attach("root");
-```
-
-This should write 'hello world' to the output section. The string in the quotes of the html() call can be any valid html. For example, this is also perfectly allowed:
-
-```javascript
-Visual.html(
-  "<div style='padding: 12px; border: 1px solid #ccc; background: #eee;'>hello world!</div>"
-).attach("root");
-```
-
-You may have noticed the above 2 examples included an attach() call. To actually place the visual into the output, you must include this function call. The value in brackets is the name of the panel to add the visual into. When you start a new notebook session, a default panel 'root' is always created for you.
-
-Dashboards and other 'Business Intelligence' type reports often layout content in a grid fashion. You can to the same by using the UI.layout function. For example, we can create 4 panels, and direct output to each panels using the example below:
-
-```javascript
-UI.layout({
-  id: "root",
-  direction: "horizontal",
-  children: [
-    {
-      id: "left",
-      direction: "vertical",
-      children: ["top-left", "bottom-left"],
-    },
-    {
-      id: "right",
-      direction: "vertical",
-      children: ["top-right", "bottom-right"],
-    },
-  ],
-});
-
-Visual.html("hello").attach("top-left");
-Visual.html("world").attach("top-right");
-Visual.html("from").attach("bottom-left");
-Visual.html("Analytics Notebook").attach("bottom-right");
-```
-
-Each panel can contain multiple visuals, and you can make the layout grid as complex as you like. The UI.layout function supports various other features which are beyond the scope of this simple tutorial.
-
-Static visuals are not going to take you very far though. The whole purpose of the analytics notebook is to enable analysts to obtain insights from data. for this, we need to use 'data bound' visuals.
-
-To create the data, we must use the DataFrame class. External data can be obtained from the web using DataFrame.fetch. However, for this tutorial, we're going to use a built-in dataset called 'iris'. Paste the following into the script section:
-
-```javascript
-let data = DataFrame.examples.iris();
-alert(data.count());
-console.log(data);
-```
-
-When you run this script, you should receive an alert of '150'. This is the number of rows in the dataset. You may have also noticed the panel in the bottom left corner has some data. This panel is the 'console' panel, and information can be directed to this panel using the console.log() function. You will see in the above script, that we are writing the data to the console. This is useful for debugging your scripts.
-
-Data on its own is not particularly useful. We need to visualise it. The simplest way to visualise data is via a table. Paste the following code into the script section:
-
-```javascript
-let data = DataFrame.examples.iris().head(10).visual("table").attach("root");
-```
-
-This script introduces a few more concepts. Firstly, we can see a .head() function call. The .head() function returns the top 'n' rows from a DataFrame object. The .visual() function creates a data bound visual from a DataFrame object. We need to provide the name of the visual type here. In this case we want to render a table, so use the type 'table'. There are a number of built-in visual types, and you can even customise the Analytics Notebook application and write your own custom visual types. Many visual types require additional configuration, but the 'table' visual type renders fine without any special configuration.
-
-You will also notice how the code 'chains' all the calls together. The above syntax is the idiomatic style recommended. The above script could however, be re-written as:
-
-```javascript
-let data = DataFrame.examples.iris();
-let head = data.head(10);
-let visual = head.visual("table");
-visual.attach("root");
-```
-
-Finally, we can add a bit of interaction. Some visuals can be used to slice and dice the data. The 'slicer' visual is such a type. In general, if a number of visuals share the same DataFrame object in a script, then if this DataFrame object is sliced or diced, then all the other visuals bound to it will automatically be sliced accordingly. Try running the following code:
-
-```javascript
-UI.layout({
-  id: "root",
-  fit: "width",
-});
-let data = DataFrame.examples.iris();
-data.visual("slicer", { columnName: "class" }).attach("root");
-data.visual("table").attach("root");
-```
-
-Here, you will be able to slice the table according to the 'class' field.
-
-Hopefully, this tutorial have given you a basic grasp of how to run scripts. We recommend you now read the API documentation to get a deeper understanding of how to write notebooks.
 
 ## Development / Source Code
 
