@@ -11,5 +11,6 @@ import "./src/AnalyticsNotebook/DataFrame.examples.js";
 import List from "./src/AnalyticsNotebook/List.js";
 import Visual from "./src/AnalyticsNotebook/Visual.js";
 import "./src/AnalyticsNotebook/Visual.library.js";
+import "./src/AnalyticsNotebook/Extensions.js";
 import "./css/AnalyticsNotebook.css";
 export { AnalyticsNotebook, UI, DataFrame, List, Visual };

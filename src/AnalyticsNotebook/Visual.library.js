@@ -622,8 +622,8 @@ Visual.library.hist = function (dataFrame, options) {
  *   .attach("root");
  */
 Visual.library.scatter = function (dataFrame, options) {
-  options = {
-    ...{
+  options = Object.mergeDeep(
+    {
       height: 300,
       width: 400,
       margin: {
@@ -654,8 +654,8 @@ Visual.library.scatter = function (dataFrame, options) {
         background: "#fff",
       },
     },
-    ...options,
-  };
+    options
+  );
 
   // Get column names
   let xColumnName = Object.getOwnPropertyNames(

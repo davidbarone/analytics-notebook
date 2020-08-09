@@ -250,12 +250,10 @@ data.forEach((d) => {
       },
       axes: {
         x: {
-          display: true,
           min: 1,
           max: 20,
         },
         y: {
-          display: true,
           min: 1,
           max: 16,
         },
