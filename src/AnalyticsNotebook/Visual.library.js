@@ -2,8 +2,6 @@ import Visual from "./Visual.js";
 
 /**
  * Default table renderer function.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  * @example <caption>Creating a table visual</caption>
  * let data = DataFrame
@@ -13,8 +11,12 @@ import Visual from "./Visual.js";
  *   .visual('table')
  *   .attach('root');
  */
-Visual.library.table = function (dataFrame, options) {
-  let first = dataFrame.data[0];
+Visual.library.table = function () {
+  let dataFrame = this.dataFrame;
+  let options = this.options;
+  let data = dataFrame.boundData();
+
+  let first = data[0];
   let columns = Object.getOwnPropertyNames(first);
 
   let html = "";
@@ -25,7 +27,7 @@ Visual.library.table = function (dataFrame, options) {
   columns.forEach((c) => (html += `<th>${c}</th>`));
   html += "</tr>";
 
-  dataFrame.data.forEach((r) => {
+  data.forEach((r) => {
     html += "<tr>";
     columns.forEach((c) => {
       html += `<td>${r[c]}</td>`;
@@ -41,12 +43,40 @@ Visual.library.table = function (dataFrame, options) {
 };
 
 /**
- * Create an interactive slicer control allowing other visuals sharing the same DataFrame object to be interactively filtered.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
- * @returns {Node}
+ * Special Options
+ * @typedef {Object} Visual~slicer
+ * @property {string} title - Optional title.
+ * @property {string} columnName - The column which should be used to populate the slicer.
  */
-Visual.library.slicer = function (dataFrame, options) {
+
+/**
+ * Creates an interactive slicer control allowing other visuals sharing the same DataFrame object to be interactively filtered.
+ * For configuration, refer to: {@link Visual~slicer}
+ * @returns {Node}
+ * @example <caption>Adding a slicer for interactive slicing</caption>
+ * UI.layout({
+ *   id: 'root',
+ *   fit: 'width'
+ * });
+ * let data = DataFrame.examples.iris();
+ * data.visual('slicer', {columnName: 'class'}).attach('root');
+ * data.visual('table').attach('root');
+ */
+Visual.library.slicer = function () {
+  let dataFrame = this.dataFrame;
+  let options = this.options;
+  let that = this;
+
+  options = Object.mergeDeep(
+    {
+      title: options.columnName || "",
+      columnName: null,
+    },
+    options
+  );
+
+  let columnName = options.columnName;
+
   let elDiv = document.createElement("div");
   if (options.title) {
     let elTitle = document.createElement("h5");
@@ -54,18 +84,14 @@ Visual.library.slicer = function (dataFrame, options) {
     elDiv.appendChild(elTitle);
   }
 
-  elSelect = document.createElement("select");
-  let values = dataFrame.list(options.columnName).unique().arr;
-
+  let elSelect = document.createElement("select");
+  let values = dataFrame.list(columnName).unique().arr;
   elSelect.addEventListener("change", function (evt) {
     // Slice the dataFrame
     let value = evt.target.value;
     if (value) {
-      let slicer = {};
-      slicer[options.columnName] = [value];
-      dataFrame.slice(slicer);
-    } else {
-      dataFrame.reset();
+      that.setState("selectedValue", value);
+      dataFrame.setSlicer(this, (row) => row[columnName] === value);
     }
   });
 
@@ -74,26 +100,18 @@ Visual.library.slicer = function (dataFrame, options) {
   elAll.text = "<select value>";
   elSelect.appendChild(elAll);
 
-  // If slicer context already set, automatically set value
-  let slicer = dataFrame.slicers[options.columnName];
-  let selectedValue = null;
-  if (slicer) {
-    //values = values.filter(v => { slicer.includes(v) });
-    selectedValue = values[0];
-  }
-
   values.forEach((v) => {
     let elOption = document.createElement("option");
     elOption.value = v;
     elOption.text = v;
-    elOption.selected = v === selectedValue;
+    elOption.selected = v === this.state.selectedValue;
     elSelect.appendChild(elOption);
   });
 
-  elReset = document.createElement("button");
+  let elReset = document.createElement("button");
   elReset.innerText = "Clear";
   elReset.addEventListener("click", function (evt) {
-    dataFrame.reset();
+    dataFrame.unsetSlicer(this);
   });
 
   elDiv.appendChild(elSelect);
@@ -339,7 +357,9 @@ Visual.library.bar = function (dataFrame, options) {
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  */
-Visual.library.html = function (dataFrame, options) {
+Visual.library.html = function () {
+  let dataFrame = this.dataFrame;
+  let options = this.options;
   let elDiv = document.createElement("div");
   let html = options.html || "";
   elDiv.innerHTML = html;
@@ -621,7 +641,10 @@ Visual.library.hist = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-Visual.library.scatter = function (dataFrame, options) {
+Visual.library.scatter = function () {
+  let dataFrame = this.dataFrame;
+  let options = this.options;
+
   options = Object.mergeDeep(
     {
       height: 300,

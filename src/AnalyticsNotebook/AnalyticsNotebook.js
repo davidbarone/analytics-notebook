@@ -27,7 +27,10 @@ function runCode() {
     let elConsole = document.getElementById("console");
     elConsole.innerHTML = "";
     var code = document.getElementById("code").value;
-    code = `async function notebookCode() {${code}}; notebookCode();`;
+    code = `
+async function notebookCode() {
+  ${code}
+}; notebookCode();`;
     var scriptElem = document.createElement("script");
     scriptElem.text = code;
     document.head.appendChild(scriptElem);

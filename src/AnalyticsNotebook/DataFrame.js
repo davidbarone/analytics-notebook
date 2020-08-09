@@ -10,8 +10,8 @@ import List from "./List.js";
 class DataFrame {
   constructor() {
     let self = this;
-    this.data = [];
-    this.slicers = {};
+    this.data = []; // underlying data
+    this.slicers = {}; // Set of filter functions applied to the core data. These filter functions come from Visual objects.
     this.data.push.apply(this.data, arguments);
 
     // Return Proxy, so that we can handle indexing, i.e.: DataFrame[n]
@@ -23,6 +23,24 @@ class DataFrame {
         return target[prop];
       },
     });
+  }
+
+  /**
+   * Returns the data after slicers have been applied to it.
+   * @returns {DataFrame}
+   */
+  boundData() {
+    if (!this.data) {
+      return undefined;
+    } else {
+      let data = this.data;
+      let slicers = Object.getOwnPropertyNames(this.slicers);
+      slicers.forEach((s) => {
+        data = data.filter(this.slicers[s]);
+      });
+      // Return the underlying Javascript Array object
+      return data;
+    }
   }
 
   /**
@@ -444,38 +462,44 @@ class DataFrame {
     return DataFrame.create(data);
   }
 
-  slice(slicers) {
-    this.slicers = {
-      ...this.slicers,
-      ...slicers,
-    };
+  // Slicer methods
 
-    this.temp = [...this.data];
-    let keys = Object.getOwnPropertyNames(this.slicers);
-    keys.forEach((k) => {
-      let values = this.slicers[k];
-      this.temp = this.temp.filter((r) => values.includes(r[k]));
-    });
-
-    // finally swap data + temp
-    [this.data, this.temp] = [this.temp, this.data];
-    return this;
+  /**
+   * Adds a visual slicer to the DataFrame slicer context. Each visual can add a single slicer function to this context.
+   * @param {Visual} visual - The visual providing the slicer context.
+   * @param {DataFrame~filterFunction} - The filter function applied to the DataFrame object.
+   */
+  setSlicer(visual, filterFunction) {
+    if (typeof filterFunction === "function") {
+      let id = visual.id;
+      this.slicers = { ...this.slicers, [id]: filterFunction };
+    }
   }
 
-  // clears slicers
-  reset() {
-    this.data = [...this.temp];
-    this.temp = undefined;
+  /**
+   * Removes a slicer originating from a Visual object.
+   * @param {Visual} visual - The visual providing the slicer context.
+   */
+  unsetSlicer(visual) {
+    this.slicers = { ...delete this.slicers[visual.id] };
+  }
+
+  /**
+   * Removes all slicer filter functions
+   */
+  resetSlicers() {
+    this.slicers = {};
   }
 
   /**
    * Creates a Visual object from a DataFrame object.
-   * @param {*} renderer - The renderer to use.
+   * @param {string} type - The visual type. This visual type must exist in the Visual.library toolbox.
    * @param {*} options - The configuration for the renderer. The configuration is renderer-specific.
+   * @param {DataFrame~filterFunction} filterFunction - Optional function to filter the data. The filter is only applied to this visual.
    * @returns {Visual}
    */
-  visual(renderer, options) {
-    let visual = new Visual(this, renderer, options);
+  visual(type, options, filterFunction) {
+    let visual = new Visual(this, type, options, filterFunction);
     return visual;
   }
 
