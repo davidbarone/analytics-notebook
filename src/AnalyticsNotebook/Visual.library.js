@@ -92,11 +92,14 @@ Visual.library.slicer = function () {
     if (value) {
       that.setState("selectedValue", value);
       dataFrame.setSlicer(this, (row) => row[columnName] === value);
+    } else {
+      // reset
+      dataFrame.unsetSlicer(this);
     }
   });
 
   let elAll = document.createElement("option");
-  elAll.value = null;
+  elAll.value = "";
   elAll.text = "<select value>";
   elSelect.appendChild(elAll);
 
@@ -145,7 +148,10 @@ Visual.library.slicer = function () {
  *   )
  *   .attach('root');
  */
-Visual.library.bar = function (dataFrame, options) {
+Visual.library.bar = function () {
+  let options = this.options;
+  let dataFrame = this.dataFrame;
+
   options = {
     ...{
       height: 300,
@@ -388,7 +394,10 @@ Visual.library.html = function () {
  *   )
  *   .attach("root");
  */
-Visual.library.pie = function (dataFrame, options) {
+Visual.library.pie = function () {
+  let options = this.options;
+  let dataFrame = this.dataFrame;
+
   options = {
     ...{
       height: 300,
@@ -414,10 +423,11 @@ Visual.library.pie = function (dataFrame, options) {
 
   // Format data
   let categoryName = Object.getOwnPropertyNames(
-    options.fnCategories(dataFrame.data[0])
+    options.fnCategories(dataFrame.boundData[0])
   )[0];
   let valueName = Object.getOwnPropertyNames(options.fnValues(dataFrame))[0];
   let data = dataFrame
+    .boundData()
     .group(options.fnCategories, options.fnValues)
     .data.toObject(categoryName, valueName);
 
@@ -502,7 +512,10 @@ Visual.library.pie = function (dataFrame, options) {
  *   )
  *   .attach("root");
  */
-Visual.library.hist = function (dataFrame, options) {
+Visual.library.hist = function () {
+  let options = this.options;
+  let dataFrame = this.dataFrame;
+
   options = {
     ...{
       height: 300,
@@ -644,6 +657,7 @@ Visual.library.hist = function (dataFrame, options) {
 Visual.library.scatter = function () {
   let dataFrame = this.dataFrame;
   let options = this.options;
+  let data = dataFrame.boundData();
 
   options = Object.mergeDeep(
     {
@@ -681,12 +695,8 @@ Visual.library.scatter = function () {
   );
 
   // Get column names
-  let xColumnName = Object.getOwnPropertyNames(
-    options.fnXValues(dataFrame.data[0])
-  )[0];
-  let yColumnName = Object.getOwnPropertyNames(
-    options.fnYValues(dataFrame.data[0])
-  )[0];
+  let xColumnName = Object.getOwnPropertyNames(options.fnXValues(data[0]))[0];
+  let yColumnName = Object.getOwnPropertyNames(options.fnYValues(data[0]))[0];
 
   // set the dimensions and margins of the graph
   var margin = options.margin,
@@ -704,13 +714,13 @@ Visual.library.scatter = function () {
   // Add X axis
   let minXValue =
     options.axes.x.min ||
-    d3.min(dataFrame.data, function (d) {
+    d3.min(data, function (d) {
       return +d[xColumnName];
     });
 
   let maxXValue =
     options.axes.x.max ||
-    d3.max(dataFrame.data, function (d) {
+    d3.max(data, function (d) {
       return +d[xColumnName];
     });
 
@@ -726,12 +736,12 @@ Visual.library.scatter = function () {
   // Add Y axis
   let minYValue =
     options.axes.y.min ||
-    d3.min(dataFrame.data, function (d) {
+    d3.min(data, function (d) {
       return +d[yColumnName];
     });
   let maxYValue =
     options.axes.y.max ||
-    d3.max(dataFrame.data, function (d) {
+    d3.max(data, function (d) {
       return +d[yColumnName];
     });
 
@@ -745,7 +755,7 @@ Visual.library.scatter = function () {
   svg
     .append("g")
     .selectAll("dot")
-    .data(dataFrame.data)
+    .data(data)
     .enter()
     .append("circle")
     .attr("cx", function (d) {
@@ -777,7 +787,10 @@ Visual.library.scatter = function () {
  *   .visual('box')
  *   .attach('root');
  */
-Visual.library.box = function (dataFrame, options) {
+Visual.library.box = function () {
+  let options = this.options;
+  let dataFrame = this.dataFrame;
+
   options = {
     ...{
       height: 250,
@@ -929,7 +942,10 @@ Visual.library.box = function (dataFrame, options) {
  *   .visual('pairs')
  *   .attach('root');
  */
-Visual.library.pairs = function (dataFrame, options) {
+Visual.library.pairs = function () {
+  let options = this.options;
+  let dataFrame = this.dataFrame;
+
   let columns = [];
   let properties = Object.getOwnPropertyNames(dataFrame.data[0]);
   properties.forEach((p) => {

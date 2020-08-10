@@ -1,14 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="en">
-
-<head>
-
-    <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
 
     <title>Analytics Notebook</title>
-    <meta name="description" content="Analytics Notebook">
-    <meta name="author" content="David Barone">
+    <meta name="description" content="Analytics Notebook" />
+    <meta name="author" content="David Barone" />
 
     <!-- d3 library from google cdn -->
     <script src="https://ajax.googleapis.com/ajax/libs/d3js/5.15.1/d3.min.js"></script>
@@ -18,42 +16,34 @@
     <script src="./Watcher.js"></script>
 
     <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        window.data = {
+          frame: [1, 2, 3, 4, 5, 6, 7],
+          name: "tony",
+        };
 
-        document.addEventListener("DOMContentLoaded", function () {
-            window.data = {
-                frame: [1, 2, 3, 4, 5, 6, 7],
-                name: 'tony'
-            };
+        walk(window.data);
 
-            walk(window.data);
-
-            /*
+        /*
             const watcher = new Watcher(
                 () => window.data.frame,
                 (val) => ProcessData(val)
             );
             */
 
-            const watcher2 = new Watcher(
-                () => window.data.frame,
-                (val) => alert(window.data.frame.length)
-            );
+        const watcher2 = new Watcher(
+          () => window.data.frame,
+          (val) => alert(window.data.frame.length)
+        );
 
-            window.data.frame = [1, 2, 3];
+        window.data.frame = [1, 2, 3];
 
-
-            function ProcessData(arr) {
-                alert(arr.length);
-            }
-
-        });
-
-
+        function ProcessData(arr) {
+          alert(arr.length);
+        }
+      });
     </script>
-</head>
+  </head>
 
-<body>
-
-</body>
-
+  <body></body>
 </html>
