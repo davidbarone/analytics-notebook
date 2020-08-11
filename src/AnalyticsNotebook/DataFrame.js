@@ -619,8 +619,6 @@ class DataFrame {
         return measures;
       }
     );
-    console.log(data);
-
     return DataFrame.create(data.data);
   }
 }

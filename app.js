@@ -12,6 +12,7 @@ import List from "./src/AnalyticsNotebook/List.js";
 import Visual from "./src/AnalyticsNotebook/Visual.js";
 import "./src/AnalyticsNotebook/Visual.library.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.table.js";
+import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.crosstab.js";
 import "./src/AnalyticsNotebook/Extensions.js";
 import "./css/AnalyticsNotebook.css";
 export { AnalyticsNotebook, UI, DataFrame, List, Visual };
