@@ -87,8 +87,8 @@ class Visual {
       if (c.panelId === id) {
         let renderFunction = Visual.library[c.type];
 
-        // Call render function, binding this to the current visual.
-        let content = renderFunction.call(c);
+        // Call render function, passing the current visual.
+        let content = renderFunction(c);
         content.id = c.id; // Assign the id to the node.
         let panelId = c.panelId;
         UI.content(content, panelId);

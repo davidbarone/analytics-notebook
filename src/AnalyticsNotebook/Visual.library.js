@@ -1,48 +1,6 @@
 import Visual from "./Visual.js";
 
 /**
- * Default table renderer function.
- * @returns {Node}
- * @example <caption>Creating a table visual</caption>
- * let data = DataFrame
- *   .examples
- *   .iris()
- *   .head(20)
- *   .visual('table')
- *   .attach('root');
- */
-Visual.library.table = function () {
-  let dataFrame = this.dataFrame;
-  let options = this.options;
-  let data = dataFrame.boundData();
-
-  let first = data[0];
-  let columns = Object.getOwnPropertyNames(first);
-
-  let html = "";
-
-  html += "<table>";
-  html += "<tr>";
-
-  columns.forEach((c) => (html += `<th>${c}</th>`));
-  html += "</tr>";
-
-  data.forEach((r) => {
-    html += "<tr>";
-    columns.forEach((c) => {
-      html += `<td>${r[c]}</td>`;
-    });
-    html += "</tr>";
-  });
-  html += "</table>";
-
-  let elDiv = document.createElement("div");
-  elDiv.style.margin = "4px 0px";
-  elDiv.innerHTML = html;
-  return elDiv;
-};
-
-/**
  * Special Options
  * @typedef {Object} Visual~slicer
  * @property {string} title - Optional title.
@@ -62,10 +20,9 @@ Visual.library.table = function () {
  * data.visual('slicer', {columnName: 'class'}).attach('root');
  * data.visual('table').attach('root');
  */
-Visual.library.slicer = function () {
-  let dataFrame = this.dataFrame;
-  let options = this.options;
-  let that = this;
+Visual.library.slicer = function (visual) {
+  let dataFrame = visual.dataFrame;
+  let options = visual.options;
 
   options = Object.mergeDeep(
     {
@@ -90,11 +47,11 @@ Visual.library.slicer = function () {
     // Slice the dataFrame
     let value = evt.target.value;
     if (value) {
-      that.setState("selectedValue", value);
-      dataFrame.setSlicer(this, (row) => row[columnName] === value);
+      visual.setState("selectedValue", value);
+      dataFrame.setSlicer(visual, (row) => row[columnName] === value);
     } else {
       // reset
-      dataFrame.unsetSlicer(this);
+      dataFrame.unsetSlicer(visual);
     }
   });
 
@@ -107,14 +64,14 @@ Visual.library.slicer = function () {
     let elOption = document.createElement("option");
     elOption.value = v;
     elOption.text = v;
-    elOption.selected = v === this.state.selectedValue;
+    elOption.selected = v === visual.state.selectedValue;
     elSelect.appendChild(elOption);
   });
 
   let elReset = document.createElement("button");
   elReset.innerText = "Clear";
   elReset.addEventListener("click", function (evt) {
-    dataFrame.unsetSlicer(this);
+    dataFrame.unsetSlicer(visual);
   });
 
   elDiv.appendChild(elSelect);
@@ -148,9 +105,9 @@ Visual.library.slicer = function () {
  *   )
  *   .attach('root');
  */
-Visual.library.bar = function () {
-  let options = this.options;
-  let dataFrame = this.dataFrame;
+Visual.library.bar = function (visual) {
+  let options = visual.options;
+  let dataFrame = visual.dataFrame;
 
   options = {
     ...{
@@ -363,9 +320,9 @@ Visual.library.bar = function () {
  * @param {Object} options - Configuration of the visual.
  * @returns {Node}
  */
-Visual.library.html = function () {
-  let dataFrame = this.dataFrame;
-  let options = this.options;
+Visual.library.html = function (visual) {
+  let dataFrame = visual.dataFrame;
+  let options = visual.options;
   let elDiv = document.createElement("div");
   let html = options.html || "";
   elDiv.innerHTML = html;
@@ -394,9 +351,9 @@ Visual.library.html = function () {
  *   )
  *   .attach("root");
  */
-Visual.library.pie = function () {
-  let options = this.options;
-  let dataFrame = this.dataFrame;
+Visual.library.pie = function (visual) {
+  let options = visual.options;
+  let dataFrame = visual.dataFrame;
 
   options = {
     ...{
@@ -512,9 +469,9 @@ Visual.library.pie = function () {
  *   )
  *   .attach("root");
  */
-Visual.library.hist = function () {
-  let options = this.options;
-  let dataFrame = this.dataFrame;
+Visual.library.hist = function (visual) {
+  let options = visual.options;
+  let dataFrame = visual.dataFrame;
 
   options = {
     ...{
@@ -654,9 +611,9 @@ Visual.library.hist = function () {
  *   )
  *   .attach("root");
  */
-Visual.library.scatter = function () {
-  let dataFrame = this.dataFrame;
-  let options = this.options;
+Visual.library.scatter = function (visual) {
+  let dataFrame = visual.dataFrame;
+  let options = visual.options;
   let data = dataFrame.boundData();
 
   options = Object.mergeDeep(
@@ -787,9 +744,9 @@ Visual.library.scatter = function () {
  *   .visual('box')
  *   .attach('root');
  */
-Visual.library.box = function () {
-  let options = this.options;
-  let dataFrame = this.dataFrame;
+Visual.library.box = function (visual) {
+  let options = visual.options;
+  let dataFrame = visual.dataFrame;
 
   options = {
     ...{
@@ -942,9 +899,9 @@ Visual.library.box = function () {
  *   .visual('pairs')
  *   .attach('root');
  */
-Visual.library.pairs = function () {
-  let options = this.options;
-  let dataFrame = this.dataFrame;
+Visual.library.pairs = function (visual) {
+  let options = visual.options;
+  let dataFrame = visual.dataFrame;
 
   let columns = [];
   let properties = Object.getOwnPropertyNames(dataFrame.data[0]);

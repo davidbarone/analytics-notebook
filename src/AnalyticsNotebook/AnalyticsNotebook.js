@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return true;
   };
   window.onunhandledrejection = function (e) {
-    consolePane.innerHTML += `<div style="color:red;">${e.reason.message}<br /></div>`;
+    consolePane.innerHTML += `<div style="color:red;">${e.reason}<br /></div>`;
     return true;
   };
 

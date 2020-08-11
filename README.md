@@ -16,6 +16,7 @@
     - [Anscombe's Quartet](#anscombes-quartet)
   - [Development / Source Code](#development--source-code)
     - [Scripts](#scripts)
+  - [API Reference](#api-reference)
 
 The analytics-notebook is an analytical and statistical notebook application written in JavaScript, and is inspired by similar notebooks such as Jupyter notebooks, and https://observablehq.com/. Like the aforementioned applications, the intention for this application is to allow developers, analysts, researchers and statisticians to make sense out of data.
 
@@ -421,3 +422,5 @@ A number of scripts have been created for basic tasks:
 David Barone 04-Aug-2020
 
 ---
+
+## API Reference

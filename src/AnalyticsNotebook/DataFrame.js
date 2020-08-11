@@ -12,6 +12,7 @@ class DataFrame {
     let self = this;
     this.data = []; // underlying data
     this.slicers = {}; // Set of filter functions applied to the core data. These filter functions come from Visual objects.
+    this.calculations = {};
     this.data.push.apply(this.data, arguments);
 
     // Return Proxy, so that we can handle indexing, i.e.: DataFrame[n]
@@ -563,6 +564,64 @@ class DataFrame {
    */
   forEach(forEachCallback) {
     this.data.forEach(forEachCallback);
+  }
+
+  /**
+   * Defines a set of calculations / measures on the DataFrame object.
+   * @param {*} obj
+   */
+  calculate(calculations) {
+    this.calculations = calculations;
+    return this;
+  }
+
+  isCalculation(columnName) {
+    if (this.data[0].hasOwnProperty(columnName)) {
+      return false;
+    } else {
+      if (this.calculations.hasOwnProperty(columnName)) {
+        return true;
+      } else {
+        throw `Column: ${columnName} does not exist in the model.`;
+      }
+    }
+  }
+
+  /**
+   * Evaluates a subcube from the DataFrame object
+   * @param {Array} columns - The columns to include in the subcube.
+   */
+  cube(...columns) {
+    let arrGroups = [];
+    let arrMeasures = [];
+
+    columns.forEach((c) => {
+      if (this.isCalculation(c)) {
+        arrMeasures.push(c);
+      } else {
+        arrGroups.push(c);
+      }
+    });
+
+    let data = this.group(
+      (row) => {
+        let groupByValue = {};
+        arrGroups.forEach((g) => {
+          groupByValue[g] = row[g];
+        });
+        return groupByValue;
+      },
+      (group) => {
+        let measures = {};
+        arrMeasures.forEach((m) => {
+          measures[m] = this.calculations[m](group, this);
+        });
+        return measures;
+      }
+    );
+    console.log(data);
+
+    return DataFrame.create(data.data);
   }
 }
 
