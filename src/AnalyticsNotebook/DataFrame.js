@@ -595,6 +595,19 @@ class DataFrame {
     let arrGroups = [];
     let arrMeasures = [];
 
+    // Filter data
+    if (!this.data) {
+      return undefined;
+    }
+
+    let data = this.data;
+    let slicers = Object.getOwnPropertyNames(this.slicers);
+    slicers.forEach((s) => {
+      data = data.filter(this.slicers[s]);
+    });
+    // Convert back to DataFrame object
+    data = DataFrame.create(data);
+
     columns.forEach((c) => {
       if (this.isCalculation(c)) {
         arrMeasures.push(c);
@@ -603,7 +616,7 @@ class DataFrame {
       }
     });
 
-    let data = this.group(
+    data = data.group(
       (row) => {
         let groupByValue = {};
         arrGroups.forEach((g) => {

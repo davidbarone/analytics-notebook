@@ -1,7 +1,16 @@
 import Visual from "../Visual.js";
 
 /**
+ * Additional options object for configuring a crosstab visual
+ * @typedef {Visual~OptionsBase} Visual~OptionsCrosstab
+ * @property {Array} binding.columns - The DataFrame field names to project onto the columns of the crosstab.
+ * @property {Array} binding.rows - The DataFrame field names to projects onto the rows of the crosstab.
+ * @property {Array} binding.values - The DataFrame field names to projects onto the values / cells of the crosstab.
+ */
+
+/**
  * Generates a crosstab, matrix or contingency table allowing relationships between multiple categorical variables to be viewed.
+ * For configuration, refer to: {@link Visual~OptionsCrosstab}.
  * @returns {Node}
  * @param {Visual} visual - The Visual object used for rendering.
  * @example <caption>Creating a contingency table of Titanic survival rates</caption>
