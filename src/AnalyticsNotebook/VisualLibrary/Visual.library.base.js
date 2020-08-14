@@ -18,6 +18,7 @@
  * @property {number} title - The title for the visual
  * @property {number} width - The width of the visual
  * @property {number} height - The height of the visual
+ * @property {boolean} inline - Set to true for an inline visual. The default is false (block visual)
  * @property {Visual~OptionsMargin} margin - The margin for the visual
  * @property {string} background - The background color for the visual
  * @property {Visual~OptionsBorder} border - The border style for the visual
@@ -28,6 +29,7 @@ let VisualOptionsBaseDefault = {
   title: "",
   width: 400,
   height: 300,
+  inline: false,
   margin: {
     top: 40,
     right: 20,
@@ -38,7 +40,7 @@ let VisualOptionsBaseDefault = {
   border: {
     width: 1,
     color: "#999",
-    radius: 8,
+    radius: 0,
   },
   binding: {},
 };

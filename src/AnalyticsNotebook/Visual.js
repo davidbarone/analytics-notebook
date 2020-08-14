@@ -1,5 +1,6 @@
 import Watcher from "../reactive/Watcher.js";
 import Observer from "../reactive/Observer.js";
+import UI from "./UI.js";
 
 /**
  * A visual represents any visual component rendered in the output, for example tables and charts.
@@ -89,9 +90,34 @@ class Visual {
 
         // Call render function, passing the current visual.
         let content = renderFunction(c);
-        content.id = c.id; // Assign the id to the node.
         let panelId = c.panelId;
-        UI.content(content, panelId);
+
+        // Add core styles
+        let elVisual = document.createElement("div");
+        elVisual.id = c.id; // Assign the id to the visual node.
+        elVisual.classList.add("visual");
+        let elInner = document.createElement("div");
+        elInner.classList.add("visual", "inner");
+        elVisual.appendChild(elInner);
+        elInner.appendChild(content);
+
+        // Apply Visual styles
+        let options = c.options;
+        if (options) {
+          if (options.background) {
+            elInner.style.backgroundColor = options.background;
+          }
+          if (options.border) {
+            elInner.style.border = `${options.border.width}px solid ${options.border.color}`;
+          }
+          if (options.border && options.border.radius) {
+            elInner.style.borderRadius = `${options.border.radius}px`;
+          }
+          if (options.inline) {
+            elVisual.style.display = "inline-block";
+          }
+        }
+        UI.content(elVisual, panelId);
       }
     });
   }

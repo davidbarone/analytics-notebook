@@ -119,14 +119,7 @@ Visual.library.column = function (visual) {
       .attr("y", -options.margin.top)
       .attr("height", options.height)
       .attr("width", options.width)
-      .style("stroke", options.border.color)
-      .style("fill", "none")
-      .style("stroke-width", options.border.width)
-      .attr("rx", options.border.radius);
-
-    if (options.background) {
-      border.style("fill", options.background);
-    }
+      .style("fill", "none");
   }
 
   // title?

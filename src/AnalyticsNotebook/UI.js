@@ -214,7 +214,7 @@ class UI {
       UI.panels[p.id] = p;
 
       let div = document.createElement("div");
-      div.classList.add("visual", "leaf");
+      div.classList.add("panel", "leaf");
 
       // Add special border css class on top/left most panes.
       if (root) {
@@ -263,56 +263,39 @@ class UI {
   }
 
   /**
-   * Writes content to an output pane.
+   * Writes content / visuals to an output panel.
    * @param {*} content
    * @param {*} id
    */
   static content(content, id = null) {
-    // Note: all content goes into an inner div within visual
-    // called div.visual.inner
+    // Note: all content / visuals goes into an inner div within panel
+    // called div.panel.inner
 
     let el = document.getElementById(id);
     if (!el) {
-      el = document.getElementById("output");
+      throw `Panel [${id}] does not exist. Cannot write content.`;
     }
 
     // If the panel already has content, set append to true.
     let append = false;
     let firstChild = el.firstChild;
-    if (firstChild.classList.contains("visual")) {
+    if (
+      firstChild.classList.contains("panel") &&
+      firstChild.classList.contains("inner")
+    ) {
       append = true;
     }
 
     if (!append) {
       el.innerHTML = "";
-    }
-
-    if (el.innerHTML === "") {
       let elInner = document.createElement("div");
-      elInner.classList.add("visual", "inner");
+      elInner.classList.add("panel", "inner");
       el.appendChild(elInner);
     }
 
     // We add all content to the inner.
     var elInner = el.firstChild;
-
-    if (content instanceof Node) {
-      elInner.appendChild(content);
-    } else if (typeof content === "string") {
-      var elDiv = document.createElement("div");
-      elDiv.innerHTML = content;
-      elInner.appendChild(elDiv);
-    } else if (typeof content === "object") {
-      let str = JSON.stringify(content, null, 2); // format the object with indentation
-      var elDiv = document.createElement("pre");
-      elDiv.innerText = str;
-      elInner.appendChild(elDiv);
-    } else {
-      // e.g. number
-      var elDiv = document.createElement("pre");
-      elDiv.innerText = content;
-      elInner.appendChild(elDiv);
-    }
+    elInner.appendChild(content);
 
     // Automatically set the zoom property to fit to container
     // This ONLY applied for panes created by user.

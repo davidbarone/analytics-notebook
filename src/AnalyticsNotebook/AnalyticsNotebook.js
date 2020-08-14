@@ -167,7 +167,7 @@ function deleteNotebook() {
 }
 
 let resizePanelContents = function (el) {
-  var elPanes = document.querySelectorAll("div.visual.leaf");
+  var elPanes = document.querySelectorAll("div.panel.leaf");
   elPanes.forEach((el) => {
     el.fit();
   });
