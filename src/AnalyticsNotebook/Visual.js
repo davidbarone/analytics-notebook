@@ -1,6 +1,7 @@
 import Watcher from "../reactive/Watcher.js";
 import Observer from "../reactive/Observer.js";
 import UI from "./UI.js";
+import VisualLibraryBase from "./VisualLibrary/Visual.library.base.js";
 
 /**
  * A visual represents any visual component rendered in the output, for example tables and charts.
@@ -87,6 +88,12 @@ class Visual {
     Visual.visuals.forEach((c) => {
       if (c.panelId === id) {
         let renderFunction = Visual.library[c.type];
+
+        // merge with default base options (let visual do visual-specific stuff)
+        c.options = Object.mergeDeep(
+          VisualLibraryBase.defaultOptions,
+          c.options
+        );
 
         // Call render function, passing the current visual.
         let content = renderFunction(c);

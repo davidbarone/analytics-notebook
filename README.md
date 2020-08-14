@@ -33,9 +33,9 @@ The analytics-notebook application has 2 main sections.
 
 ### Code Section
 
-The code section is where the script is entered or loaded. Scripts are coded using Javascript, and there is an API available to help with common analytical tasks like data manipulation. To run a script simply click the run button, or press ctrl-enter. Any output of the script will be rendered to the output section.
+The code section is where the script is entered or loaded. Scripts are coded using Javascript, and there is an API available to help with common analytical tasks like data manipulation and with visuals rendering. To run a script simply click the run button, or press ctrl-enter. Any output of the script will be rendered to the output section.
 
-At the base of the code section there is a console window. This is similar to the developer console windows found in all browsers. This window will display any errors in your scripts, and output can also be directed to the console (you may not want all output from your scripts going to the output section) using the standard Javascript function console.log().
+At the base of the code section there is a console window. This is similar to the developer console windows found in browsers. This window will display any errors in your scripts, and output can also be directed to the console (you may not want all output from your scripts going to the output section, for example, debugging information) using the standard Javascript function console.log().
 
 ### Output Section
 
@@ -157,7 +157,7 @@ UI.layout({
   fit: "width",
 });
 let data = DataFrame.examples.iris();
-data.visual("slicer", { columnName: "class" }).attach("root");
+data.visual("slicer", { column: "class" }).attach("root");
 data.visual("table").attach("root");
 ```
 
@@ -176,7 +176,7 @@ In order to work efficiently with the code and output sections, there is an API 
 
 ### DataFrame
 
-The DataFrame class can be thought of as a 2-dimensional table. DataFrames are the work-horse of the analytical-notebook application. Data can be read from any url and is automatically returned as a DataFrame. Any transformation or filtering operations on a DataFrame generally return another DataFrame. In this way, the script can chain calls together to create a more natural-language syntax.
+The DataFrame class can be thought of as a 2-dimensional table. DataFrames are the work-horse of the analytical-notebook application. Json data can be read from a url and is automatically returned as a DataFrame. Any transformation or filtering operations on a DataFrame generally return another DataFrame. In this way, the script can chain calls together to create a more natural-language syntax.
 
 ### List
 
@@ -190,7 +190,7 @@ The Visual class is used to create and render visuals. As mentioned above, a key
 
 The UI class is used for manipulating the output. Typically you don't need to use the UI class directly. It is called indirectly when you create visuals. For example, the normal pattern to render a visual is to create a Visual object from a DataFrame object using the visual() function, then attach to the DOM using the Visual.attach() function:
 
-```
+```javascript
 dataframe.visual({visual_renderer_function}, {options}).attach('root');
 ```
 
@@ -214,8 +214,8 @@ UI.layout({
 });
 
 // Add custom 'caption' type to visuals library:
-Visual.library.caption = function() {
-  let options = this.options;
+Visual.library.caption = function(visual) {
+  let options = visual.options;
   elDiv = document.createElement("div");
   elDiv.style.marginTop = "20px";
   elDiv.style.marginBottom = "20px";

@@ -1,16 +1,29 @@
 import Visual from "../Visual.js";
 
 /**
- * Displays a scatter plot allowing 2 continuous variables to be compared.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
- * @param {number} options.height - The height of the scatterplot.
- * @param {number} options.width - The width of the scatterplot.
- * @param {Object} options.margin - The margins for the scatterplot.
- * @param {number} options.margin.top - The top margin for the scatterplot.
- * @param {number} options.margin.right - The right margin for the scatterplot.
- * @param {number} options.margin.bottom - The bottom margin for the scatterplot.
- * @param {number} options.margin.left - The bottom margin for the scatterplot.
+ * Additional options for configuring a scatterplot visual.
+ * @typedef {Visual~OptionsBase} Visual~ScatterOptions
+ * @property {string} binding.column - The DataFrame field name to project onto the x axis of the scatter plot.
+ * @property {string} binding.row - The DataFrame field name to project onto the y axis of the scatter plot.
+ * @property {string} binding.detail - If specified, the data frame will be grouped by this field. Otherwise, the raw data will be used.
+ * @property {string} binding.size - The DataFrame field name to use for the size of the marks on the scatter plot.
+ * @property {string} binding.color - The DataFrame field name to use for the color of the marks on the scatter plot.
+ * @property {object} axes - The axes configuration.
+ * @property {object} axes.column - The x-axis configuration.
+ * @property {boolean} axes.column.display - Toggles the display of the column (x) axis.
+ * @property {string} axes.column.title - The column (x) axis title.
+ * @property {string} axes.column.min - The min value of the column (x) axis.
+ * @property {string} axes.column.max - The max value of the column (x) axis.
+ * @property {object} axes.row - The y-axis configuration.
+ * @property {boolean} axes.row.display - Toggles the display of the row (y) axis.
+ * @property {string} axes.row.title - The row (y) axis title.
+ * @property {string} axes.row.min - The min value of the row (y) axis.
+ * @property {string} axes.row.max - The max value of the row (y) axis.
+ */
+
+/**
+ * Displays a scatter plot allowing 2 continuous variables to be compared. For configuration, refer to: {@link Visual~ScatterOptions}.
+ * @param {Visual} visual - The Visual object used for rendering.
  * @returns {Node}
  * @example <caption>Displaying a scatterplot</caption>
  * DataFrame
@@ -20,29 +33,24 @@ import Visual from "../Visual.js";
  *   .visual(
  *     'scatter',
  *     {
- *       fnXValues: (r) => {
- *         return { age: r.age };
- *       },
- *       fnYValues: (r) => {
- *         return { fare: r.fare };
+ *       binding: {
+ *         column: 'age',
+ *         row: 'fare'
  *       }
  *     }
  *   )
  *   .attach("root");
- *
  * @example <caption>Incorporating a 3rd dimension using color</caption>
  * let iris = DataFrame.examples.iris();
  * iris
  *   .visual(
  *     'scatter',
  *     {
- *       fnXValues: (r) => {
- *         return { sepal_length_cm: r.sepal_length_cm };
- *       },
- *       fnYValues: (r) => {
- *         return { sepal_width_cm: r.sepal_width_cm };
- *       },
- *       fnColor: (r) => r.class==="Iris-setosa" ? "green" : r.class==="Iris-versicolor" ? "red" : "blue"
+ *       binding: {
+ *         column: 'sepal_length_cm',
+ *         row: 'sepal_width_cm',
+ *         color: 'class'
+ *       }
  *     }
  *   )
  *   .attach("root");
@@ -50,46 +58,50 @@ import Visual from "../Visual.js";
 Visual.library.scatter = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
-  let data = dataFrame.boundData();
 
   options = Object.mergeDeep(
     {
-      height: 300,
-      width: 400,
-      margin: {
-        top: 10,
-        right: 30,
-        bottom: 30,
-        left: 60,
+      binding: {
+        detail: "",
+        column: "",
+        row: "",
+        size: "",
+        color: "",
       },
-      title: "",
-      fnXValues: null,
-      fnYValues: null,
-      fnSize: null,
-      fnColor: null,
       axes: {
-        x: {
+        column: {
           display: true,
           title: "",
         },
-        y: {
+        row: {
           display: true,
           title: "",
         },
-      },
-      border: {
-        width: 0,
-        color: "black",
-        radius: 8,
-        background: "#fff",
       },
     },
     options
   );
 
   // Get column names
-  let xColumnName = Object.getOwnPropertyNames(options.fnXValues(data[0]))[0];
-  let yColumnName = Object.getOwnPropertyNames(options.fnYValues(data[0]))[0];
+  let xColumnName = options.binding.column;
+  let yColumnName = options.binding.row;
+
+  const colorScale = d3.scaleOrdinal().range(d3.schemeCategory10);
+
+  // get data
+  let data = dataFrame.boundData();
+  if (options.binding.detail) {
+    // if detail specified, this is the 'grouping' field. Otherwise, get all raw data
+    let allColumns = [
+      options.binding.detail,
+      options.binding.column,
+      options.binding.row,
+      options.binding.color,
+      options.binding.size,
+    ].filter((c) => c);
+
+    data = data.cube(allColumns);
+  }
 
   // set the dimensions and margins of the graph
   var margin = options.margin,
@@ -106,20 +118,20 @@ Visual.library.scatter = function (visual) {
 
   // Add X axis
   let minXValue =
-    options.axes.x.min ||
+    options.axes.column.min ||
     d3.min(data, function (d) {
       return +d[xColumnName];
     });
 
   let maxXValue =
-    options.axes.x.max ||
+    options.axes.column.max ||
     d3.max(data, function (d) {
       return +d[xColumnName];
     });
 
   var x = d3.scaleLinear().domain([minXValue, maxXValue]).range([0, width]);
 
-  if (options.axes.x.display) {
+  if (options.axes.column.display) {
     svg
       .append("g")
       .attr("transform", "translate(0," + height + ")")
@@ -128,19 +140,19 @@ Visual.library.scatter = function (visual) {
 
   // Add Y axis
   let minYValue =
-    options.axes.y.min ||
+    options.axes.row.min ||
     d3.min(data, function (d) {
       return +d[yColumnName];
     });
   let maxYValue =
-    options.axes.y.max ||
+    options.axes.row.max ||
     d3.max(data, function (d) {
       return +d[yColumnName];
     });
 
   var y = d3.scaleLinear().domain([minYValue, maxYValue]).range([height, 0]);
 
-  if (options.axes.y.display) {
+  if (options.axes.row.display) {
     svg.append("g").call(d3.axisLeft(y));
   }
 
@@ -158,10 +170,12 @@ Visual.library.scatter = function (visual) {
       return y(d[yColumnName]);
     })
     .attr("r", function (d) {
-      return options.fnSize ? options.fnSize(d) : 5;
+      return options.binding.size ? d[options.binding.size] : 5;
     })
     .style("fill", function (d) {
-      return options.fnColor ? options.fnColor(d) : "#69b3a2";
+      return options.binding.color
+        ? colorScale(d[options.binding.color])
+        : "#69b3a2";
     });
 
   return svg.node().parentNode;
