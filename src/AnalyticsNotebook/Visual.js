@@ -91,6 +91,7 @@ class Visual {
 
         // merge with default base options (let visual do visual-specific stuff)
         c.options = Object.mergeDeep(
+          {},
           VisualLibraryBase.defaultOptions,
           c.options
         );

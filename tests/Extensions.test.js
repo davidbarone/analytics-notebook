@@ -17,7 +17,7 @@ test("Object.mergeDeep merges 2 objects correctly", () => {
     },
   };
 
-  let result = Object.mergeDeep(first, second);
+  let result = Object.mergeDeep({}, first, second);
 
   expect(result).toEqual({
     a: 1,

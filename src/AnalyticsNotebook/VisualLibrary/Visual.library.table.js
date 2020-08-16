@@ -14,6 +14,12 @@ import Visual from "../Visual.js";
 Visual.library.table = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
+
+  if (!options.binding.columns) {
+    // if columns not specified, default to show all columns in the model
+    options.binding.columns = dataFrame.model();
+  }
+
   let data = dataFrame.cube(...options.binding.columns);
 
   let first = data[0];

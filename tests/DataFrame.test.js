@@ -72,7 +72,17 @@ test("DataFrame.filter() should correctly filter rows", () => {
   ).toBe(50);
 });
 
-test("DataFrame.group() should group correctly", () => {
+test("DataFrame.group() without aggretations should return distinct groups", () => {
+  let grouped = DataFrame.examples.iris().group((g) => {
+    return { class: g.class };
+  });
+
+  expect(grouped.count()).toEqual(3); // 3 groups each with count property of 50
+  expect(Object.getOwnPropertyNames(grouped[0]).length).toBe(1);
+  expect(Object.getOwnPropertyNames(grouped[0])[0]).toBe("class");
+});
+
+test("DataFrame.group() with aggregations should group and aggregate correctly", () => {
   let grouped = DataFrame.examples.iris().group(
     (g) => {
       return { class: g.class };
@@ -88,15 +98,15 @@ test("DataFrame.group() should group correctly", () => {
   expect(grouped[2].observations).toBe(50);
 });
 
-test("DataFrame.pivot() should pivot correctly", () => {
-  let pivot = DataFrame.examples.anscombe().pivot(
+test("DataFrame.group() with pivot function should pivot correctly", () => {
+  let pivot = DataFrame.examples.anscombe().group(
     (g) => {
       return { observation: g.observation };
     },
-    (p) => p.dataset,
     (a) => {
       return { x: a.list("x").mean(), y: a.list("y").mean() };
-    }
+    },
+    (p) => p.dataset
   );
 
   expect(pivot.count()).toEqual(11); // 11 grouping columns
@@ -108,8 +118,100 @@ test("DataFrame.pivot() should pivot correctly", () => {
   expect(Object.getOwnPropertyNames(pivot[0]).indexOf("2") >= 0).toBeTruthy();
   expect(Object.getOwnPropertyNames(pivot[0]).indexOf("3") >= 0).toBeTruthy();
   expect(Object.getOwnPropertyNames(pivot[0]).indexOf("4") >= 0).toBeTruthy();
-
   expect(typeof pivot[0][1]).toBe("object");
+});
+
+test("DataFrame indexing and use of model calculations", () => {
+  // This tests the DataFrame indexer [].
+  // Also, it tests the use of calculations, and the
+  // use of calculations that use other calculations.
+  // This covers the Proxy code.
+
+  let data = [
+    { id: 1, name: "david", age: 41, sex: "m" },
+    { id: 2, name: "peter", age: 25, sex: "m" },
+    { id: 3, name: "jane", age: 33, sex: "f" },
+    { id: 4, name: "ann", age: 51, sex: "f" },
+    { id: 5, name: "carole", age: 34, sex: "f" },
+    { id: 6, name: "ian", age: 26, sex: "m" },
+    { id: 7, name: "margaret", age: 71, sex: "f" },
+    { id: 8, name: "paul", age: 18, sex: "m" },
+    { id: 9, name: "julie", age: 22, sex: "f" },
+  ];
+
+  let df = DataFrame.create(data);
+
+  df = df
+    .calculate({
+      sexDesc: (r, df) => (r.sex === "m" ? "male" : "female"),
+      ageBand: (r, df) => Math.floor(r.age / 10) * 10,
+      ABC: (r, df) =>
+        r.ageBand >= 50 ? "A" : r.sexDesc === "female" ? "B" : "C",
+    })
+    .measure({
+      count: (g, df) => g.count(),
+    });
+
+  expect(df[3].ABC).toBe("A");
+  expect(df[4].ABC).toBe("B");
+  expect(df[5].ABC).toBe("C");
+});
+
+test("DataFrame joins", () => {
+  let sales = DataFrame.create([
+    { customer: "A1495", sku: "BH41", qty: 10, unitPrice: 1.45 },
+    { customer: "G234", sku: "HF42", qty: 1, unitPrice: 2.0 },
+    { customer: "F4824", sku: "AH52", qty: 5, unitPrice: 1.0 },
+    { customer: "E472", sku: "IF14", qty: 20, unitPrice: 1.2 },
+    { customer: "A2235", sku: "FI42", qty: 5, unitPrice: 1.8 },
+    { customer: "J942", sku: "AV91", qty: 2, unitPrice: 2.5 },
+    { customer: "B1244", sku: "FY14", qty: 1, unitPrice: 3 },
+    { customer: "S95", sku: "FE56", qty: 5, unitPrice: 5 },
+    { customer: "D424", sku: "FE39", qty: 1, unitPrice: 2.5 },
+    { customer: "P1254", sku: "DD67", qty: 2, unitPrice: 3.0 },
+  ]);
+
+  let customers = DataFrame.create([
+    { customer: "A1495", name: "Paul Allen" },
+    { customer: "G234", name: "Tony George" },
+    { customer: "F4824", name: "Dave Farthing" },
+    { customer: "E472", name: "Simone Earl" },
+    { customer: "A2235", name: "Fiona Abbot" },
+    { customer: "J942", name: "Tracy Jones" },
+    { customer: "B1244", name: "Stan Brown" },
+    { customer: "S345", name: "Michael Smith" },
+    { customer: "F254", name: "Dave Firth" },
+    { customer: "J1344", name: "Stuart Jones" },
+  ]);
+
+  // The join types, and the expected row counts.
+  let joinTests = {
+    outer: 13,
+    inner: 7,
+    left: 10,
+    right: 10,
+  };
+
+  Object.getOwnPropertyNames(joinTests).forEach((j) => {
+    let join = sales.join(
+      customers,
+      j,
+      (left, right) => {
+        return left.customer === right.customer;
+      },
+      (left, right) => {
+        return {
+          customer: right.customer ?? left.customer ?? null,
+          name: right.name ?? null,
+          sku: left.customer ?? null,
+          qty: left.qty ?? null,
+          unitPrice: left.unitPrice ?? null,
+        };
+      }
+    );
+
+    expect(join.count()).toBe(joinTests[j]);
+  });
 });
 
 export default {};

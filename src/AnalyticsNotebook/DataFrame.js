@@ -1,11 +1,19 @@
 import List from "./List.js";
 import ColumnCategory from "./ColumnCategory.js";
+import JoinType from "./JoinType.js";
+import "./Extensions.js";
 
 /**
  * DataFrame - Manages all manipulation of data.
  *
  * A DataFrame is similar to an Array object. It should be thought of as an array of objects, or a two dimensional array, similar to a table. The DataFrame class is the data manipulation.
- * A DataFrame instance is used for retrieving, exploring, cleansing, and transforming data.
+ * A DataFrame instance is used for the following:
+ * - Retrieving data
+ * - Creating data
+ * - Cleansing & transforming data
+ * - Analysing data.
+ * Many methods in the DataFrame class return new DataFrame instances. These can be 'chained' together to form a data processing pipeline.
+ * Additionally, a DataFrame instance can have calculations and measures defined on it. These are formulae which are evaluated at runtime. Collectively, a DataFrame instance with the calculations and measures is known as a 'model'.
  */
 class DataFrame {
   constructor(arr) {
@@ -23,7 +31,8 @@ class DataFrame {
     return new Proxy(this, {
       get(target, prop, receiver) {
         if (Number(prop) == prop && !(prop in target)) {
-          return target.getRowProxy(target._data[prop], target);
+          let proxy = target.getRowProxy(target._data[prop], target);
+          return proxy;
           // Return a proxy of the object which can evaluate calculations too.
         }
         return target[prop];
@@ -33,7 +42,9 @@ class DataFrame {
 
   /**
    * Gets a proxy for a single row / object which can evaluate calculations in the model.
-   * @param {*} obj
+   * @param {object} obj - The object to create a proxy for.
+   * @param {DataFrame} dataFrame - The DataFrame instance with addional calculations & measures defined.
+   * @returns {object} The returned object will be able to evaluate any calculations defined in the model.
    */
   getRowProxy(obj, dataFrame) {
     let df = dataFrame;
@@ -44,7 +55,7 @@ class DataFrame {
         } else if (
           Object.getOwnPropertyNames(df._calculations).includes(prop)
         ) {
-          return df._calculations[prop](target, df);
+          return df._calculations[prop](df.getRowProxy(target, df), df);
         }
       },
     });
@@ -54,7 +65,7 @@ class DataFrame {
   /**
    * Creates a new DataFrame object from a plain Javascript Array object.
    * @param {Array} arr - The array to create a DataFrame object from.
-   * @returns {DataFrame}
+   * @returns {DataFrame} A DataFrame instance.
    */
   static create(arr) {
     return new DataFrame(arr);
@@ -140,6 +151,19 @@ class DataFrame {
   }
 
   /**
+   * Gets all the columns, calculations, and measures in the model.
+   * @returns {Array} A array of names in the model.
+   */
+  model() {
+    let first = this[0];
+    let props = Object.getOwnPropertyNames(first);
+    let calculations = Object.getOwnPropertyNames(this._calculations);
+    let measures = Object.getOwnPropertyNames(this._measures);
+    let model = [...props, ...calculations, ...measures];
+    return model;
+  }
+
+  /**
    * This callback is a required parameter of the DataFrame map method.
    * @callback DataFrame~mapFunction
    * @param {object} row - The current row in the DataFrame.
@@ -147,54 +171,123 @@ class DataFrame {
    */
 
   /**
-   * Transforms a DataFrame object using a mapping function.
-   * @param {DataFrame~mapFunction} mapFunction - The function to map the data. The function accepts a single parameter 'row' representing the current row. The function must return an object representing the transformed row.
-   * @returns {DataFrame}
+   * Transforms a DataFrame instance using a mapping function.
+   * @param {DataFrame~mapFunction} mapFunction - The function to map the data..
+   * @returns {DataFrame} The transformed DataFrame instance.
+   * @example <caption>Transforming a DataFrame instance</caption>
+   * var people = [
+   *   { name: "Tony", sex: "Male", age: 25 },
+   *   { name: "Paul", sex: "Male", age: 17 },
+   *   { name: "Sarah", sex: "Female", age: 42 },
+   *   { name: "Debbie", sex: "Female", age: 62 },
+   *   { name: "Michael", sex: "Male", age: 51 },
+   *   { name: "Jenny", sex: "Female", age: 38 },
+   *   { name: "Frank", sex: "Male", age: 32 },
+   *   { name: "Amy", sex: "Female", age: 29 }
+   * ];
+   *
+   * let df = DataFrame.create(people).map((p)=> { return { ageBand: Math.floor(p.age/10)*10, ...p }});
+   * console.log(df);
    */
   map(mapFunction) {
     return DataFrame.create(this._data.map(mapFunction));
   }
 
   /**
-   * This callback is a required parameter of the DataFrame filter method.
+   * Callback function to filter (include / exclude) an object.
    * @callback DataFrame~filterFunction
-   * @param {object} row - The current row in the DataFrame.
-   * @returns {boolean} The function should returns a boolean value denoting the rows to be kept.
+   * @param {object} row - The current object in the DataFrame instance.
+   * @returns {boolean} Returns true to keep the object in the DataFrame instance, and false to remove it.
    */
 
   /**
    * Filters a DataFrame object using a filter function.
    * @param {DataFrame~filterFunction} filterFunction - The function to filter the data. The function accepts a single parameter 'row' representing the current row. The function must return a boolean.
-   * @returns {DataFrame}
+   * @returns {DataFrame} A filtered DataFrame instance.
+   * @example <caption>Filtering a DataFrame instance</caption>
+   * var people = [
+   *   { name: "Tony", sex: "Male", age: 25 },
+   *   { name: "Paul", sex: "Male", age: 17 },
+   *   { name: "Sarah", sex: "Female", age: 42 },
+   *   { name: "Debbie", sex: "Female", age: 62 },
+   *   { name: "Michael", sex: "Male", age: 51 },
+   *   { name: "Jenny", sex: "Female", age: 38 },
+   *   { name: "Frank", sex: "Male", age: 32 },
+   *   { name: "Amy", sex: "Female", age: 29 }
+   * ];
+   *
+   * let df = DataFrame.create(people).filter((p)=> { return p.sex==="Male" });
+   * console.log(df);
    */
   filter(filterFunction) {
     return DataFrame.create(this._data.filter(filterFunction));
   }
 
   /**
-   * This callback is a required parameter of the DataFrame group method.
+   * Callback function which assigns an object to a group.
    * @callback DataFrame~groupingFunction
    * @param {object} row - The current row in the DataFrame.
    * @returns {object} The callback should return an object representing the properties of the row that should be considered as the 'group' for the row.
-   * All the unique values returned for all rows in the DataFrame objects will form the group rows of the resulting DataFrame.
+   * All the unique values returned for all rows in the DataFrame objects will form the grouping rows of the resulting DataFrame instance.
    */
 
   /**
-   * This callback is a required parameter of the DataFrame group method.
+   * Callback function which aggregates a group of objects.
    * @callback DataFrame~aggregateFunction
    * @param {DataFrame} group - The current group in the DataFrame.
-   * @returns {object} The callback should return an object representing any aggregrated values of the group. A single object must be returned.
+   * @param {DataFrame} dataFrame - The original DataFrame object that the grouping was performed on.
+   * @returns {object} The callback should return an object representing any aggregrated values of the group. A single object must be returned with one or more properties.
    */
 
   /**
-   * Groups a DataFrame object using a grouping function and an optional aggregation function. The group function is mandatory and specifies the group values.
-   * If the aggregation function is ommitted, the result is simply the distinct group values. If an aggregation function is specified, then additional
-   * aggregated values for each group can be included.
+   * Callback function which defines column headings for each object.
+   * @callback DataFrame~pivotFunction
+   * @param {DataFrame} group - The current group in the DataFrame.
+   * @param {DataFrame} dataFrame - The original DataFrame object that the grouping was performed on.
+   * @returns {string} The pivot function should return back a string value. This value will be projected as a column header.
+   */
+
+  /**
+   * Groups a DataFrame object using a grouping function and optional aggregation and pivot functions. The group function is mandatory and specifies the group values. If the aggregation function is ommitted, the result is simply the distinct group values. If an aggregation function is specified, then additional aggregated values for each group can be included.
+   * If a pivot function is specified, then the distinct string values returned by the pivot function are projected as column headers.
    * @param {DataFrame~groupingFunction} groupingFunction
    * @param {DataFrame~aggregateFunction} aggregateFunction
-   * @returns {DataFrame}
+   * @param {DataFrame~pivotFunction} [pivotFunction] - If specified, then the return value of the function ({string}) is used as a column header. Similar to pivoting in relational databases.
+   * @returns {DataFrame} The grouped DataFrame instance.
+   * @example <caption>Grouping a DataFrame instance</caption>
+   * var people = [
+   *   { name: "Tony", sex: "Male", age: 25 },
+   *   { name: "Paul", sex: "Male", age: 17 },
+   *   { name: "Sarah", sex: "Female", age: 42 },
+   *   { name: "Debbie", sex: "Female", age: 62 },
+   *   { name: "Michael", sex: "Male", age: 51 },
+   *   { name: "Jenny", sex: "Female", age: 38 },
+   *   { name: "Frank", sex: "Male", age: 32 },
+   *   { name: "Amy", sex: "Female", age: 29 }
+   * ];
+   *
+   * let df = DataFrame
+   *   .create(people)
+   *   .group(
+   *       (g)=> { return { sex: g.sex }},
+   *       (a)=> { return { count: a.length }}
+   *     );
+   *
+   * console.log(df);
+   * @example <caption>Pivoting the Anscombe's Quartet built-in dataset</caption>
+   * let df = DataFrame
+   *   .examples
+   *   .anscombe()
+   *   .group(
+   *     g => { return { observation: g.observation }},
+   *     a => { return JSON.stringify({ x: a.list('x').mean(), y: a.list('y').mean() })},
+   *     p => p.dataset
+   *   )
+   *   .remove('observation')
+   *   .visual('table')
+   *   .attach('root');
    */
-  group(groupingFunction, aggregateFunction) {
+  group(groupingFunction, aggregateFunction, pivotFunction) {
     let groups = {};
     let that = this;
     this.forEach(function (r) {
@@ -203,81 +296,57 @@ class DataFrame {
       groups[group] = groups[group] || [];
       groups[group].push(proxy);
     });
+
+    // Optional pivot function - Get distinct values for the pivot function
+    let pivot = [];
+    if (pivotFunction) {
+      this.forEach(function (r) {
+        let proxy = that.getRowProxy(r, that);
+        let value = pivotFunction(proxy);
+        if (pivot.indexOf(value) === -1) pivot.push(value);
+      });
+    }
+
     let data = Object.keys(groups).map(function (group) {
       if (!aggregateFunction) {
+        // no aggragations - just return distinct groups
         return JSON.parse(group);
       } else {
-        let items = DataFrame.create(groups[group]);
-        var agg = aggregateFunction(items);
-        return { ...JSON.parse(group), ...agg };
+        if (pivotFunction) {
+          // groups + aggregates + pivot -> pivot data too.
+          let pivotObj = {};
+          pivot.forEach((p) => {
+            let items = DataFrame.create(groups[group]).filter(
+              (r) => pivotFunction(r) === p
+            );
+            let value = aggregateFunction(items);
+
+            // If value has 1 property only, then extract this value
+            let props = Object.getOwnPropertyNames(value);
+            if (props.length === 1) {
+              value = value[props[0]];
+            }
+            pivotObj[p] = value;
+          });
+          return { ...JSON.parse(group), ...pivotObj };
+        } else {
+          // groups + aggregates, no pivot - join groups + aggregations
+          let items = DataFrame.create(groups[group]);
+          var agg = aggregateFunction(items);
+          return { ...JSON.parse(group), ...agg };
+        }
       }
     });
     return DataFrame.create(data);
   }
 
   /**
-   * This callback is a required parameter of the DataFrame pivot function.
-   * @callback DataFrame~pivotFunction
-   * @param {DataFrame} group - The current group in the DataFrame.
-   * @returns {string} The pivot function should return back a string value. This value will be projected as a column header.
-   */
-
-  /**
-   * Pivots rows into columns using a pivot function.
-   * @param {DataFrame~groupingFunction} groupingFunction - The data grouping function.
-   * @param {DataFrame~pivotFunction} pivotFunction - The data pivoting function.
-   * @param {DataFrame~aggregateFunction} aggregateFunction - The data aggregation function.
-   * @returns {DataFrame}
-   * @example <caption>Pivoting the Anscombe's Quartet built-in dataset</caption>
-   * let df = DataFrame
-   *   .examples
-   *   .anscombe()
-   *   .pivot(
-   *     g => { return { observation: g.observation }},
-   *     p => p.dataset,
-   *     a => { return JSON.stringify({ x: a.list('x').mean(), y: a.list('y').mean() })}
-   *   )
-   *   .remove('observation')
-   *   .visual('table')
-   *   .attach('root');
-   */
-  pivot(groupingFunction, pivotFunction, aggregateFunction) {
-    // Get distinct values for the pivot function
-    let pivot = [];
-    this.data.forEach(function (r) {
-      let value = pivotFunction(r);
-      if (pivot.indexOf(value) === -1) pivot.push(value);
-    });
-
-    let groups = {};
-    this._data.forEach(function (o) {
-      var group = JSON.stringify(groupingFunction(o));
-      groups[group] = groups[group] || [];
-      groups[group].push(o);
-    });
-
-    let data = Object.keys(groups).map(function (group) {
-      // For each group, loop through each pivot value
-      // calculating the value to pivot
-      let pivotObj = {};
-      pivot.forEach((p) => {
-        let items = DataFrame.create(groups[group]).filter(
-          (r) => pivotFunction(r) === p
-        );
-        let value = aggregateFunction(items);
-        pivotObj[p] = value;
-      });
-
-      return { ...JSON.parse(group), ...pivotObj };
-    });
-
-    return DataFrame.create(data);
-  }
-
-  /**
    * Gets the top 'n' rows of a DataFrame object.
    * @param {Number} top - Top 'n' rows to select.
-   * @returns {DataFrame}
+   * @returns {DataFrame} A DataFrame instance with top 'n' rows only.
+   * @example <caption>Getting the top 'n' rows from a DataFrame Instance</caption>
+   * let titanic = DataFrame.examples.titanic.head(5);
+   * console.log(titanic);
    */
   head(top) {
     let arr = [...this._data];
@@ -286,7 +355,10 @@ class DataFrame {
 
   /**
    * Returns the number of rows in the DataFrame.
-   * @returns {number} The number of rows in the DataFrame object.
+   * @returns {number} The number of rows in the DataFrame instance.
+   * @example <caption>Getting the row count of a DataFrame Instance</caption>
+   * let count = DataFrame.examples.titanic.count();
+   * console.log(count);
    */
   count() {
     return this._data.length;
@@ -297,6 +369,16 @@ class DataFrame {
    * @param {*} sortFunction
    * @param {*} descending
    * @returns {DataFrame} The sorted DataFrame object
+   * @example <caption>Ranking a dataset using Sort</caption>
+   * let oldest5 = DataFrame
+   *   .examples
+   *   .titanic
+   *   .map((t) => { return { name: t.name, age: parseFloat(t.age) }})
+   *   .filter((t) => { return !Number.isNaN(t.age) })
+   *   .sort((t) => { return t["age"] }, true)
+   *   .head(5);
+   *
+   * console.log(oldest5);
    */
   sort(sortFunction, descending) {
     let reverse = descending ? -1 : 1;
@@ -308,12 +390,81 @@ class DataFrame {
   }
 
   /**
-   * Joins 2 DataFrame objects.
-   * @param {*} dataFrame
-   * @param {*} type
-   * @param {*} joinFunction
-   * @param {*} selectFunction
+   * Callback function which compares 2 objects for equality.
+   * @callback DataFrame~joinFunction
+   * @param {object} objA - The first object.
+   * @param {object} objb - The second object.
+   * @returns {boolean} The function should return true if the objects are considered equal based on the function.
+   */
+
+  /**
+   * Callback function which merges / returns an object from 2 input objects.
+   * @callback DataFrame~mergeFunction
+   * @param {object} objA - The first object.
+   * @param {object} objb - The second object.
+   * @returns {object} The merged / returned object.
+   */
+
+  /**
+   * Joins the current DataFrame instance (left) to another DataFrame instance (right). Supports left, right, inner and outer join types.
+   * @param {DataFrame} dataFrame - The right hand DataFrame instance
+   * @param {JoinType} type - The join type
+   * @param {DataFrame~joinFunction} joinFunction - The join function to compare rows from the left and right DataFrame instances.
+   * @param {DataFrame~mergeFunction} selectFunction - The function to select the reqired values from the 2 joined tables.
    * @returns {DataFrame}
+   * @example <caption>Joining 2 DataFrame Instances</caption>
+   * UI.layout({
+   *   id: 'root',
+   *   direction: 'horizontal',
+   *   children: [
+   *     {id: 'left'},
+   *     {id: 'centre'},
+   *     {id: 'right'}
+   *   ]
+   * });
+   *
+   * let sales = DataFrame.create([
+   *     {customer:'A1495', sku: 'BH41', qty: 10, unitPrice: 1.45},
+   *     {customer:'G234', sku: 'HF42', qty: 1, unitPrice: 2.00},
+   *     {customer:'F4824', sku: 'AH52', qty: 5, unitPrice: 1.00},
+   *     {customer:'E472', sku: 'IF14', qty: 20, unitPrice: 1.20},
+   *     {customer:'A2235', sku: 'FI42', qty: 5, unitPrice: 1.80},
+   *     {customer:'J942', sku: 'AV91', qty: 2, unitPrice: 2.50},
+   *     {customer:'B1244', sku: 'FY14', qty: 1, unitPrice: 3},
+   *     {customer:'S95', sku: 'FE56', qty: 5, unitPrice: 5},
+   *     {customer:'D424', sku: 'FE39', qty: 1, unitPrice: 2.50},
+   *     {customer:'P1254', sku: 'DD67', qty: 2, unitPrice: 3.00}
+   * ]);
+   *
+   * let customers = DataFrame.create([
+   *     {customer:'A1495', name: 'Paul Allen'},
+   *     {customer:'G234', name: 'Tony George'},
+   *     {customer:'F4824', name: 'Dave Farthing'},
+   *     {customer:'E472', name: 'Simone Earl'},
+   *     {customer:'A2235', name: 'Fiona Abbot' },
+   *     {customer:'J942', name: 'Tracy Jones'},
+   *     {customer:'B1244', name: 'Stan Brown'},
+   *     {customer:'S345', name: 'Michael Smith'},
+   *     {customer:'F254', name: 'Dave Firth'},
+   *     {customer:'J1344', name: 'Stuart Jones' }
+   * ]);
+   *
+   * let join = sales.join(
+   *     customers,
+   *     'outer',
+   *     (left,right) => { return left.customer === right.customer },
+   *     (left,right) => { return {
+   *         customer: right.customer ?? left.customer ?? null,
+   *         name: right.name ?? null,
+   *         sku: left.customer ?? null,
+   *         qty: left.qty ?? null,
+   *         unitPrice: left.unitPrice ?? null
+   *     }}
+   * );
+   *
+   * sales.visual('table').attach('left');
+   * customers.visual('table').attach('centre');
+   * join.visual('table').attach('right');
    */
   join(dataFrame, type, joinFunction, selectFunction) {
     let results = [];

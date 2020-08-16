@@ -26,6 +26,7 @@ Visual.library.slicer = function (visual) {
   let options = visual.options;
 
   options = Object.mergeDeep(
+    {},
     {
       title: options.column || "",
       column: null,

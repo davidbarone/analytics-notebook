@@ -35,6 +35,7 @@ Visual.library.crosstab = function (visual) {
   let options = visual.options;
 
   options = Object.mergeDeep(
+    {},
     {
       title: "",
       binding: {

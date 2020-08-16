@@ -60,6 +60,7 @@ Visual.library.scatter = function (visual) {
   let options = visual.options;
 
   options = Object.mergeDeep(
+    {},
     {
       binding: {
         detail: "",
