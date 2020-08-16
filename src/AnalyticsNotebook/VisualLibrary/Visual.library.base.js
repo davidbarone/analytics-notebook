@@ -36,9 +36,9 @@ let VisualOptionsBaseDefault = {
     bottom: 40,
     left: 60,
   },
-  background: "#eee",
+  background: "#fefefe",
   border: {
-    width: 1,
+    width: 0,
     color: "#999",
     radius: 0,
   },

@@ -54,12 +54,12 @@ class Visual {
    * should get data from this function only.
    * @returns {Array} Data is returned in native Javascript Array format, which is more suited to libraries like D3.
    */
-  boundData() {
+  slicedData() {
     if (!this.dataFrame) {
       return undefined;
     } else {
       // Get the dataFrame bound data (which includes slicers)
-      let data = this.dataFrame.boundData();
+      let data = this.dataFrame.slicedData();
       // Apply visual filter if set
       if (this.filterFunction) {
         data = data.filter(this.filterFunction);
@@ -151,7 +151,7 @@ Visual.visuals = [];
  * are used by the internal framework when rendering visuals to the output panel. The visual type required is typically defined when using the
  * DataFrame.prototype.visual method. Render functions take no parameters. However, they automatically bind 'this' to the Visual, so all data and configuration
  * can be obtained from the parent Visual object.
- * - To get the data, call this.boundData()
+ * - To get the data, call this.slicedData()
  * - To get the configuration options, call this.options
  * - To add a slicer, call this.dataFrame.setSlicer(this, <filterFunction>)
  * - To remove a slicer, call this.dataFrame.unsetSlicer(this)

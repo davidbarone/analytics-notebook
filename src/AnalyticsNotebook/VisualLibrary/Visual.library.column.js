@@ -42,13 +42,39 @@ import VisualLibraryBase from "./Visual.library.base.js";
  *     }
  *   )
  *   .attach('root');
+ * @example <caption>Law of Large Numbers</caption>
+ * let roll = () => Math.floor(Math.random() * 6) + 1;
+ * let attempts = prompt("Enter number of dice throws (1 - 1,000,000):");
+ * let data = [];
+ *
+ * for (let i = 0; i < attempts; i++) {
+ *   data.push({roll: roll()});
+ * }
+ *
+ * let df = DataFrame
+ *   .create(data)
+ *   .calculate({
+ *     count: (g, df) => g.count()
+ *   });
+ *
+ * df
+ *   .visual(
+ *     'column'
+ *     , {
+ *       title: `Results of ${attempts} Throws:`,
+ *       binding: {
+ *         column: 'roll',
+ *         values: ['count']
+ *       }
+ *     }
+ *   ).attach('root');
  */
 Visual.library.column = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
 
   options = Object.mergeDeep(
-    VisualLibraryBase.defaultOptions,
+    {},
     {
       binding: {
         column: "",

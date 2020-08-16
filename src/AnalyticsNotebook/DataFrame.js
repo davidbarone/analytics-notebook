@@ -1,25 +1,30 @@
 import List from "./List.js";
+import ColumnCategory from "./ColumnCategory.js";
 
 /**
  * DataFrame - Manages all manipulation of data.
  *
- * A DataFrame is similar to an Array object. It should be thought of as an array of objects
- * or a two dimensional array, similar to a table. The DataFrame class is the data workhorse.
- * It should be used for retrieving, exploring, cleansing, and transforming data.
+ * A DataFrame is similar to an Array object. It should be thought of as an array of objects, or a two dimensional array, similar to a table. The DataFrame class is the data manipulation.
+ * A DataFrame instance is used for retrieving, exploring, cleansing, and transforming data.
  */
 class DataFrame {
-  constructor() {
+  constructor(arr) {
     let self = this;
-    this.data = []; // underlying data
-    this.slicers = {}; // Set of filter functions applied to the core data. These filter functions come from Visual objects.
-    this.calculations = {};
-    this.data.push.apply(this.data, arguments);
+    this._data = []; // underlying data
+    this._slicers = {}; // Set of filter functions applied to the core data. These filter functions come from Visual objects.
+    this._calculations = {};
+    this._measures = {};
+
+    for (let i = 0, len = arr.length; i < len; i++) {
+      this._data.push(arr[i]);
+    }
 
     // Return Proxy, so that we can handle indexing, i.e.: DataFrame[n]
     return new Proxy(this, {
       get(target, prop, receiver) {
         if (Number(prop) == prop && !(prop in target)) {
-          return self.data[prop];
+          return target.getRowProxy(target._data[prop], target);
+          // Return a proxy of the object which can evaluate calculations too.
         }
         return target[prop];
       },
@@ -27,21 +32,23 @@ class DataFrame {
   }
 
   /**
-   * Returns the data after slicers have been applied to it.
-   * @returns {DataFrame}
+   * Gets a proxy for a single row / object which can evaluate calculations in the model.
+   * @param {*} obj
    */
-  boundData() {
-    if (!this.data) {
-      return undefined;
-    } else {
-      let data = this.data;
-      let slicers = Object.getOwnPropertyNames(this.slicers);
-      slicers.forEach((s) => {
-        data = data.filter(this.slicers[s]);
-      });
-      // Return the underlying Javascript Array object
-      return data;
-    }
+  getRowProxy(obj, dataFrame) {
+    let df = dataFrame;
+    let p = new Proxy(obj, {
+      get(target, prop, receiver) {
+        if (Object.getOwnPropertyNames(target).includes(prop)) {
+          return target[prop];
+        } else if (
+          Object.getOwnPropertyNames(df._calculations).includes(prop)
+        ) {
+          return df._calculations[prop](target, df);
+        }
+      },
+    });
+    return p;
   }
 
   /**
@@ -50,7 +57,7 @@ class DataFrame {
    * @returns {DataFrame}
    */
   static create(arr) {
-    return new DataFrame(...arr);
+    return new DataFrame(arr);
   }
 
   /**
@@ -145,7 +152,7 @@ class DataFrame {
    * @returns {DataFrame}
    */
   map(mapFunction) {
-    return DataFrame.create(this.data.map(mapFunction));
+    return DataFrame.create(this._data.map(mapFunction));
   }
 
   /**
@@ -161,7 +168,7 @@ class DataFrame {
    * @returns {DataFrame}
    */
   filter(filterFunction) {
-    return DataFrame.create(this.data.filter(filterFunction));
+    return DataFrame.create(this._data.filter(filterFunction));
   }
 
   /**
@@ -189,10 +196,12 @@ class DataFrame {
    */
   group(groupingFunction, aggregateFunction) {
     let groups = {};
-    this.data.forEach(function (o) {
-      var group = JSON.stringify(groupingFunction(o));
+    let that = this;
+    this.forEach(function (r) {
+      let proxy = that.getRowProxy(r, that);
+      var group = JSON.stringify(groupingFunction(proxy));
       groups[group] = groups[group] || [];
-      groups[group].push(o);
+      groups[group].push(proxy);
     });
     let data = Object.keys(groups).map(function (group) {
       if (!aggregateFunction) {
@@ -241,7 +250,7 @@ class DataFrame {
     });
 
     let groups = {};
-    this.data.forEach(function (o) {
+    this._data.forEach(function (o) {
       var group = JSON.stringify(groupingFunction(o));
       groups[group] = groups[group] || [];
       groups[group].push(o);
@@ -271,7 +280,7 @@ class DataFrame {
    * @returns {DataFrame}
    */
   head(top) {
-    let arr = [...this.data];
+    let arr = [...this._data];
     return DataFrame.create(arr.splice(0, top));
   }
 
@@ -280,7 +289,7 @@ class DataFrame {
    * @returns {number} The number of rows in the DataFrame object.
    */
   count() {
-    return this.data.length;
+    return this._data.length;
   }
 
   /**
@@ -294,8 +303,8 @@ class DataFrame {
     let fn = (a, b) => {
       return sortFunction(a) > sortFunction(b) ? 1 * reverse : -1 * reverse;
     };
-    this.data.sort(fn);
-    return DataFrame.create(this.data);
+    this._data.sort(fn);
+    return DataFrame.create(this._data);
   }
 
   /**
@@ -308,8 +317,8 @@ class DataFrame {
    */
   join(dataFrame, type, joinFunction, selectFunction) {
     let results = [];
-    let left = [...this.data];
-    let right = [...dataFrame.data];
+    let left = [...this._data];
+    let right = [...dataFrame._data];
     let leftIds = [];
     let rightIds = [];
 
@@ -365,7 +374,7 @@ class DataFrame {
    * @returns {List}
    */
   list(columnName) {
-    return new List([...this.data.map((r) => r[columnName])]);
+    return new List([...this._data.map((r) => r[columnName])]);
   }
 
   /**
@@ -373,7 +382,7 @@ class DataFrame {
    * @returns {DataFrame}
    */
   describe() {
-    let first = this.data[0];
+    let first = this._data[0];
     let props = Object.getOwnPropertyNames(first);
     let results = [];
     props.forEach((p) => {
@@ -563,7 +572,10 @@ class DataFrame {
    * @param {DataFrame~forEachCallback} forEachCallback
    */
   forEach(forEachCallback) {
-    this.data.forEach(forEachCallback);
+    for (let i = 0, len = this.count(); i < len; i++) {
+      let proxy = this.getRowProxy(this[i], this);
+      forEachCallback(proxy, i, this);
+    }
   }
 
   /**
@@ -571,45 +583,68 @@ class DataFrame {
    * @param {*} obj
    */
   calculate(calculations) {
-    this.calculations = calculations;
+    this._calculations = calculations;
     return this;
   }
 
-  isCalculation(columnName) {
-    if (this.data[0].hasOwnProperty(columnName)) {
-      return false;
+  /**
+   * Defines a set of measures on the DataFrame object
+   */
+  measure(measures) {
+    this._measures = measures;
+    return this;
+  }
+
+  /**
+   * Returns the column category.
+   * @param {*} columnName
+   * @returns {ColumnCategory}
+   */
+  columnCategory(columnName) {
+    if (this._data[0].hasOwnProperty(columnName)) {
+      return ColumnCategory.COLUMN;
+    } else if (this._calculations.hasOwnProperty(columnName)) {
+      return ColumnCategory.CALCULATION;
+    } else if (this._measures.hasOwnProperty(columnName)) {
+      return ColumnCategory.MEASURE;
     } else {
-      if (this.calculations.hasOwnProperty(columnName)) {
-        return true;
-      } else {
-        throw `Column: ${columnName} does not exist in the model.`;
-      }
+      throw `Column: ${columnName} does not exist in the model.`;
     }
   }
 
   /**
-   * Evaluates a subcube from the DataFrame object
+   * Returns the data after slicers have been applied to it. A new DataFrame object is returned with the same calculations and measures as the original DataFrame instance.
+   * @returns {DataFrame}
+   */
+  slicedData() {
+    if (!this._data) {
+      return undefined;
+    } else {
+      let data = this._data;
+      let slicers = Object.getOwnPropertyNames(this._slicers);
+      slicers.forEach((s) => {
+        data = data.filter(this._slicers[s]);
+      });
+      let df = DataFrame.create(data);
+      df.calculate(this._calculations);
+      df.measure(this._measures);
+      return df;
+    }
+  }
+
+  /**
+   * Evaluates a subcube from the DataFrame object. The cube method evaluates any calculations and measures defined in the model
    * @param {Array} columns - The columns to include in the subcube.
    */
   cube(...columns) {
     let arrGroups = [];
     let arrMeasures = [];
 
-    // Filter data
-    if (!this.data) {
-      return undefined;
-    }
-
-    let data = this.data;
-    let slicers = Object.getOwnPropertyNames(this.slicers);
-    slicers.forEach((s) => {
-      data = data.filter(this.slicers[s]);
-    });
-    // Convert back to DataFrame object
-    data = DataFrame.create(data);
+    // Filter data first
+    let data = this.slicedData();
 
     columns.forEach((c) => {
-      if (this.isCalculation(c)) {
+      if (this.columnCategory(c) === ColumnCategory.MEASURE) {
         arrMeasures.push(c);
       } else {
         arrGroups.push(c);
@@ -620,19 +655,24 @@ class DataFrame {
       (row) => {
         let groupByValue = {};
         arrGroups.forEach((g) => {
-          groupByValue[g] = row[g];
+          if (
+            this.columnCategory(g) === ColumnCategory.COLUMN ||
+            this.columnCategory(g) === ColumnCategory.CALCULATION
+          ) {
+            groupByValue[g] = row[g];
+          }
         });
         return groupByValue;
       },
       (group) => {
         let measures = {};
         arrMeasures.forEach((m) => {
-          measures[m] = this.calculations[m](group, this);
+          measures[m] = this._measures[m](group, this);
         });
         return measures;
       }
     );
-    return DataFrame.create(data.data);
+    return data;
   }
 }
 

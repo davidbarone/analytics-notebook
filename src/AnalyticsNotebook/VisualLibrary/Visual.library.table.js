@@ -14,7 +14,7 @@ import Visual from "../Visual.js";
 Visual.library.table = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
-  let data = dataFrame.boundData();
+  let data = dataFrame.cube(...options.binding.columns);
 
   let first = data[0];
   let columns = Object.getOwnPropertyNames(first);
