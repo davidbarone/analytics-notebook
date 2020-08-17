@@ -166,7 +166,9 @@ class DataFrame {
   /**
    * This callback is a required parameter of the DataFrame map method.
    * @callback DataFrame~mapFunction
-   * @param {object} row - The current row in the DataFrame.
+   * @param {object} currentValue - The current row in the DataFrame.
+   * @param {number} [index] - The index of the currentValue in the array.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that map was called on.
    * @returns {object} The transformed row.
    */
 
@@ -190,7 +192,12 @@ class DataFrame {
    * console.log(df);
    */
   map(mapFunction) {
-    return DataFrame.create(this._data.map(mapFunction));
+    let len = this._data.length;
+    let arr = [];
+    for (let i = 0, len = this._data.length; i < len; i++) {
+      arr.push(mapFunction(this._data[i], i, this));
+    }
+    return DataFrame.create(arr);
   }
 
   /**

@@ -214,4 +214,46 @@ test("DataFrame joins", () => {
   });
 });
 
+test("Ensure model() returns all features of the model", () => {
+  let mt = DataFrame.examples.mtcars();
+  mt.calculate({
+    brand: (r, df) => {
+      let pos = r.model.indexOf(" ");
+      if (pos !== -1) {
+        return r.model.substring(0, pos);
+      } else {
+        return r.model;
+      }
+    },
+  }).measure({
+    count: (g, df) => g.count(),
+  });
+
+  expect(mt.model().length).toEqual(14); // 14 variables in model, including 'brand' and 'count'
+  //["model","mpg","cyl","disp","hp","drat","wt","qsec","vs","am","gear","carb","brand","count"]
+});
+
+test("Ensure the cube() method aggregates selected columns from the model", () => {
+  let mt = DataFrame.examples.mtcars();
+
+  mt.calculate({
+    brand: (r, df) => {
+      let pos = r.model.indexOf(" ");
+      if (pos !== -1) {
+        return r.model.substring(0, pos);
+      } else {
+        return r.model;
+      }
+    },
+  }).measure({
+    count: (g, df) => g.count(),
+  });
+
+  // Create a cube from the raw data with just 2 attributes: brand + count.
+  // There are 22 different brands, so should create a 22*2 DataFrame instance
+  let cube = mt.cube("brand", "count");
+  expect(cube.count()).toBe(22);
+  expect(Object.getOwnPropertyNames(cube[0]).length).toBe(2);
+});
+
 export default {};
