@@ -43,20 +43,28 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
     font-weight: 600;
   }
 
+  h1 {
+    background-color: #f78888;
+    color: #333;
+    padding: 20px;
+    text-align: center;
+    border-left: 12px solid #bbddff;
+  }
+
   h2,h3 {
     margin-top: 1em;
   }
 
   h2 {
-    background-color: #ddd;
-    padding: 8px;
+    background-color: #f3d250;
+    padding: 20px;
     text-align: center;
-    border: 1px solid #999;
-    border-radius: 8px
+    border-top: 1px solid #999;
+    border-bottom: 1px solid #999;
   }
 
   h3 {
-    background-color: #ddd;
+    background-color: #5da2d5;
     padding: 8px;
     border-left: 12px solid #999;
   }

@@ -540,7 +540,7 @@ class DataFrame {
    * @returns {DataFrame}
    */
   describe() {
-    let first = this._data[0];
+    let first = this[0];
     let props = Object.getOwnPropertyNames(first);
     let results = [];
     props.forEach((p) => {
@@ -561,7 +561,7 @@ class DataFrame {
         std: column.std(),
       });
     });
-    return new DataFrame(...results);
+    return DataFrame.create(results);
   }
 
   /**

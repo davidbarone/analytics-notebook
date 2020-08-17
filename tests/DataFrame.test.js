@@ -256,4 +256,12 @@ test("Ensure the cube() method aggregates selected columns from the model", () =
   expect(Object.getOwnPropertyNames(cube[0]).length).toBe(2);
 });
 
+test("Ensure the describe() method returns correct descriptive statistics", () => {
+  let desc = DataFrame.examples.iris().describe();
+
+  // 5 rows (1 row for each column in the iris dataset)
+  // 13 columns (name + 12 descriptive stats)
+  expect(desc.count()).toBe(5);
+  expect(Object.getOwnPropertyNames(desc[0]).length).toBe(13);
+});
 export default {};
