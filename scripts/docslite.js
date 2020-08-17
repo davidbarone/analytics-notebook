@@ -73,7 +73,11 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
   `;
 
     fs.readFile(readmeFile, "utf8", function (err, contents) {
-      md = contents;
+      md =
+        contents +
+        `
+# API Reference
+`;
       fs.readFile(filename, "utf8", function (err, contents) {
         md = md + contents;
         let converter = new showdown.Converter();
