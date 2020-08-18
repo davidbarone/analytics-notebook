@@ -8,14 +8,28 @@ import VisualLibraryBase from "./VisualLibrary/Visual.library.base.js";
  */
 class Visual {
   /**
-   * Creates a new visual. If the visual is created with a dataFrame object, the visual is 'data-bound'. Otherwise
-   * the visual is 'non-data-bound'. Data-bound visuals automatically update whenver the underlying data changes.
-   * @param {DataFrame} dataFrame - The base DataFrame object that the visual is created from.
+   * Creates a new visual. If the visual is created with a dataFrame object, the visual is 'data-bound'. Otherwise the visual is 'non-data-bound' or static. Data-bound visuals automatically update whenver the underlying data changes.
+   * Visuals are configured using an options object. The data bindings for the visual are set using a 'binding' property. A binding object consist of multiple properties, each containing an array of column names. The table below shows which bindings are required for the visuals included in the base system:
+   * |Type          | Column | Row    | Value  | Color  | Size   | Detail |
+   * |--------------|:------:|:------:|:------:|:------:|:------:|:------:|
+   * | **bar**      | X      | X      | X      |        |        |        |
+   * | **column**   | X      | X      |        |        |        |        |
+   * | **pie**      | X      |        | X      |        |        |        |
+   * | **table**    | X      |        |        |        |        |        |
+   * | **crosstag** | X      | X      | X      |        |        |        |
+   * | **hist**     | X      |        |        |        |        |        |
+   * | **box**      | X      |        |        |        |        |        |
+   * | **scatter**  | X      | X      |        | X      | X      | X      |
+   * | **slicer**   | X      |        |        |        |        |        |
+   * | **pairs**    | ?      |        |        |        |        |        |
+   * | **html**     |        |        |        |        |        |        |
+   *
    * @param {string} type - The type of visual from the visual library.
-   * @param {Object} options - configuration for the rendering. This is visual-type specific.
+   * @param {DataFrame} dataFrame - The DataFrame instance that is bound to the visual.
+   * @param {Visual~OptionsBase} options - Configuration for the visual. This is visual-type specific, but there are standard configuration options that all visuals have.
    * @param {DataFrame~filterFunction} filterFunction - The function to filter the data. The filter will be applied to this visual only.
    */
-  constructor(dataFrame, type, options, filterFunction) {
+  constructor(type, dataFrame, options, filterFunction) {
     this.dataFrame = dataFrame;
     this.type = type;
     this.options = options;
@@ -137,6 +151,10 @@ class Visual {
   static html(html) {
     let visual = new Visual(undefined, "html", { html });
     return visual;
+  }
+
+  static create(type, dataFrame, options, filterFunction) {
+    return new Visual(type, dataFrame, options, filterFunction);
   }
 }
 

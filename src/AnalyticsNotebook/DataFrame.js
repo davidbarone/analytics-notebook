@@ -31,7 +31,7 @@ class DataFrame {
     return new Proxy(this, {
       get(target, prop, receiver) {
         if (Number(prop) == prop && !(prop in target)) {
-          let proxy = target.getRowProxy(target._data[prop], target);
+          let proxy = target.getRowProxy(target._data[prop], prop, target);
           return proxy;
           // Return a proxy of the object which can evaluate calculations too.
         }
@@ -43,10 +43,11 @@ class DataFrame {
   /**
    * Gets a proxy for a single row / object which can evaluate calculations in the model.
    * @param {object} obj - The object to create a proxy for.
+   * @param {Number} i - The index of the row in the DataFrame instance.
    * @param {DataFrame} dataFrame - The DataFrame instance with addional calculations & measures defined.
    * @returns {object} The returned object will be able to evaluate any calculations defined in the model.
    */
-  getRowProxy(obj, dataFrame) {
+  getRowProxy(obj, i, dataFrame) {
     let df = dataFrame;
     let p = new Proxy(obj, {
       get(target, prop, receiver) {
@@ -55,7 +56,7 @@ class DataFrame {
         } else if (
           Object.getOwnPropertyNames(df._calculations).includes(prop)
         ) {
-          return df._calculations[prop](df.getRowProxy(target, df), df);
+          return df._calculations[prop](df.getRowProxy(target, i, df), i, df);
         }
       },
     });
@@ -164,12 +165,12 @@ class DataFrame {
   }
 
   /**
-   * This callback is a required parameter of the DataFrame map method.
+   * Callback function to map or transform an object to another object.
    * @callback DataFrame~mapFunction
-   * @param {object} currentValue - The current row in the DataFrame.
-   * @param {number} [index] - The index of the currentValue in the array.
-   * @param {DataFrame} [dataFrame] - The DataFrame instance that map was called on.
-   * @returns {object} The transformed row.
+   * @param {object} currentValue - The current row in the DataFrame instance.
+   * @param {number} [index] - The index of the current row in the DataFrame instance.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that the function was called on.
+   * @returns {object} The transformed object.
    */
 
   /**
@@ -203,7 +204,9 @@ class DataFrame {
   /**
    * Callback function to filter (include / exclude) an object.
    * @callback DataFrame~filterFunction
-   * @param {object} row - The current object in the DataFrame instance.
+   * @param {object} currentValue - The current row in the DataFrame instance.
+   * @param {number} [index] - The index of the current row in the DataFrame instance.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that the function was called on.
    * @returns {boolean} Returns true to keep the object in the DataFrame instance, and false to remove it.
    */
 
@@ -227,13 +230,22 @@ class DataFrame {
    * console.log(df);
    */
   filter(filterFunction) {
-    return DataFrame.create(this._data.filter(filterFunction));
+    let len = this._data.length;
+    let arr = [];
+    for (let i = 0, len = this._data.length; i < len; i++) {
+      if (filterFunction(this._data[i], i, this)) {
+        arr.push(this._data[i]);
+      }
+    }
+    return DataFrame.create(arr);
   }
 
   /**
    * Callback function which assigns an object to a group.
    * @callback DataFrame~groupingFunction
-   * @param {object} row - The current row in the DataFrame.
+   * @param {object} currentValue - The current row in the DataFrame instance.
+   * @param {number} [index] - The index of the current row in the DataFrame instance.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that the function was called on.
    * @returns {object} The callback should return an object representing the properties of the row that should be considered as the 'group' for the row.
    * All the unique values returned for all rows in the DataFrame objects will form the grouping rows of the resulting DataFrame instance.
    */
@@ -249,16 +261,16 @@ class DataFrame {
   /**
    * Callback function which defines column headings for each object.
    * @callback DataFrame~pivotFunction
-   * @param {DataFrame} group - The current group in the DataFrame.
-   * @param {DataFrame} dataFrame - The original DataFrame object that the grouping was performed on.
+   * @param {object} currentValue - The current row in the DataFrame instance.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that the function was called on.
    * @returns {string} The pivot function should return back a string value. This value will be projected as a column header.
    */
 
   /**
    * Groups a DataFrame object using a grouping function and optional aggregation and pivot functions. The group function is mandatory and specifies the group values. If the aggregation function is ommitted, the result is simply the distinct group values. If an aggregation function is specified, then additional aggregated values for each group can be included.
    * If a pivot function is specified, then the distinct string values returned by the pivot function are projected as column headers.
-   * @param {DataFrame~groupingFunction} groupingFunction
-   * @param {DataFrame~aggregateFunction} aggregateFunction
+   * @param {DataFrame~groupingFunction} groupingFunction - Callback function to group the DataFrame instance.
+   * @param {DataFrame~aggregateFunction} [aggregateFunction] - Optional callback to add aggregate data to the groups.
    * @param {DataFrame~pivotFunction} [pivotFunction] - If specified, then the return value of the function ({string}) is used as a column header. Similar to pivoting in relational databases.
    * @returns {DataFrame} The grouped DataFrame instance.
    * @example <caption>Grouping a DataFrame instance</caption>
@@ -297,21 +309,21 @@ class DataFrame {
   group(groupingFunction, aggregateFunction, pivotFunction) {
     let groups = {};
     let that = this;
-    this.forEach(function (r) {
-      let proxy = that.getRowProxy(r, that);
+    for (let i = 0, len = this.count(); i < len; i++) {
+      let proxy = that.getRowProxy(that[i], i, that);
       var group = JSON.stringify(groupingFunction(proxy));
       groups[group] = groups[group] || [];
       groups[group].push(proxy);
-    });
+    }
 
     // Optional pivot function - Get distinct values for the pivot function
     let pivot = [];
     if (pivotFunction) {
-      this.forEach(function (r) {
-        let proxy = that.getRowProxy(r, that);
-        let value = pivotFunction(proxy);
+      for (let i = 0, len = this.count(); i < len; i++) {
+        let proxy = that[i];
+        let value = pivotFunction(proxy, that);
         if (pivot.indexOf(value) === -1) pivot.push(value);
-      });
+      }
     }
 
     let data = Object.keys(groups).map(function (group) {
@@ -372,8 +384,17 @@ class DataFrame {
   }
 
   /**
+   * Callback function which defines the value to sort on. Note that this callback function differs from JavaScript's sort callback in that it doesn't actually calculate the sort, but instead simply returns the value to be sorted.
+   * @callback DataFrame~sortFunction
+   * @param {object} currentValue - The current row in the DataFrame instance.
+   * @param {number} [index] - The index of the current row in the DataFrame instance.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that the function was called on.
+   * @returns {object} The callback should return an object representing the value to sort on.
+   */
+
+  /**
    * Sorts the rows in a DataFrame object based on a sort function.
-   * @param {*} sortFunction
+   * @param {DataFrame~sortFunction} sortFunction
    * @param {*} descending
    * @returns {DataFrame} The sorted DataFrame object
    * @example <caption>Ranking a dataset using Sort</caption>
@@ -667,7 +688,7 @@ class DataFrame {
    * @returns {Visual}
    */
   visual(type, options, filterFunction) {
-    let visual = new Visual(this, type, options, filterFunction);
+    let visual = new Visual(type, this, options, filterFunction);
     return visual;
   }
 
@@ -731,25 +752,40 @@ class DataFrame {
    */
   forEach(forEachCallback) {
     for (let i = 0, len = this.count(); i < len; i++) {
-      let proxy = this.getRowProxy(this[i], this);
+      let proxy = this.getRowProxy(this[i], i, this);
       forEachCallback(proxy, i, this);
     }
   }
 
   /**
-   * Defines a set of calculations / measures on the DataFrame object.
-   * @param {*} obj
+   * Defines a calculation on the DataFrame object. Unlike the map() function, Calculations are not physically materialised in the DataFrame instance. Instead, they are dynamically evaluated at runtime.
+   * @param {string} name - The name of the calculation.
+   * @param {DataFrame~mapFunction} - The calculation callback function.
+   * @returns {DataFrame}
    */
-  calculate(calculations) {
-    this._calculations = calculations;
+  calculate(name, calculation) {
+    this._calculations[name] = calculation;
     return this;
   }
 
   /**
-   * Defines a set of measures on the DataFrame object
+   * Callback function to calculate a measure based on a group of data.
+   * @callback DataFrame~measureFunction
+   * @param {DataFrame} currentGroup - The current group in the DataFrame instance.
+   * @param {number} [index] - The index of the current group in the DataFrame instance.
+   * @param {DataFrame} [dataFrame] - The DataFrame instance that the function was called on.
+   * @returns {Number | String} The aggregated value.
    */
-  measure(measures) {
-    this._measures = measures;
+
+  /**
+   * Defines a measure on the DataFrame object. Measures aggregate a group of data down to a single value. Measures are normally used to sum, count and otherwise summarise numeric data.
+   * @param {string} name - The name of the measure.
+   * @param {DataFrame~mapFunction} - The measure callback function.
+   * @returns {DataFrame}
+   *
+   */
+  measure(name, measure) {
+    this._measures[name] = measure;
     return this;
   }
 
@@ -784,8 +820,12 @@ class DataFrame {
         data = data.filter(this._slicers[s]);
       });
       let df = DataFrame.create(data);
-      df.calculate(this._calculations);
-      df.measure(this._measures);
+      Object.keys(this._calculations).forEach((k) => {
+        df.calculate(k, this._calculations[k]);
+      });
+      Object.keys(this._measures).forEach((k) => {
+        df.measure(k, this._measures[k]);
+      });
       return df;
     }
   }

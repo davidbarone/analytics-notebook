@@ -142,15 +142,12 @@ test("DataFrame indexing and use of model calculations", () => {
   let df = DataFrame.create(data);
 
   df = df
-    .calculate({
-      sexDesc: (r, df) => (r.sex === "m" ? "male" : "female"),
-      ageBand: (r, df) => Math.floor(r.age / 10) * 10,
-      ABC: (r, df) =>
-        r.ageBand >= 50 ? "A" : r.sexDesc === "female" ? "B" : "C",
-    })
-    .measure({
-      count: (g, df) => g.count(),
-    });
+    .calculate("sexDesc", (r, i, df) => (r.sex === "m" ? "male" : "female"))
+    .calculate("ageBand", (r, i, df) => Math.floor(r.age / 10) * 10)
+    .calculate("ABC", (r, i, df) =>
+      r.ageBand >= 50 ? "A" : r.sexDesc === "female" ? "B" : "C"
+    )
+    .measure("count", (g, i, df) => g.count());
 
   expect(df[3].ABC).toBe("A");
   expect(df[4].ABC).toBe("B");
@@ -216,18 +213,14 @@ test("DataFrame joins", () => {
 
 test("Ensure model() returns all features of the model", () => {
   let mt = DataFrame.examples.mtcars();
-  mt.calculate({
-    brand: (r, df) => {
-      let pos = r.model.indexOf(" ");
-      if (pos !== -1) {
-        return r.model.substring(0, pos);
-      } else {
-        return r.model;
-      }
-    },
-  }).measure({
-    count: (g, df) => g.count(),
-  });
+  mt.calculate("brand", (r, i, df) => {
+    let pos = r.model.indexOf(" ");
+    if (pos !== -1) {
+      return r.model.substring(0, pos);
+    } else {
+      return r.model;
+    }
+  }).measure("count", (g, i, df) => g.count());
 
   expect(mt.model().length).toEqual(14); // 14 variables in model, including 'brand' and 'count'
   //["model","mpg","cyl","disp","hp","drat","wt","qsec","vs","am","gear","carb","brand","count"]
@@ -236,18 +229,14 @@ test("Ensure model() returns all features of the model", () => {
 test("Ensure the cube() method aggregates selected columns from the model", () => {
   let mt = DataFrame.examples.mtcars();
 
-  mt.calculate({
-    brand: (r, df) => {
-      let pos = r.model.indexOf(" ");
-      if (pos !== -1) {
-        return r.model.substring(0, pos);
-      } else {
-        return r.model;
-      }
-    },
-  }).measure({
-    count: (g, df) => g.count(),
-  });
+  mt.calculate("brand", (r, i, df) => {
+    let pos = r.model.indexOf(" ");
+    if (pos !== -1) {
+      return r.model.substring(0, pos);
+    } else {
+      return r.model;
+    }
+  }).measure("count", (g, i, df) => g.count());
 
   // Create a cube from the raw data with just 2 attributes: brand + count.
   // There are 22 different brands, so should create a 22*2 DataFrame instance
@@ -263,5 +252,21 @@ test("Ensure the describe() method returns correct descriptive statistics", () =
   // 13 columns (name + 12 descriptive stats)
   expect(desc.count()).toBe(5);
   expect(Object.getOwnPropertyNames(desc[0]).length).toBe(13);
+});
+
+test("Ensure that sorting sorts correctly", () => {
+  let sortOldestFirst = DataFrame.examples
+    .titanic()
+    .map((t) => {
+      return { name: t.name, age: parseFloat(t.age) };
+    })
+    .filter((t) => {
+      return !Number.isNaN(t.age);
+    })
+    .sort((t) => {
+      return t["age"];
+    }, true);
+
+  expect(sortOldestFirst[0].age).toBe(80);
 });
 export default {};

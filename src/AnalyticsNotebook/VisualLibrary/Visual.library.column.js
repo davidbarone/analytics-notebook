@@ -6,14 +6,10 @@ import VisualLibraryBase from "./Visual.library.base.js";
  * @typedef {Visual~OptionsBase} Visual~ColumnOptions
  * @property {string} binding.column - The DataFrame field name to project onto the main categories axis of the column chart.
  * @property {string} binding.row - The DataFrame field name to project onto the groupings of the column chart.
- * @property {Array} binding.values - The DataFrame field name(s) to projects onto the values / cells of the crosstab. If the binding.row value is specified, only 1 value field can be entered here.
+ * @property {Array} binding.value - The DataFrame field name(s) to projects onto the values / cells of the crosstab. If the binding.row value is specified, only 1 value field can be entered here.
  * @property {object} axes - The axes configuration.
- * @property {object} axes.column - The x-axis configuration.
- * @property {boolean} axes.column.display - Toggles the display of the column (x) axis.
- * @property {string} axes.column.title - The column (x) axis title.
- * @property {object} axes.row - The y-axis configuration.
- * @property {boolean} axes.row.display - Toggles the display of the row (y) axis.
- * @property {string} axes.row.title - The row (y) axis title.
+ * @property {Visual~OptionsAxis} axes.column - The x-axis configuration.
+ * @property {Visual~OptionsAxis} axes.row - The y-axis configuration.
  */
 
 /**
