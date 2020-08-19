@@ -17,6 +17,7 @@ import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.crosstab.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.slicer.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.column.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.scatter.js";
+import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.pie.js";
 import "./src/AnalyticsNotebook/Extensions.js";
 import "./css/AnalyticsNotebook.css";
 export { AnalyticsNotebook, UI, DataFrame, List, Visual };

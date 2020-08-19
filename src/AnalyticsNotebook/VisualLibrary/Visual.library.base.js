@@ -1,3 +1,5 @@
+import ColumnCategory from "../ColumnCategory.js";
+
 /**
  * Configuration for the margins of a visual. Typically used for visuals with x and y axes. The margins refer to the space where the axes labels and title go.
  * @typedef {object} Visual~OptionsMargin
@@ -61,9 +63,81 @@ let VisualOptionsBaseDefault = {
     color: "#999",
     radius: 0,
   },
-  binding: {},
+  binding: {
+    column: "",
+    row: "",
+    value: "",
+    color: "",
+    size: "",
+    detail: "",
+  },
+  axes: {
+    column: {
+      display: true,
+      title: "",
+    },
+    row: {
+      display: true,
+      title: "",
+    },
+  },
+};
+
+/**
+ * Validates the options.binding configuration. This is done via a validation object.
+ * @param {DataFrame} dataFrame - The DataFrame instance containing the model.
+ * @param {object} binding - The binding object to validate.
+ * @param {Array.object} rules - The rules for validation. The rules object must contain a property for each binding you're validating for. The value of the property is a string containing 2 characters. The first character denotes the type of field permitted. Possible values are 'C' for columns and calculations, and 'N' for measures. The second character denote how many values can be provided. Valid values are '1' for only 1 field permitted, and '+' for 1 or more values permitted.
+ */
+let validateBinding = function (dataFrame, binding, rules) {
+  let ok = false;
+  for (let r of rules) {
+    console.log(r);
+    for (let prop of Object.getOwnPropertyNames(r)) {
+      let configuration = r[prop];
+      let category = configuration[0];
+      let size = configuration[1];
+      if (!binding[prop]) {
+        // no binding set - error
+        break;
+      }
+      if (size == "1" && binding[prop].length > 1) {
+        // should be 1 element. More than 1 supplied.
+        break;
+      }
+
+      // Check the correct type of field.
+      if (
+        binding[prop].some((c) => {
+          let columnCategory = dataFrame.columnCategory(c);
+          if (
+            (category.toLowerCase() === "m" &&
+              columnCategory === ColumnCategory.MEASURE) ||
+            (category.toLowerCase() === "c" &&
+              columnCategory === ColumnCategory.COLUMN) ||
+            (category.toLowerCase() === "c" &&
+              columnCategory === ColumnCategory.CALCULATION)
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        })
+      ) {
+        break;
+      }
+    }
+
+    // if got here, then rule OK.
+    ok = true;
+    break;
+  }
+  if (!ok) {
+    throw "Invalid binding specified.";
+  }
 };
 
 export default {
   defaultOptions: VisualOptionsBaseDefault,
+  validateBinding: validateBinding,
 };

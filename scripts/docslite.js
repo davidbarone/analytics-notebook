@@ -44,7 +44,7 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
   }
 
   h1 {
-    background-color: #f78888;
+    background-color: #437FC7;
     color: #333;
     padding: 20px;
     text-align: center;
@@ -56,7 +56,7 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
   }
 
   h2 {
-    background-color: #f3d250;
+    background-color: #6DAFFE;
     padding: 20px;
     text-align: center;
     border-top: 1px solid #999;
@@ -64,7 +64,7 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
   }
 
   h3 {
-    background-color: #5da2d5;
+    background-color: #EDF6FF;
     padding: 8px;
     border-left: 12px solid #999;
   }

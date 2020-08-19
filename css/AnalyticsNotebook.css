@@ -46,11 +46,13 @@ div#waiting.show {
 
 header {
   margin: 0;
-  background-color: #234567;
+  background-color: #b9732f;
   min-height: 40px;
   line-height: 40px;
   text-align: center;
-  color: #eee;
+  color: #222;
+  font-weight: 600;
+  box-sizing: border-box;
 }
 
 main {
@@ -142,6 +144,9 @@ button.slider {
   left: 0;
   height: 40px;
   padding: 0px 2px;
+  border-radius: 0;
+  box-sizing: border-box;
+  border: 1px solid #999;
 }
 
 h1,
@@ -177,67 +182,13 @@ table {
 }
 
 tr:nth-child(odd) {
-  background: #efefef;
+  background: #edf6ff;
 }
 
 th {
-  background-color: rgb(153, 204, 255);
+  background-color: #b9732f;
   text-align: center;
   font-weight: 600;
-}
-
-.helpOperation {
-  padding: 0px;
-  border: 2px solid black;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-
-.helpOperationHeader {
-  line-height: 40px;
-  margin: 0px;
-  background-color: grey;
-  color: white;
-  font-size: 1em;
-  font-weight: 600;
-  border-bottom: 2px solid black;
-  padding: 0;
-  margin: 0;
-}
-
-.helpOperationHeader > span {
-  line-height: 40px;
-  padding: 12px;
-  border-right: 2px solid black;
-}
-
-.helpOperationHeader > span:first-child {
-  color: #fff;
-  background-color: black;
-}
-
-.helpOperationBody {
-  padding: 8px;
-}
-
-.helpOperationSignature {
-  margin-top: 12px;
-  border: 2px solid grey;
-  background: #eee;
-  color: black;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.helpOperationSignature > div:first-child {
-  background-color: #25649f;
-  color: white;
-  font-weight: 600;
-}
-
-.helpOperationSignature > div {
-  padding: 4px;
 }
 
 pre.code {

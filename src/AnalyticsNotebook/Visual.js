@@ -110,6 +110,17 @@ class Visual {
           c.options
         );
 
+        // for binding option, we ensure all properties are arrays.
+        for (let key in c.options.binding) {
+          if (typeof c.options.binding[key] === "string") {
+            c.options.binding[key] = [c.options.binding[key]];
+          } else if (Array.isArray(c.options.binding[key])) {
+            // good to go.
+          } else {
+            throw `Binding for ${key} must be an Array of columns.`;
+          }
+        }
+
         // Call render function, passing the current visual.
         let content = renderFunction(c);
         let panelId = c.panelId;
@@ -121,10 +132,21 @@ class Visual {
         let elInner = document.createElement("div");
         elInner.classList.add("visual", "inner");
         elVisual.appendChild(elInner);
+
+        let options = c.options;
+
+        // Add title?
+        if (options.title) {
+          let elTitle = document.createElement("div");
+          elTitle.innerText = options.title;
+          elTitle.style.textAlign = "center";
+          elTitle.style.fontWeight = 600;
+          elInner.appendChild(elTitle);
+        }
+
         elInner.appendChild(content);
 
         // Apply Visual styles
-        let options = c.options;
         if (options) {
           if (options.background) {
             elInner.style.backgroundColor = options.background;

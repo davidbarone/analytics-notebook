@@ -69,27 +69,12 @@ Visual.library.column = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
 
-  options = Object.mergeDeep(
-    {},
-    {
-      binding: {
-        column: "",
-        row: "",
-        value: "",
-      },
-      axes: {
-        column: {
-          display: true,
-          title: "",
-        },
-        row: {
-          display: true,
-          title: "",
-        },
-      },
-    },
-    options
-  );
+  options = Object.mergeDeep({}, options);
+
+  VisualLibraryBase.validateBinding(dataFrame, options.binding, [
+    { column: "1c", value: "+m" },
+    { column: "1c", row: "1c", value: "1m" },
+  ]);
 
   let columns = [
     options.binding.column,
