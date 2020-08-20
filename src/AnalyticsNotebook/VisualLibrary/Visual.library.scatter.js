@@ -1,4 +1,5 @@
 import Visual from "../Visual.js";
+import VisualLibraryBase from "./Visual.library.base.js";
 
 /**
  * Additional options for configuring a scatterplot visual.
@@ -58,51 +59,21 @@ import Visual from "../Visual.js";
 Visual.library.scatter = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
+  options = Object.mergeDeep({}, options);
 
-  options = Object.mergeDeep(
-    {},
-    {
-      binding: {
-        detail: "",
-        column: "",
-        row: "",
-        size: "",
-        color: "",
-      },
-      axes: {
-        column: {
-          display: true,
-          title: "",
-        },
-        row: {
-          display: true,
-          title: "",
-        },
-      },
-    },
-    options
-  );
+  VisualLibraryBase.validateBinding(dataFrame, options.binding, [
+    { column: "1m", row: "1m", detail: '?c', size: '?m', color: '?m' }
+  ]);
 
   // Get column names
-  let xColumnName = options.binding.column;
-  let yColumnName = options.binding.row;
-
+  let xColumnName = options.binding.column[0];
+  let yColumnName = options.binding.row[0];
+  let detailBinding = options.binding.detail[0];
+  let colorBinding = options.binding.color[0];
+  let sizeBinding = options.binding.size[0];
+  let columns = [xColumnName, yColumnName, detailBinding, colorBinding, sizeBinding].filter(c => c);
+  let data = dataFrame.cube(...columns)._data;
   const colorScale = d3.scaleOrdinal().range(d3.schemeCategory10);
-
-  // get data
-  let data = dataFrame.boundData();
-  if (options.binding.detail) {
-    // if detail specified, this is the 'grouping' field. Otherwise, get all raw data
-    let allColumns = [
-      options.binding.detail,
-      options.binding.column,
-      options.binding.row,
-      options.binding.color,
-      options.binding.size,
-    ].filter((c) => c);
-
-    data = data.cube(allColumns);
-  }
 
   // set the dimensions and margins of the graph
   var margin = options.margin,
@@ -171,11 +142,11 @@ Visual.library.scatter = function (visual) {
       return y(d[yColumnName]);
     })
     .attr("r", function (d) {
-      return options.binding.size ? d[options.binding.size] : 5;
+      return sizeBinding ? d[sizebinding] : 5;
     })
     .style("fill", function (d) {
-      return options.binding.color
-        ? colorScale(d[options.binding.color])
+      return colorBinding
+        ? colorScale(d[colorBinding])
         : "#69b3a2";
     });
 

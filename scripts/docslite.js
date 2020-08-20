@@ -44,7 +44,7 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
   }
 
   h1 {
-    background-color: #437FC7;
+    background-color: steelBlue;
     color: #333;
     padding: 20px;
     text-align: center;
@@ -73,21 +73,19 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
   `;
 
     fs.readFile(readmeFile, "utf8", function (err, contents) {
-      md =
-        contents +
-        `
-# API Reference
-`;
+      md = contents;
       fs.readFile(filename, "utf8", function (err, contents) {
         md = md + contents;
         let converter = new showdown.Converter();
-        converter.setFlavor("github");
+        converter.setFlavor("vanilla");
+        converter.setOption("tables", true);  // format tables
+        converter.setOption("ghCompatibleHeaderId", true);  // header links
         let html = `<html><head>${style}</head><body>${converter.makeHtml(
           md
         )}</body></html>`;
         // write output as html
         html = html.replace(/(&amp;nbsp;)/g, " "); // Showdown bug: https://github.com/showdownjs/showdown/issues/669
-        fs.writeFile(outFile, html, "utf8", function (err) {});
+        fs.writeFile(outFile, html, "utf8", function (err) { });
       });
     });
   })

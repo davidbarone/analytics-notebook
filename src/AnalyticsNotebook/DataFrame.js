@@ -52,10 +52,12 @@ class DataFrame {
     let p = new Proxy(obj, {
       get(target, prop, receiver) {
         if (Object.getOwnPropertyNames(target).includes(prop)) {
+          // physical column
           return target[prop];
         } else if (
           Object.getOwnPropertyNames(df._calculations).includes(prop)
         ) {
+          // calculation - behaves like physical column
           return df._calculations[prop](df.getRowProxy(target, i, df), i, df);
         }
       },
@@ -549,11 +551,15 @@ class DataFrame {
 
   /**
    * Returns a single column from a DataFrame object.
-   * @param {string} columnName
+   * @param {string} column - The column can be a physical column or a calculation.
    * @returns {List}
    */
-  list(columnName) {
-    return new List([...this._data.map((r) => r[columnName])]);
+  list(column) {
+    let arr = []
+    for (let i = 0, len = this.count(); i < len; i++) {
+      arr.push(this[i][column]);
+    }
+    return new List(arr);
   }
 
   /**
@@ -599,7 +605,7 @@ class DataFrame {
       float: parseFloat,
     };
 
-    let data = this.data.map((row) => {
+    let data = this._data.map((row) => {
       let convertedValues = columnsToCast.reduce((acc, cur) => {
         return {
           ...acc,
@@ -623,7 +629,7 @@ class DataFrame {
    */
   remove(...columnNames) {
     let data = [];
-    this.data.forEach((row) => {
+    this._data.forEach((row) => {
       columnNames.forEach((c) => {
         delete row[c];
       });
@@ -640,7 +646,7 @@ class DataFrame {
    */
   select(...columnNames) {
     let data = [];
-    this.data.forEach((row) => {
+    this._data.forEach((row) => {
       let obj = {};
       columnNames.forEach((c) => {
         obj[c] = row[c];
@@ -661,7 +667,7 @@ class DataFrame {
   setSlicer(visual, filterFunction) {
     if (typeof filterFunction === "function") {
       let id = visual.id;
-      this.slicers = { ...this.slicers, [id]: filterFunction };
+      this._slicers = { ...this._slicers, [id]: filterFunction };
     }
   }
 
@@ -670,14 +676,14 @@ class DataFrame {
    * @param {Visual} visual - The visual providing the slicer context.
    */
   unsetSlicer(visual) {
-    this.slicers = { ...delete this.slicers[visual.id] };
+    this._slicers = { ...delete this._slicers[visual.id] };
   }
 
   /**
    * Removes all slicer filter functions
    */
   resetSlicers() {
-    this.slicers = {};
+    this._slicers = {};
   }
 
   /**

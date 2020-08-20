@@ -9,21 +9,7 @@ import VisualLibraryBase from "./VisualLibrary/Visual.library.base.js";
 class Visual {
   /**
    * Creates a new visual. If the visual is created with a dataFrame object, the visual is 'data-bound'. Otherwise the visual is 'non-data-bound' or static. Data-bound visuals automatically update whenver the underlying data changes.
-   * Visuals are configured using an options object. The data bindings for the visual are set using a 'binding' property. A binding object consist of multiple properties, each containing an array of column names. The table below shows which bindings are required for the visuals included in the base system:
-   * |Type          | Column | Row    | Value  | Color  | Size   | Detail |
-   * |--------------|:------:|:------:|:------:|:------:|:------:|:------:|
-   * | **bar**      | X      | X      | X      |        |        |        |
-   * | **column**   | X      | X      |        |        |        |        |
-   * | **pie**      | X      |        | X      |        |        |        |
-   * | **table**    | X      |        |        |        |        |        |
-   * | **crosstag** | X      | X      | X      |        |        |        |
-   * | **hist**     | X      |        |        |        |        |        |
-   * | **box**      | X      |        |        |        |        |        |
-   * | **scatter**  | X      | X      |        | X      | X      | X      |
-   * | **slicer**   | X      |        |        |        |        |        |
-   * | **pairs**    | ?      |        |        |        |        |        |
-   * | **html**     |        |        |        |        |        |        |
-   *
+   * Visuals are configured using an options object.
    * @param {string} type - The type of visual from the visual library.
    * @param {DataFrame} dataFrame - The DataFrame instance that is bound to the visual.
    * @param {Visual~OptionsBase} options - Configuration for the visual. This is visual-type specific, but there are standard configuration options that all visuals have.
@@ -51,11 +37,11 @@ class Visual {
     // Set data binding if data bound viz
     if (this.dataFrame) {
       const watcher1 = new Watcher(
-        () => this.dataFrame.data,
+        () => this.dataFrame._data,
         (val) => this.render()
       );
       const watcher2 = new Watcher(
-        () => this.dataFrame.slicers,
+        () => this.dataFrame._slicers,
         (val) => this.render()
       );
     } else {
@@ -111,6 +97,7 @@ class Visual {
         );
 
         // for binding option, we ensure all properties are arrays.
+
         for (let key in c.options.binding) {
           if (typeof c.options.binding[key] === "string") {
             c.options.binding[key] = [c.options.binding[key]];
@@ -122,45 +109,16 @@ class Visual {
         }
 
         // Call render function, passing the current visual.
-        let content = renderFunction(c);
+        let content;
+        let elVisual;
+        try {
+          content = renderFunction(c);
+          elVisual = VisualLibraryBase.doBaseStyles(content, c.options, c.id);
+        } catch (error) {
+          elVisual = VisualLibraryBase.doErrorVisual(error, c.options, c.id);
+        }
         let panelId = c.panelId;
 
-        // Add core styles
-        let elVisual = document.createElement("div");
-        elVisual.id = c.id; // Assign the id to the visual node.
-        elVisual.classList.add("visual");
-        let elInner = document.createElement("div");
-        elInner.classList.add("visual", "inner");
-        elVisual.appendChild(elInner);
-
-        let options = c.options;
-
-        // Add title?
-        if (options.title) {
-          let elTitle = document.createElement("div");
-          elTitle.innerText = options.title;
-          elTitle.style.textAlign = "center";
-          elTitle.style.fontWeight = 600;
-          elInner.appendChild(elTitle);
-        }
-
-        elInner.appendChild(content);
-
-        // Apply Visual styles
-        if (options) {
-          if (options.background) {
-            elInner.style.backgroundColor = options.background;
-          }
-          if (options.border) {
-            elInner.style.border = `${options.border.width}px solid ${options.border.color}`;
-          }
-          if (options.border && options.border.radius) {
-            elInner.style.borderRadius = `${options.border.radius}px`;
-          }
-          if (options.inline) {
-            elVisual.style.display = "inline-block";
-          }
-        }
         UI.content(elVisual, panelId);
       }
     });
@@ -171,7 +129,7 @@ class Visual {
    * visuals for static content like text and abstract shapes which does not change
    */
   static html(html) {
-    let visual = new Visual(undefined, "html", { html });
+    let visual = new Visual("html", null, { html });
     return visual;
   }
 

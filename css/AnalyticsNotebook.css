@@ -13,6 +13,19 @@ div.visual.inner {
   margin: 0;
 }
 
+div.visual.error {
+ background: #faceca;
+ border: 1px solid #700d04;
+ color: #111;
+ vertical-align: top;
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ margin-bottom: 4px;
+ margin-right: 4px;
+ padding: 4px;
+}
+
 html,
 body {
   padding: 0;
@@ -46,7 +59,7 @@ div#waiting.show {
 
 header {
   margin: 0;
-  background-color: #b9732f;
+  background-color: wheat;
   min-height: 40px;
   line-height: 40px;
   text-align: center;
@@ -186,7 +199,7 @@ tr:nth-child(odd) {
 }
 
 th {
-  background-color: #b9732f;
+  background-color: wheat;
   text-align: center;
   font-weight: 600;
 }

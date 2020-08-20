@@ -16,6 +16,7 @@
     - [Anscombe's Quartet](#anscombes-quartet)
   - [Development / Source Code](#development--source-code)
     - [Scripts](#scripts)
+- [API Reference](#api-reference)
 
 The analytics-notebook is an analytical and statistical notebook application written in JavaScript, and is inspired by similar notebooks such as Jupyter notebooks, and https://observablehq.com/. Like the aforementioned applications, the intention for this application is to allow developers, analysts, researchers and statisticians to make sense out of data.
 
@@ -206,118 +207,69 @@ This documentation you're reading has been compiled using jsDoc. More informatio
 The following script performs some simple exploratory analysis on the 'Titanic' dataset:
 
 ```javascript
-// Create single 'root' panel and allow vertical scrollbar.
+// Create single 'root' panel and allow vertical scrollbar.
 UI.layout({
   id: "root",
   fit: "width",
 });
 
-// Add custom 'caption' type to visuals library:
-Visual.library.caption = function(visual) {
-  let options = visual.options;
-  elDiv = document.createElement("div");
-  elDiv.style.marginTop = "20px";
-  elDiv.style.marginBottom = "20px";
-  elDiv.style.backgroundColor = "#ddeeff";
-  elDiv.style.border = "1px solid #aabbcc";
-  elDiv.style.fontWeight = 700;
-  elDiv.style.padding = "10px";
-  elDiv.innerHTML = options.html || "";
-  return elDiv;
-};
+// Get the titanic dataset and do modelling:
+let data = DataFrame
+  .examples
+  .titanic()
+  .select("sex", "pclass", "age", "fare", "sibsp", "parch", "survived", "embarked")
+  .cast({age: "float", fare: "float"})
+  .calculate('rownum', (r,i,df) => i)
+  .calculate('embarkedDesc', (r,i,df) => r.embarked === "C" ? "Cherbourg" : r.embarked === "S" ? "Southampton" : r.embarked === "Q" ? "Queenstown" : "Unknown")
+  .measure('passengers', (g,i,df) => g.count())
+  .measure('average age', (g,i,df) => g.list('age').mean())
+  .measure('average fare', (g,i,df) => g.list('fare').mean());
 
-Visual.caption = (html) => {
-  let viz = new Visual(null, "caption", { html }, null);
-  return viz;
-};
+data.visual('slicer', {inline: true, title: 'Embarked:', background: '#ccc', binding: {column: 'embarked'}}).attach('root');
+data.visual('slicer', {inline: true, title: 'Class:', background: '#ccc', binding: {column: 'pclass'}}).attach('root');
+data.head(5).visual("table", {title: 'First 5 Rows'}).attach("root");
+data.describe().visual("table", {title: 'Descriptive Statistics'}).attach("root");
 
-// Get the titanic dataset:
-let data = DataFrame.examples.titanic();
-
-// Get first 5 rows:
-Visual.html("<header>Titanic Analysis</header>").attach("root");
-Visual.caption(`Number of rows: ${data.count()}`).attach("root");
-Visual.caption("Top 5 rows:").attach("root");
-data.head(5).visual("table").attach("root");
-
-// Get descriptive statistics:
-Visual.caption("Let's get the data descriptive statistics:").attach("root");
-data.describe().visual("table").attach("root");
-
-// Some simple transformations and cleansing:
-Visual.caption("Let's remove unwanted columns:").attach("root");
-data = data.select(
-  "sex",
-  "pclass",
-  "age",
-  "fare",
-  "sibsp",
-  "parch",
-  "survived"
-);
-data.head(5).visual("table").attach("root");
-
-Visual.caption(
-  "Age appears to be a string value - lets convert to a float:"
-).attach("root");
-data = data.cast({
-  age: "float",
-  fare: "float",
-});
-
-data.describe().visual("table").attach("root");
-
-Visual.caption(
-  "Lets convert the sex field to a numeric variable and also rename and tidy up some of the other columns."
-).attach("root");
-data = data.map((r) => {
-  return {
-    is_male: r.sex.toLowerCase() === "male" ? 1 : 0,
-    class: r.pclass,
-    fare: r.fare,
-    age: r.age,
-    relatives: r.sibsp + r.parch,
-    survived: r.survived,
-  };
-});
-
-data.head(5).visual("table").attach("root");
-data.describe().visual("table").attach("root");
-
-// Simple visualisations:
-Visual.caption(
-  "Pie chart showing passengers by sex (male=1, female=0):"
-).attach("root");
 data
-  .visual("pie", {
-    fnCategories: (r) => {
-      return { is_male: r.is_male };
-    },
-    fnValues: (g) => {
-      return { passengers: g.count() };
-    },
-  })
+  .visual(
+    "pie",
+    {
+      title: "Passengers by Sex",
+      inline: true,
+      binding: {
+        column: 'sex',
+        value: 'passengers'
+      }
+    }
+  )
   .attach("root");
 
-Visual.caption("Histogram of passenger ages:").attach("root");
 data
-  .visual("hist", {
-    fnValues: (r) => {
-      return { age: r.age };
-    },
-  })
+  .visual(
+    "hist",
+    {
+      title: 'Passenger Ages',
+      inline: true,
+      binding: {
+        column: 'age'
+      }
+    }
+  )
   .attach("root");
 
-Visual.caption("Scatterplot showing fare vs age variables:").attach("root");
 data
-  .visual("scatter", {
-    fnXValues: (row) => {
-      return { age: row.age };
-    },
-    fnYValues: (row) => {
-      return { fare: row.fare };
-    },
-  })
+  .visual(
+    "scatter",
+    {
+      title: 'Fare vs Age',
+      inline: true,
+      binding: {
+        column: 'average age',
+        row: 'average fare',
+        detail: 'rownum'
+      }
+    }
+  )
   .attach("root");
 ```
 
@@ -421,3 +373,5 @@ A number of scripts have been created for basic tasks:
 David Barone 04-Aug-2020
 
 ---
+
+# API Reference

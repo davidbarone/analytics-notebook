@@ -1,4 +1,5 @@
 import Visual from "../Visual.js";
+import VisualLibraryBase from "./Visual.library.base.js";
 
 /**
  * Options object for configuring a slicer visual
@@ -27,24 +28,19 @@ Visual.library.slicer = function (visual) {
 
   options = Object.mergeDeep(
     {},
-    {
-      title: options.column || "",
-      column: null,
-    },
     options
   );
 
-  let column = options.column;
+  VisualLibraryBase.validateBinding(dataFrame, options.binding, [
+    { column: "1c" },
+  ]);
 
+  let column = options.binding.column;
   let elDiv = document.createElement("div");
-  if (options.title) {
-    let elTitle = document.createElement("h5");
-    elTitle.innerText = options.title;
-    elDiv.appendChild(elTitle);
-  }
 
   let elSelect = document.createElement("select");
   let values = dataFrame.list(column).unique().arr;
+
   elSelect.addEventListener("change", function (evt) {
     // Slice the dataFrame
     let value = evt.target.value;
