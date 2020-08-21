@@ -4,16 +4,16 @@ import JoinType from "./JoinType.js";
 import "./Extensions.js";
 
 /**
- * DataFrame - Manages all manipulation of data.
+ * Provides data extraction and manipulation services.
  *
- * A DataFrame is similar to an Array object. It should be thought of as an array of objects, or a two dimensional array, similar to a table. The DataFrame class is the data manipulation.
- * A DataFrame instance is used for the following:
+ * A DataFrame is similar to an Array object. It should be thought of as an array of objects, or a two dimensional array, similar to a table. Methods on the DataFrame class and DataFrame instances can be used for:
  * - Retrieving data
- * - Creating data
+ * - Creating new data
  * - Cleansing & transforming data
- * - Analysing data.
- * Many methods in the DataFrame class return new DataFrame instances. These can be 'chained' together to form a data processing pipeline.
- * Additionally, a DataFrame instance can have calculations and measures defined on it. These are formulae which are evaluated at runtime. Collectively, a DataFrame instance with the calculations and measures is known as a 'model'.
+ * - Summarising data
+ * - Analysing data
+ * Many methods in a DataFrame instance return a new DataFrame instance. Therefore calls can be 'chained' together to form a data processing pipeline.
+ * Additionally, a DataFrame instance can have calculations and measures defined on it. These are formulae which are evaluated at runtime. Collectively, a DataFrame instance with its physical columns, calculations and measures is known as a 'model'. Each individual column, calculation or measure is know as a 'field'.
  */
 class DataFrame {
   constructor(arr) {
@@ -291,7 +291,7 @@ class DataFrame {
    *   .create(people)
    *   .group(
    *       (g)=> { return { sex: g.sex }},
-   *       (a)=> { return { count: a.length }}
+   *       (a)=> { return { count: a.count() }}
    *     );
    *
    * console.log(df);
@@ -366,7 +366,7 @@ class DataFrame {
    * @param {Number} top - Top 'n' rows to select.
    * @returns {DataFrame} A DataFrame instance with top 'n' rows only.
    * @example <caption>Getting the top 'n' rows from a DataFrame Instance</caption>
-   * let titanic = DataFrame.examples.titanic.head(5);
+   * let titanic = DataFrame.examples.titanic().head(5);
    * console.log(titanic);
    */
   head(top) {
@@ -402,7 +402,7 @@ class DataFrame {
    * @example <caption>Ranking a dataset using Sort</caption>
    * let oldest5 = DataFrame
    *   .examples
-   *   .titanic
+   *   .titanic()
    *   .map((t) => { return { name: t.name, age: parseFloat(t.age) }})
    *   .filter((t) => { return !Number.isNaN(t.age) })
    *   .sort((t) => { return t["age"] }, true)
@@ -553,6 +553,9 @@ class DataFrame {
    * Returns a single column from a DataFrame object.
    * @param {string} column - The column can be a physical column or a calculation.
    * @returns {List}
+   * @example <caption>Getting a list of unique values in a column</caption>
+   * let list = DataFrame.examples.titanic().list('pclass');
+   * console.log(list.unique());
    */
   list(column) {
     let arr = []
@@ -713,17 +716,17 @@ class DataFrame {
    * let iris = DataFrame.examples.iris();
    * let corr = iris.corr();
    * console.log(corr);
-   *
+   * 
    * // Visualise
-   * corr.pivot(
+   * corr.group(
    *   g => { return { x: g.x }},
-   *   p => p.y,
-   *   a => a.list('corr').mean()
+   *   a => a.list('corr').mean(),
+   *   p => p.y
    * ).visual('table').attach('root');
    */
   corr() {
     let columns = [];
-    let properties = Object.getOwnPropertyNames(this.data[0]);
+    let properties = Object.getOwnPropertyNames(this._data[0]);
     properties.forEach((p) => {
       if (this.list(p).type() === "number") {
         columns.push(p);

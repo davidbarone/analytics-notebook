@@ -52,7 +52,7 @@ Each distinct component displayed rendered to the output section is called a 'Vi
 - Data bound visuals
 - Static visuals
 
-Data bound visuals are the most commonly used visual. These have a dataset (known as a DataFrame) attached to them. Furthermore, if the data changes (for example through some interactive visuals that can modify data - like the 'slicer' visual), then these visuals will automatically redraw. Static visuals are for things like headings, and free text. This information is normally static and does not have any data bound to it.
+Data bound visuals are the most commonly used visual. These have a dataset (known as a DataFrame) attached to them. Furthermore, if the data changes (for example through some interactive visuals that can modify data - like the 'slicer' visual), then these visuals will automatically update. Static visuals are for things like headings, and free text. This information is normally static and does not have any data bound to it.
 
 ## Tutorial
 
@@ -122,7 +122,7 @@ Each panel can contain multiple visuals, and you can make the layout grid as com
 
 Static visuals are not going to take you very far though. The whole purpose of the analytics notebook is to enable analysts to obtain insights from data. For this, we need to use 'data bound' visuals.
 
-To create data, the DataFrame class is generally used. External data can be obtained from the web using DataFrame.fetch. However, for this tutorial, we're going to use a built-in dataset called 'iris'. Paste the following into the script section:
+To create data, the DataFrame class is generally used. External data can be obtained from the web using DataFrame.fetch(). However, for this tutorial, we're going to use a built-in dataset called 'iris'. Paste the following into the script section:
 
 ```javascript
 let data = DataFrame.examples.iris();
@@ -157,11 +157,11 @@ UI.layout({
   fit: "width",
 });
 let data = DataFrame.examples.iris();
-data.visual("slicer", { column: "class" }).attach("root");
+data.visual("slicer", { binding: {column: "class" }}).attach("root");
 data.visual("table").attach("root");
 ```
 
-Here, you will be able to slice the table according to the 'class' field.
+Here, you will be able to slice the table according to the 'class' field, and see the values changing. Note that for the slicer, we introduce a 'binding' option. The data connections to the visuals are defined through a bindings object. The bindings tells the visual which field(s) to add (and onto which axes for charts). The bindings will be feel similar to anyone who has used a business intelligence tool, and has dragged fields into a row / columns / details configuration area. In fact, the bindings names used in this tool are very similar: 'column','row','value','detail','color', and 'size'. 
 
 Hopefully, this tutorial has given you a basic grasp of how to run scripts. We recommend you now read the API documentation to get a deeper understanding of how to write more complex notebooks.
 
@@ -176,29 +176,37 @@ In order to work efficiently with the code and output sections, there is an API 
 
 ### DataFrame
 
-The DataFrame class can be thought of as a 2-dimensional table. DataFrames are the work-horse of the analytical-notebook application. Json data can be read from a url and is automatically returned as a DataFrame. Any transformation or filtering operations on a DataFrame generally return another DataFrame. In this way, the script can chain calls together to create a more natural-language syntax.
+The DataFrame class can be thought of as a 2-dimensional table. DataFrames are the work-horse of the analytics-notebook application. Json data can be read from a URL and is automatically returned as a DataFrame instance. Any transformation or filtering operations on a DataFrame instance generally return another DataFrame instance. In this way, the script can manipulate data by chaining calls together, to create a more natural-looking script. A DataFrame instance also supports cube-like features. Variables can be defined in the DataFrame instance, and these can are evaluated dynamically by any visuals bound to it. There are 2 types of variable:
+
+- calculation: Calculations are evaluated row-by-row, A calculation behaves like a physical column, and can be used for slicing and dicing the data.
+- measure: A measure is used for summarising data. Typically measures are used to calculate numeric aggregations (like 'total sales', or 'average performance').
+
+The physical columns in the DataFrame instance, together with the calculations and measures, as known as a 'model' and an individual column, calculation or measure is known as a 'field'.
 
 ### List
 
-A List object can be considered as a 1 dimensional list of values or a single column from a DataFrame. Lists objects are typically used to process a column, often to aggregate the values in some way or to perform univariate analysis.
+A List object can be considered as a 1 dimensional list of values or a single column from a DataFrame instance. Lists are typically used to process a column, often to aggregate the values in some way or to perform univariate analysis.
 
 ### Visual
 
-The Visual class is used to create and render visuals. As mentioned above, a key feature of data-bound visuals is that when the underlying data changes, the visual is automatically redraw. This feature enables interactive dashboards to be built using this tool too.
+The Visual class is used to create and render visuals. As mentioned above, a key feature of data-bound visuals is that when the underlying data changes, the visual is automatically updated. This feature enables interactive dashboards to be built using this tool too.
 
 ### UI
 
-The UI class is used for manipulating the output. Typically you don't need to use the UI class directly. It is called indirectly when you create visuals. For example, the normal pattern to render a visual is to create a Visual object from a DataFrame object using the visual() function, then attach to the DOM using the Visual.attach() function:
+The UI class is used for manipulating the output section. Typically you don't need to use the UI class directly. It is called indirectly when you create visuals. For example, the normal pattern to render a visual is to create a Visual object from a DataFrame object using the visual() function, then attach to the DOM using the Visual.attach() function:
 
 ```javascript
-dataframe.visual({visual_renderer_function}, {options}).attach('root');
+DataFrame.examples.mtcars().head(10).visual('table').attach('root');
 ```
 
 The one method from the UI class which you will typically use (once per script) is the UI.layout() function. This function is used to design the grid layout for the output so that visuals can be positioned in the style of a dashboard.
 
 ## Documentation
 
-This documentation you're reading has been compiled using jsDoc. More information can be found from the home page: https://jsdoc.app/. The documentation has also been styled using the ink-docstrap template (https://www.npmjs.com/package/ink-docstrap).
+This documentation you're reading has been compiled using jsDoc. More information can be found from the home page: https://jsdoc.app/. The single-page version of the documentation also uses the following libraries:
+- jsdoc-to-markdown: converts all documentation to markdown
+- showdown: converts resulting markdown file to single .html file
+The full multifile version of the documentation has been styled using the ink-docstrap template (https://www.npmjs.com/package/ink-docstrap).
 
 ## Examples
 
@@ -310,7 +318,9 @@ UI.layout({
     },
   ],
 });
-let anscombe = DataFrame.examples.anscombe();
+let anscombe = DataFrame
+  .examples
+  .anscombe();
 
 let data = [
   { dataset: "1", panel: "top-left" },
@@ -320,34 +330,40 @@ let data = [
 ];
 
 data.forEach((d) => {
-  let dataset = anscombe.filter((r) => r.dataset === d.dataset);
+  let dataset = anscombe
+    .filter((r) => r.dataset === d.dataset)
+    .calculate('rownum', (r,i,df) => i)
+    .measure('x value', (g,i,df) => g.list('x').mean())
+    .measure('y value', (g,i,df) => g.list('y').mean());
+
   dataset
-    .visual("scatter", {
-      fnXValues: (r) => {
-        return { x: r.x };
-      },
-      fnYValues: (r) => {
-        return { y: r.y };
-      },
-      axes: {
-        x: {
-          min: 1,
-          max: 20,
+    .visual(
+      "scatter",
+      {
+        binding: {
+          column: 'x value',
+          row: 'y value',
+          detail: 'rownum'
         },
-        y: {
-          min: 1,
-          max: 16,
-        },
-      },
-    })
-    .attach(d.panel);
+        axes: {
+          column: {
+            min: 1,
+            max: 20
+          },
+          row: {
+            min: 1,
+            max: 16
+          }
+        }
+    }
+  )
+  .attach(d.panel);
+
   Visual.html(`mean(x): ${dataset.list("x").mean()}`).attach(d.panel);
   Visual.html(`var(x): ${dataset.list("x").var()}`).attach(d.panel);
-  Visual.html(`y mean: ${dataset.list("y").mean()}`).attach(d.panel);
+  Visual.html(`mean(y): ${dataset.list("y").mean()}`).attach(d.panel);
   Visual.html(`var(y): ${dataset.list("y").var()}`).attach(d.panel);
-  Visual.html(`corr(x,y): ${dataset.list("x").corr(dataset.list("y"))}`).attach(
-    d.panel
-  );
+  Visual.html(`corr(x,y): ${dataset.list("x").corr(dataset.list("y"))}`).attach(d.panel);
 });
 ```
 
@@ -361,12 +377,12 @@ The source code for this project is available from: https://github.com/davidbaro
 
 A number of scripts have been created for basic tasks:
 
-- docs: Creates a full document web site using jsDoc and the in-docstrap template. Suitable for highest quality documentation.
-- docslite: Creates a single-file documentation page via jsDoc-to-markdown and Showdown. This documentation is useful when you need a 'bundled' solution.
-- build: Builds site in production mode.
-- build-dev: Builds site in development mode.
-- serve: runs the Webpack Dev Server with Hot Module Replacement (HMR).
-- test: runs the test suite (using Jest) with code coverage metrics included
+- **docs**: Creates a full document web site using jsDoc and the in-docstrap template. Suitable for highest quality documentation.
+- **docslite**: Creates a single-file documentation page via jsDoc-to-markdown and Showdown. This documentation is useful when you need a 'bundled' solution.
+- **build**: Builds site in production mode.
+- **build-dev**: Builds site in development mode.
+- **serve**: runs the Webpack Dev Server with Hot Module Replacement (HMR).
+- **test**: runs the test suite (using Jest) with code coverage metrics included
 
 ---
 

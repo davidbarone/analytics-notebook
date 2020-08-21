@@ -52,7 +52,7 @@ class UI {
   static refresh(panel) {
     let visuals = panels[panel];
 
-    visuals.forEach((v) => {});
+    visuals.forEach((v) => { });
     UI.content();
   }
 
@@ -263,9 +263,9 @@ class UI {
   }
 
   /**
-   * Writes content / visuals to an output panel.
-   * @param {*} content
-   * @param {*} id
+   * Writes content and visuals to an output panel. Note this method should not be used by users. To display visuals, use the Visual.attach() method to attach the visual to the DOM.
+   * @param {object} content
+   * @param {string} id
    */
   static content(content, id = null) {
     // Note: all content / visuals goes into an inner div within panel

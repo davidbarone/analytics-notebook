@@ -1,5 +1,5 @@
 /**
- * A List object represents a single column from a DataFrame. Univariate analysis can be performed on a List object.
+ * A List instance represents a single column from a DataFrame. Univariate analysis can be performed on a List instance. List instances are also used to summarise data.
  */
 class List {
   constructor(arr) {
@@ -23,7 +23,7 @@ class List {
    * @returns {number} The count of items in the list.
    * @example <caption>Getting the number of records in a dataset</caption>
    * let titanic = DataFrame.examples.titanic();
-   * UI.content(titanic.column("age").count());
+   * alert(titanic.column("age").count());
    */
   count() {
     return this.arr.length;
@@ -34,7 +34,7 @@ class List {
    * @returns {number} Returns the sum of a list.
    * @example <caption>Getting the sum of a list</caption>
    * let titanic = DataFrame.examples.titanic();
-   * UI.content(titanic.column("survived").sum());
+   * alert(titanic.column("survived").sum());
    */
   sum() {
     return this.values().arr.reduce((acc, cur) => acc + cur, 0);
@@ -45,7 +45,7 @@ class List {
    * @returns {number} Returns the minimum value in a list.
    * @example <caption>Getting the minimum value of a list</caption>
    * let titanic = DataFrame.examples.titanic();
-   * UI.content(titanic.column("survived").min());
+   * alert(titanic.column("survived").min());
    */
   min() {
     return this.values().arr.reduce((acc, cur) => (acc <= cur ? acc : cur));
@@ -56,7 +56,7 @@ class List {
    * @returns {number} Returns the maximum value in a list.
    * @example <caption>Getting the maximum value of a list</caption>
    * let titanic = DataFrame.examples.titanic();
-   * UI.content(titanic.column("survived").max());
+   * alert(titanic.column("survived").max());
    */
   max() {
     return this.values().arr.reduce((acc, cur) => (acc > cur ? acc : cur));
@@ -67,7 +67,7 @@ class List {
    * @returns {number} Returns the mean value in a list.
    * @example <caption>Getting the mean value of a list</caption>
    * let titanic = DataFrame.examples.titanic();
-   * UI.content(titanic.column("survived").mean());
+   * alert(titanic.column("survived").mean());
    */
   mean() {
     return (
@@ -82,7 +82,7 @@ class List {
    * @returns {number} Returns the corresponding percentile value.
    * @example <caption>Getting the Q1 value of a list of values</caption>
    * let titanic = DataFrame.examples.titanic().cast({age: 'float'});
-   * UI.content(titanic.list("age").percentile(25));
+   * alert(titanic.list("age").percentile(25));
    */
   percentile(percentile) {
     const sorted = this.values().arr.sort((a, b) => (a > b ? 1 : -1));
@@ -95,7 +95,7 @@ class List {
    * @returns {List} All non-null values (duplicates included).
    * @example <caption>Getting a list of non-null values</caption>
    * let titanic = DataFrame.examples.titanic().cast({age: 'float'});
-   * UI.content(titanic.list("age").values());
+   * alert(titanic.list("age").values());
    */
   values() {
     return new List(this.arr.filter((i) => i || i == 0));
@@ -106,7 +106,7 @@ class List {
    * @returns {List} Unique list of non-null values.
    * @example <caption>Getting a unique list of non-null values</caption>
    * let titanic = DataFrame.examples.titanic().cast({age: 'float'});
-   * UI.content(titanic.list("age").unique());
+   * alert(titanic.list("age").unique());
    */
   unique() {
     let results = [];
@@ -119,7 +119,7 @@ class List {
    * @returns {string} The type of the list.
    * @example <caption>Getting the type of a list</caption>
    * let titanic = DataFrame.examples.titanic().cast({age: 'float'});
-   * UI.content(titanic.list("age").unique());
+   * alert(titanic.list("age").unique());
    */
   type() {
     let type = "undefined";
@@ -133,8 +133,8 @@ class List {
    * Returns the most frequent value(s). Up to 5 mode values are permitted.
    * @returns {Array} The list of most frequently occuring value(s).
    * @example <caption>Getting the mode of a list</caption>
-   * let values = new Column(1,5,3,7,3,7,8,12,15);
-   * UI.content(values.mode());
+   * let values = new List([1,5,3,7,3,7,8,12,15]);
+   * alert(values.mode());
    */
   mode() {
     let obj = {};
@@ -183,7 +183,7 @@ class List {
    *   .cast({age: 'float'})
    *   .list('age')
    *   .var();
-   * console.log(variance);
+   * alert(variance);
    */
   var() {
     let sumSquaredDeviations = 0;
@@ -204,7 +204,7 @@ class List {
    *   .cast({age: 'float'})
    *   .list('age')
    *   .std();
-   * console.log(std);
+   * alert(std);
    */
   std() {
     return Math.pow(this.var(), 0.5);
@@ -218,7 +218,7 @@ class List {
    * let iris = DataFrame.examples.iris();
    * let sepal_length_cm = iris.list('sepal_length_cm');
    * let petal_length_cm =  iris.list('petal_length_cm');
-   * console.log(sepal_length_cm.corr(petal_length_cm));
+   * alert(sepal_length_cm.corr(petal_length_cm));
    */
   corr(list) {
     if (this.count() !== list.count()) {
@@ -242,7 +242,7 @@ class List {
       }
     }
 
-    let corr = numerator / denominator;
+    let corr = (1 / (rowCount - 1)) * (numerator / denominator);
     return Math.round(corr * 1000000) / 1000000;
   }
 }
