@@ -4,8 +4,7 @@ import VisualLibraryBase from "./Visual.library.base.js";
 /**
  * Draws a boxplot diagram. Boxplot diagrams are useful for showing the 5-number summary of a continuous variable.
  * The function will automatically include a boxplot for every numeric variable in the DataFrame object.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
+ * @param {Visual} visual - The Visual object used for rendering.
  * @returns {Node}
  * @example <caption>Displaying a boxplot diagram for continuous variables in the iris dataset</caption>
  * DataFrame

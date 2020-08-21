@@ -2,6 +2,7 @@ import Visual from "../Visual.js";
 
 /**
  * Default table renderer function.
+ * @param {Visual} visual - The Visual object used for rendering.
  * @returns {Node}
  * @example <caption>Creating a table visual</caption>
  * let data = DataFrame

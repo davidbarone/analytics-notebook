@@ -16,8 +16,11 @@
   --grey-3: #aaa;
   --grey-4: #eee;
 
-  /* Margins / Padding */
-  --default-space: 4px;
+  /* widths */
+  --width-narrow: 2px;
+  --width-normal: 4px;
+  --width-wide: 8px;
+  --width-x-wide: 12px;
 }
 
 div.visual {
@@ -25,13 +28,13 @@ div.visual {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  margin-bottom: var(--default-space);
-  margin-right: var(--default-space);
+  margin-bottom: var(--width-normal);
+  margin-right: var(--width-normal);
 }
 
 div.visual.inner {
   display: inline-block;
-  padding: var(--default-space);
+  padding: var(--width-normal);
   margin: 0;
 }
 
@@ -43,9 +46,9 @@ div.visual.error {
  margin: 0;
  padding: 0;
  box-sizing: border-box;
- margin-bottom: var(--default-space);
- margin-right: var(--default-space);
- padding: var(--default-space);
+ margin-bottom: var(--width-normal);
+ margin-right: var(--width-normal);
+ padding: var(--width-normal);
 }
 
 html,
@@ -141,22 +144,22 @@ div.panel {
 }
 
 div.panel.leaf {
-  border-bottom: var(--default-space) solid var(--grey-3);
-  border-right: var(--default-space) solid var(--grey-3);
+  border-bottom: var(--width-normal) solid var(--grey-3);
+  border-right: var(--width-normal) solid var(--grey-3);
 }
 
 div.panel.top {
-  border-top: var(--default-space) solid var(--grey-3);
+  border-top: var(--width-normal) solid var(--grey-3);
 }
 
 div.panel.left {
-  border-left: var(--default-space) solid var(--grey-3);
+  border-left: var(--width-normal) solid var(--grey-3);
 }
 
 div.panel.inner {
   border: 0;
   margin: 0;
-  padding: var(--default-space);
+  padding: var(--width-normal);
   overflow: auto;
   width: 100%;
   height: 100%;
@@ -191,7 +194,21 @@ h4,
 h5,
 h6 {
   margin: 0;
-  padding: 0;
+  padding: 4px 20px;
+  margin-bottom: 8px;
+  background-color: var(--grey-3);
+}
+
+h1 {
+  border-left: var(--width-x-wide) solid var(--color-1);
+}
+
+h2 {
+  border-left: var(--width-x-wide) solid var(--color-2);
+}
+
+h3 {
+  border-left: var(--width-x-wide) solid var(--color-2);
 }
 
 .help h1,
@@ -227,16 +244,11 @@ th {
 }
 
 pre {
-  background-color: var(--grey-3);
-  margin-left: var(--grey-1);
-}
-
-pre.code {
-  background: #ccc;
-  border: 1px solid black;
-  border-radius: 8px;
-  border-left: 8px solid var(--color-3);
-  padding: 4px;
+  background-color: var(--grey-4);
+  padding: var(--width-wide);
+  border-radius: var(--width-wide);
+  border: 1px solid var(--grey-3);
+  border-left: var(--width-wide) solid var(--grey-3);
 }
 
 div.field {

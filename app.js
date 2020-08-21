@@ -10,7 +10,6 @@ import DataFrame from "./src/AnalyticsNotebook/DataFrame.js";
 import "./src/AnalyticsNotebook/DataFrame.examples.js";
 import List from "./src/AnalyticsNotebook/List.js";
 import Visual from "./src/AnalyticsNotebook/Visual.js";
-import "./src/AnalyticsNotebook/Visual.library.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.base.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.table.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.crosstab.js";

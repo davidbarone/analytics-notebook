@@ -3,8 +3,8 @@ import VisualLibraryBase from "./Visual.library.base.js";
 
 /**
  * Creates scatterplot matrix showing relationship between numerical variables in a DataFrame object.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
+ * @param {Visual} visual - The Visual object used for rendering.
+ * @returns {Node}
  * @example <caption>Creating a scatterplot matrix</caption>
  * DataFrame
  *   .examples

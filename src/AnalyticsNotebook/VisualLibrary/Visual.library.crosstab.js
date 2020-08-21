@@ -11,8 +11,8 @@ import Visual from "../Visual.js";
 /**
  * Generates a crosstab, matrix or contingency table allowing relationships between multiple categorical variables to be viewed.
  * For configuration, refer to: {@link Visual~OptionsCrosstab}.
- * @returns {Node}
  * @param {Visual} visual - The Visual object used for rendering.
+ * @returns {Node}
  * @example <caption>Creating a contingency table of Titanic survival rates</caption>
  * let data = DataFrame.examples.titanic();
  * 

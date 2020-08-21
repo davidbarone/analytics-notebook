@@ -12,10 +12,31 @@ var urlNotebooks = "https://[enter endpoint...]";
 var docsPath = "AnalyticsNotebook.Docs.html";
 
 function showHelp() {
-  UI.layout("root");
+
+  document.getElementById("waiting").classList.add("show");
+
+  setTimeout(() => {
+    UI.layout({ id: 'root', fit: 'width' });
+
+    fetch('./AnalyticsNotebook.docs.html').then((response) => {
+      return response.text();
+    }).then((html) => {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(html, 'text/html');
+      var body = doc.querySelector('body');
+
+      // add to root
+      UI.content(body, "root");
+      document.getElementById("waiting").classList.remove("show");
+    });
+  });
+
+
+  /*
   document.getElementById(
     "root"
   ).innerHTML = `<object type="text/html" style="width: 100%; height: 100%" data="./AnalyticsNotebook.Docs.html" ></object>`;
+    */
 }
 
 function runCode() {
@@ -290,7 +311,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (typeof message == "object") {
       consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${
         JSON && JSON.stringify ? JSON.stringify(message) : message
-      }<br /></div>`;
+        }<br /></div>`;
     } else {
       consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
     }

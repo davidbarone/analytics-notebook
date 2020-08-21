@@ -17,60 +17,6 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
       "../dist/AnalyticsNotebook.Docs.html"
     );
     var md = "";
-    var style = `
-<style>
-  html {
-    font-family: Arial, Helvetica, sans-serif;
-  }
-
-  table,
-  th,
-  td {
-    border: solid 1px #ddeeee;
-    padding: 4px;
-  }
-
-  table {
-    padding: 2px;
-    border-collapse: collapse;
-    border-spacing: 0;
-  }
-
-  th {
-    background-color: #336699;
-    color: #efefef;
-    text-align: center;
-    font-weight: 600;
-  }
-
-  h1 {
-    background-color: steelBlue;
-    color: #333;
-    padding: 20px;
-    text-align: center;
-    border-left: 12px solid #bbddff;
-  }
-
-  h2,h3 {
-    margin-top: 1em;
-  }
-
-  h2 {
-    background-color: #6DAFFE;
-    padding: 20px;
-    text-align: center;
-    border-top: 1px solid #999;
-    border-bottom: 1px solid #999;
-  }
-
-  h3 {
-    background-color: #EDF6FF;
-    padding: 8px;
-    border-left: 12px solid #999;
-  }
-
-  </style>
-  `;
 
     fs.readFile(readmeFile, "utf8", function (err, contents) {
       md = contents;
@@ -80,7 +26,7 @@ jsdoc2md.render({ files: "src/**/*.js" }).then((output) =>
         converter.setFlavor("vanilla");
         converter.setOption("tables", true);  // format tables
         converter.setOption("ghCompatibleHeaderId", true);  // header links
-        let html = `<html><head>${style}</head><body>${converter.makeHtml(
+        let html = `<html><body>${converter.makeHtml(
           md
         )}</body></html>`;
         // write output as html

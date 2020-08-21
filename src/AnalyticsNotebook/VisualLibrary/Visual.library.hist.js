@@ -3,8 +3,7 @@ import VisualLibraryBase from "./Visual.library.base.js";
 
 /**
  * Renders a histogram. Histograms display the display the frequency distribution of a continuous variable using bins.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
+ * @param {Visual} visual - The Visual object used for rendering.
  * @returns {Node}
  * @example <caption>Displaying a histogram</caption>
  * DataFrame
