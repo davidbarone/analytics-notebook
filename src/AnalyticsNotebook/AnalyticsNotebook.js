@@ -18,7 +18,7 @@ function showHelp() {
   setTimeout(() => {
     UI.layout({ id: 'root', fit: 'width' });
 
-    fetch('./AnalyticsNotebook.docs.html').then((response) => {
+    fetch('./AnalyticsNotebook.Docs.html').then((response) => {
       return response.text();
     }).then((html) => {
       var parser = new DOMParser();
