@@ -154,7 +154,7 @@ Visual.library.scatter = function (visual) {
       return y(d[yColumnName]);
     })
     .attr("r", function (d) {
-      return sizeBinding ? d[sizeBinding] : 5;
+      return sizeBinding ? d[sizeBinding] : 3;
     })
     .style("fill", function (d) {
       return colorBinding

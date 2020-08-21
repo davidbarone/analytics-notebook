@@ -78,6 +78,45 @@ class Visual {
   }
 
   /**
+   * Returns an orphaned Html Node element which can be manually placed into the DOM.
+   * @returns {Node}
+   */
+  node() {
+    let renderFunction = Visual.library[this.type];
+
+    // merge with default base options (let visual do visual-specific stuff)
+    this.options = Object.mergeDeep(
+      {},
+      VisualLibraryBase.defaultOptions,
+      this.options
+    );
+
+    // for binding option, we ensure all properties are arrays.
+
+    for (let key in this.options.binding) {
+      if (typeof this.options.binding[key] === "string") {
+        this.options.binding[key] = [this.options.binding[key]];
+      } else if (Array.isArray(this.options.binding[key])) {
+        // good to go.
+      } else {
+        throw `Binding for ${key} must be an Array of columns.`;
+      }
+    }
+
+    // Call render function, passing the current visual.
+    let content;
+    let elVisual;
+    try {
+      content = renderFunction(this);
+      elVisual = VisualLibraryBase.doBaseStyles(content, this.options, this.id);
+    } catch (error) {
+      elVisual = VisualLibraryBase.doErrorVisual(error, this.options, this.id);
+    }
+
+    return elVisual;
+  }
+
+  /**
    * Redraws the current visual and all other visuals in the same panel. Re-rendering
    * typically occurs when data is sliced via interactive visuals.
    */
@@ -87,39 +126,8 @@ class Visual {
     UI.clear(id);
     Visual.visuals.forEach((c) => {
       if (c.panelId === id) {
-        let renderFunction = Visual.library[c.type];
-
-        // merge with default base options (let visual do visual-specific stuff)
-        c.options = Object.mergeDeep(
-          {},
-          VisualLibraryBase.defaultOptions,
-          c.options
-        );
-
-        // for binding option, we ensure all properties are arrays.
-
-        for (let key in c.options.binding) {
-          if (typeof c.options.binding[key] === "string") {
-            c.options.binding[key] = [c.options.binding[key]];
-          } else if (Array.isArray(c.options.binding[key])) {
-            // good to go.
-          } else {
-            throw `Binding for ${key} must be an Array of columns.`;
-          }
-        }
-
-        // Call render function, passing the current visual.
-        let content;
-        let elVisual;
-        try {
-          content = renderFunction(c);
-          elVisual = VisualLibraryBase.doBaseStyles(content, c.options, c.id);
-        } catch (error) {
-          elVisual = VisualLibraryBase.doErrorVisual(error, c.options, c.id);
-        }
-        let panelId = c.panelId;
-
-        UI.content(elVisual, panelId);
+        let elVisual = c.node();
+        UI.content(elVisual, id);
       }
     });
   }
