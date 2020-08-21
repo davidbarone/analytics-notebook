@@ -20,20 +20,18 @@ import VisualLibraryBase from "./Visual.library.base.js";
  * let model = DataFrame
  *   .examples
  *   .titanic()
- *   .calculate({
- *     passengers: (g, df) => g.count()
- *   });
- *
+ *   .measure('passengers', (g, i, df) => g.count());
+ * 
  * model
  *   .visual(
  *     'column',
  *     {
- *       title: 'Passengers on the Titanic by Embarked port & Sex',
+ *       title: 'Passengers on the Titanic by Embarked & Sex',
  *       background: '#abcdef',
  *       binding: {
  *         column: 'embarked',
  *         row: 'sex',
- *         values: ['passengers']
+ *         value: 'passengers'
  *       }
  *     }
  *   )
@@ -42,17 +40,15 @@ import VisualLibraryBase from "./Visual.library.base.js";
  * let roll = () => Math.floor(Math.random() * 6) + 1;
  * let attempts = prompt("Enter number of dice throws (1 - 1,000,000):");
  * let data = [];
- *
+ * 
  * for (let i = 0; i < attempts; i++) {
  *   data.push({roll: roll()});
  * }
- *
+ * 
  * let df = DataFrame
  *   .create(data)
- *   .calculate({
- *     count: (g, df) => g.count()
- *   });
- *
+ *   .measure('count', (g, i, df) => g.count());
+ * 
  * df
  *   .visual(
  *     'column'
@@ -60,10 +56,11 @@ import VisualLibraryBase from "./Visual.library.base.js";
  *       title: `Results of ${attempts} Throws:`,
  *       binding: {
  *         column: 'roll',
- *         values: ['count']
+ *         value: 'count'
  *       }
  *     }
- *   ).attach('root');
+ *   )
+ *   .attach('root');
  */
 Visual.library.column = function (visual) {
   let dataFrame = visual.dataFrame;
@@ -77,31 +74,32 @@ Visual.library.column = function (visual) {
   ]);
 
   let columns = [
-    options.binding.column,
-    options.binding.row,
-    options.binding.values,
+    options.binding.column[0],
+    options.binding.row[0],
+    ...options.binding.value,
   ].filter((c) => c);
 
   // Summarise data
   let data = visual.dataFrame.cube(...columns);
 
   let subGroups = [];
+
   // If the row field set, pivot the data
-  if (options.binding.row) {
-    subGroups = data.list(options.binding.row).unique().arr;
-    data = data.pivot(
+  if (options.binding.row[0]) {
+    subGroups = data.list(options.binding.row[0]).unique().arr;
+    data = data.group(
       (g) => {
-        return { [options.binding.column]: g[options.binding.column] };
+        return { [options.binding.column[0]]: g[options.binding.column[0]] };
       },
-      (p) => p[options.binding.row],
-      (a) => a.list(options.binding.values[0]).sum()
+      (a) => a.list(options.binding.value[0]).sum(),
+      (p) => p[options.binding.row[0]]
     );
   } else {
     // just value(s) specified. These are already column headers.
-    subGroups = options.binding.values;
+    subGroups = options.binding.value;
   }
 
-  data = data.data; // Get underlying native js array.
+  data = data._data; // Get underlying native js array.
 
   // set the dimensions and margins of the graph
   let width = options.width - options.margin.left - options.margin.right,
@@ -118,36 +116,13 @@ Visual.library.column = function (visual) {
       "translate(" + options.margin.left + "," + options.margin.top + ")"
     );
 
-  // border
-  if (options.border) {
-    var border = svg
-      .append("rect")
-      .attr("x", -options.margin.left)
-      .attr("y", -options.margin.top)
-      .attr("height", options.height)
-      .attr("width", options.width)
-      .style("fill", "none");
-  }
-
-  // title?
-  if (options.title) {
-    svg
-      .append("text")
-      .attr("x", options.width / 2 - options.margin.left)
-      .attr("y", 0 - options.margin.top / 2)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("text-decoration", "underline")
-      .text(options.title);
-  }
-
   // X axis
   var x = d3
     .scaleBand()
     .range([0, width])
     .domain(
       data.map(function (d) {
-        return d[options.binding.column];
+        return d[options.binding.column[0]];
       })
     )
     .padding(0.2);
@@ -205,7 +180,7 @@ Visual.library.column = function (visual) {
 
     .append("g")
     .attr("transform", function (d) {
-      return "translate(" + x(d[options.binding.column]) + ",0)";
+      return "translate(" + x(d[options.binding.column[0]]) + ",0)";
     })
     .selectAll("rect")
     .data(function (d) {

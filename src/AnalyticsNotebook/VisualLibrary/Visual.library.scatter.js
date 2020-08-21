@@ -31,26 +31,38 @@ import VisualLibraryBase from "./Visual.library.base.js";
  *   .examples
  *   .titanic()
  *   .cast({age: 'float', fare: 'float'})
+ *   .calculate('rownum', (r, i, df) => i)
+ *   .measure('age values', (g, i, df) => g.list('age').mean())
+ *   .measure('fare values', (g, i, df) => g.list('fare').mean())
  *   .visual(
  *     'scatter',
  *     {
  *       binding: {
- *         column: 'age',
- *         row: 'fare'
+ *         column: 'age values',
+ *         row: 'fare values',
+ *         detail: 'rownum'
  *       }
  *     }
  *   )
  *   .attach("root");
  * @example <caption>Incorporating a 3rd dimension using color</caption>
- * let iris = DataFrame.examples.iris();
+ * let iris = DataFrame
+ *   .examples
+ *   .iris()
+ *   .calculate('rownum', (r, i, df) => i)
+ *   .measure('sepal length values', (g, i, df) => g.list('sepal_length_cm').mean())
+ *   .measure('sepal width values', (g, i, df) => g.list('sepal_width_cm').mean())
+ *   .measure('color value', (g, i, df) => g.list('class').min());
+ * 
  * iris
  *   .visual(
  *     'scatter',
  *     {
  *       binding: {
- *         column: 'sepal_length_cm',
- *         row: 'sepal_width_cm',
- *         color: 'class'
+ *         column: 'sepal length values',
+ *         row: 'sepal width values',
+ *         detail: 'rownum',
+ *         color: 'color value'
  *       }
  *     }
  *   )

@@ -14,8 +14,8 @@ import VisualLibraryBase from "./Visual.library.base.js";
  *   .visual(
  *     'hist',
  *     {
- *       fnValues: (r) => {
- *         return { age: r.age };
+ *       binding: {
+ *         column: 'age'
  *       }
  *     }
  *   )

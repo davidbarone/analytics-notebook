@@ -19,7 +19,7 @@ import VisualLibraryBase from "./Visual.library.base.js";
  *   fit: 'width'
  * });
  * let data = DataFrame.examples.iris();
- * data.visual('slicer', {column: 'class'}).attach('root');
+ * data.visual('slicer', {binding: {column: 'class'}}).attach('root');
  * data.visual('table').attach('root');
  */
 Visual.library.slicer = function (visual) {

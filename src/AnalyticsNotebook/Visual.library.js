@@ -1,19 +1,5 @@
 import Visual from "./Visual.js";
 
-/**
- * Renderer that renders static content. The dataFrame object is ignored.
- * @param {DataFrame} dataFrame - The data bound to the visual.
- * @param {Object} options - Configuration of the visual.
- * @returns {Node}
- */
-Visual.library.html = function (visual) {
-  let dataFrame = visual.dataFrame;
-  let options = visual.options;
-  let elDiv = document.createElement("div");
-  let html = options.html || "";
-  elDiv.innerHTML = html;
-  return elDiv;
-};
 
 
 /**

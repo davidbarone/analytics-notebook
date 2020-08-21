@@ -14,7 +14,7 @@ import VisualLibraryBase from "./Visual.library.base.js";
  *   .visual(
  *     'pie',
  *     {
- *       title: 'This is a test',
+ *       title: 'Titanic Passengers' Sex',
  *       background: '#999',
  *       border: {width: 1, color: '#333'},
  *       binding: {

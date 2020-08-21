@@ -15,12 +15,10 @@ import Visual from "../Visual.js";
  * @param {Visual} visual - The Visual object used for rendering.
  * @example <caption>Creating a contingency table of Titanic survival rates</caption>
  * let data = DataFrame.examples.titanic();
- *
- * data.calculate({
- *   passengers: (g, df) => g.count(),
- *   survival: (g, df) => g.filter(r=>r.survived===1).count() / g.count()
- * });
- *
+ * 
+ * data.measure('passengers', (g, i, df) => g.count());
+ * data.measure('survival', (g, i, df) => g.filter(r => r.survived===1).count() / g.count());
+ * 
  * data
  *   .visual('crosstab', {
  *     binding: {
