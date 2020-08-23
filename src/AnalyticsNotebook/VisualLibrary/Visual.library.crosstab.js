@@ -15,10 +15,10 @@ import Visual from "../Visual.js";
  * @returns {Node}
  * @example <caption>Creating a contingency table of Titanic survival rates</caption>
  * let data = DataFrame.examples.titanic();
- * 
+ *
  * data.measure('passengers', (g, i, df) => g.count());
  * data.measure('survival', (g, i, df) => g.filter(r => r.survived===1).count() / g.count());
- * 
+ *
  * data
  *   .visual('crosstab', {
  *     binding: {
@@ -32,34 +32,26 @@ Visual.library.crosstab = function (visual) {
   let dataFrame = visual.dataFrame;
   let options = visual.options;
 
-  options = Object.mergeDeep(
-    {},
-    {
-      title: "",
-      binding: {
-        columns: null,
-        rows: null,
-        values: null,
-      },
-    },
-    options
-  );
+  options = Object.mergeDeep({}, options);
 
-  let columnsFieldCount = options.binding.columns.length;
-  let rowsFieldCount = options.binding.rows.length;
-  let valuesFieldCount = options.binding.values.length;
+  let columnsFieldCount = options.binding.column.length;
+  let rowsFieldCount = options.binding.row.length;
+  let valuesFieldCount = options.binding.value.length;
+
+  let columns = [
+    ...options.binding.column,
+    ...options.binding.row,
+    ...options.binding.value,
+    ...options.binding.color,
+  ].filter((c) => c);
 
   // Get summarised data
-  let data = dataFrame.cube(
-    ...options.binding.columns,
-    ...options.binding.rows,
-    ...options.binding.values
-  );
+  let data = dataFrame.cube(...columns);
 
   // Get rows headers
   let rowGroups = data.group((row) => {
     let group = {};
-    options.binding.rows.forEach((r) => {
+    options.binding.row.forEach((r) => {
       group[r] = row[r];
     });
     return group;
@@ -68,7 +60,7 @@ Visual.library.crosstab = function (visual) {
   // Get column headers
   let columnGroups = data.group((row) => {
     let group = {};
-    options.binding.columns.forEach((c) => {
+    options.binding.column.forEach((c) => {
       group[c] = row[c];
     });
     return group;
@@ -84,12 +76,12 @@ Visual.library.crosstab = function (visual) {
     html += "<tr>";
     if (row <= columnsFieldCount) {
       // Display the row headers
-      options.binding.rows.forEach((r) => {
+      options.binding.row.forEach((r) => {
         html += `<th>${columnsFieldCount === row ? r : ""}</th>`;
       });
 
       // Display the column headers
-      let columnName = options.binding.columns[row];
+      let columnName = options.binding.column[row];
       for (let c = 0; c < columnGroups.count(); c++) {
         html += `<th>${columnGroups[c][columnName]}</th>`;
       }
@@ -102,7 +94,7 @@ Visual.library.crosstab = function (visual) {
     html += "<tr>";
     // Display the row headers
     for (let r = 0; r < rowsFieldCount; r++) {
-      let rowName = options.binding.rows[r];
+      let rowName = options.binding.row[r];
       html += `<th>${rowGroups[row][rowName]}</th>`;
     }
 
@@ -116,10 +108,7 @@ Visual.library.crosstab = function (visual) {
       let cell = data
         .filter((f) => {
           let match = true;
-          let dimensions = [
-            ...options.binding.columns,
-            ...options.binding.rows,
-          ];
+          let dimensions = [...options.binding.column, ...options.binding.row];
           for (let d of dimensions) {
             if (f[d] !== intersect[d]) {
               match = false;
@@ -128,19 +117,28 @@ Visual.library.crosstab = function (visual) {
           }
           return match;
         })
-        .select(...options.binding.values)[0];
+        .select(...options.binding.value, ...options.binding.color)[0];
 
+      // Any color binding used? If so, need to color cell background
+      let cellStyle = "";
+      if (options.binding.color[0]) {
+        let colorField = options.binding.color[0];
+        let colorValue = cell[colorField];
+        if (colorValue.isColor()) {
+          cellStyle = `style="background-color: ${colorValue};"`;
+        }
+      }
       if (cell) {
         if (valuesFieldCount > 1) {
           let cellTable = "<table>";
-          options.binding.values.forEach((v) => {
+          options.binding.value.forEach((v) => {
             cellTable += `<tr><th>${v}</th><td>${cell[v]}</td></tr>`;
           });
           cellTable += "</table>";
-          html += `<td>${cellTable}</td>`;
+          html += `<td ${cellStyle}>${cellTable}</td>`;
         } else {
-          let fieldName = options.binding.values[0];
-          html += `<td>${cell[fieldName]}</td>`;
+          let fieldName = options.binding.value[0];
+          html += `<td ${cellStyle}>${cell[fieldName]}</td>`;
         }
       } else {
         html += "<td style=backgound-color: #999;></td>";

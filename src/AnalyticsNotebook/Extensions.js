@@ -149,4 +149,19 @@ Object.mergeDeep = function (target, ...sources) {
   return Object.mergeDeep(target, ...sources);
 };
 
+/**
+ * Determines whether a string is a CSS color string. This function recognises hex codes, RBG strings, and color names like 'red'. Note that hex strings are typically converted to RGB values automatically.
+ */
+String.prototype.isColor = function () {
+  var s = new Option().style;
+  s.color = this;
+  let test1 = s.color === this.toLowerCase();
+  let test2 = /^#[0-9A-F]{6}$/i.test(this);
+  if (test1 == true || test2 == true) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 export default {};

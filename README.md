@@ -14,6 +14,7 @@
   - [Examples](#examples)
     - [Titanic Exploratory Analysis](#titanic-exploratory-analysis)
     - [Anscombe's Quartet](#anscombes-quartet)
+    - [Mtcars Analysis](#mtcars-analysis)
   - [Development / Source Code](#development--source-code)
     - [Scripts](#scripts)
 - [API Reference](#api-reference)
@@ -365,6 +366,81 @@ data.forEach((d) => {
   Visual.html(`var(y): ${dataset.list("y").var()}`).attach(d.panel);
   Visual.html(`corr(x,y): ${dataset.list("x").corr(dataset.list("y"))}`).attach(d.panel);
 });
+```
+### Mtcars Analysis
+
+```javascript
+let mt = DataFrame
+  .examples
+  .mtcars()
+  .calculate('index', (r, i, df) => i)
+  .measure('mpg value', (g, i, df) => g.list('mpg').mean())
+  .measure('hp value', (g, i, df) => g.list('hp').mean())
+  .measure('qsec value', (g, i, df) => g.list('qsec').mean())
+  .measure('disp value', (g, i, df) => g.list('disp').mean())
+  .measure('cyl value', (g, i, df) => g.list('cyl').mean())
+
+
+//mt.head(5).visual('table', {inline: true}).attach('root');
+
+
+mt.describe().visual('table').attach('root');
+
+mt
+  .corr()
+  .measure('color', (g,i,df) => {
+      let value = Math.abs(g.list('corr').mean());
+      let green = 105 + Math.floor(150 * value);
+      let red = 255 - Math.floor(150 * value);
+      let blue = 100;
+      let color =  `rgb(${red}, ${green}, ${blue})`;
+      return `${color}`;
+    }
+  )
+  .visual(
+    'crosstab',
+    {
+      binding: {
+        column: 'x',
+        row: 'y',
+        value: 'corr',
+       color: 'color'
+      }
+    }
+  )
+  .attach('root');
+
+mt
+  .visual(
+    'scatter',
+    {
+      title: 'mpg vs hp (color: cyl)',
+      inline: true,
+      binding: {
+        detail: 'index',
+        column: 'mpg value',
+        row: 'hp value',
+        color: 'cyl value'
+      }
+    }
+  )
+  .attach('root');
+
+mt
+  .visual(
+    'scatter',
+    {
+      title: 'qsec vs disp (color: cyl)',
+      inline: true,
+      binding: {
+        detail: 'index',
+        column: 'qsec value',
+        row: 'disp value',
+        color: 'cyl value'
+      }
+    }
+  )
+  .attach('root');
 ```
 
 ## Development / Source Code
