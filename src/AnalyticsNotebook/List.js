@@ -98,7 +98,7 @@ class List {
    * alert(titanic.list("age").values());
    */
   values() {
-    return new List(this.arr.filter((i) => i || i == 0));
+    return new List(this.arr.filter((i) => i || i === 0));
   }
 
   /**
@@ -237,7 +237,7 @@ class List {
     for (let i = 0; i < rowCount; i++) {
       let x = this[i];
       let y = list[i];
-      if ((y || 0) && (x || 0)) {
+      if ((y || y === 0) && (x || x === 0)) {
         numerator += (x - xMean) * (y - yMean);
       }
     }

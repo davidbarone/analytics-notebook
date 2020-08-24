@@ -369,6 +369,8 @@ data.forEach((d) => {
 ```
 ### Mtcars Analysis
 
+Another simple descriptive analytics notebook, this time featuring a heat-map to show correlation between variables.
+
 ```javascript
 let mt = DataFrame
   .examples
@@ -376,25 +378,21 @@ let mt = DataFrame
   .calculate('index', (r, i, df) => i)
   .measure('mpg value', (g, i, df) => g.list('mpg').mean())
   .measure('hp value', (g, i, df) => g.list('hp').mean())
-  .measure('qsec value', (g, i, df) => g.list('qsec').mean())
+  .measure('wt value', (g, i, df) => g.list('wt').mean())
   .measure('disp value', (g, i, df) => g.list('disp').mean())
   .measure('cyl value', (g, i, df) => g.list('cyl').mean())
-
-
-//mt.head(5).visual('table', {inline: true}).attach('root');
-
 
 mt.describe().visual('table').attach('root');
 
 mt
   .corr()
   .measure('color', (g,i,df) => {
+      // calculates the color attribute based on correlation (0 = red, +/-1 = green)
       let value = Math.abs(g.list('corr').mean());
       let green = 105 + Math.floor(150 * value);
       let red = 255 - Math.floor(150 * value);
       let blue = 100;
-      let color =  `rgb(${red}, ${green}, ${blue})`;
-      return `${color}`;
+      return  `rgb(${red}, ${green}, ${blue})`;
     }
   )
   .visual(
@@ -430,11 +428,11 @@ mt
   .visual(
     'scatter',
     {
-      title: 'qsec vs disp (color: cyl)',
+      title: 'wt vs disp (color: cyl)',
       inline: true,
       binding: {
         detail: 'index',
-        column: 'qsec value',
+        column: 'wt value',
         row: 'disp value',
         color: 'cyl value'
       }
