@@ -4,7 +4,7 @@ import "../src/AnalyticsNotebook/DataFrame.examples.js";
 
 
 test("Check that zero values are included", () => {
-    // Javascript treats zero number value as falsey.
+    // Javascript treats zero number value as falsy.
     // But we need to treat as truthy (i.e. include in all statistical + aggregations)
 
     // vs column is 0/1 field.
