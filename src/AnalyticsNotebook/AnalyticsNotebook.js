@@ -31,7 +31,6 @@ function showHelp() {
     });
   });
 
-
   /*
   document.getElementById(
     "root"
@@ -51,13 +50,16 @@ function runCode() {
     code = `
 async function notebookCode() {
   ${code}
-}; notebookCode();`;
+}; notebookCode().then(r=> {
+  // remove the waiting css
+  document.getElementById("waiting").classList.remove("show");  
+});
+`;
     var scriptElem = document.createElement("script");
     scriptElem.text = code;
     document.head.appendChild(scriptElem);
     // and immediately remove script upon completion
     document.head.removeChild(scriptElem);
-    document.getElementById("waiting").classList.remove("show");
   }, 100);
 }
 
@@ -341,7 +343,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     slider();
   }
   if (urlParams.has("script")) {
-    elCode = document.getElementById("code");
+    let elCode = document.getElementById("code");
     code.innerHTML = urlParams.get("script");
     runCode();
   }
