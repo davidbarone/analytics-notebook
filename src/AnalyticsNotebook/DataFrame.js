@@ -550,15 +550,15 @@ class DataFrame {
   }
 
   /**
-   * Returns a single column from a DataFrame object.
-   * @param {string} column - The column can be a physical column or a calculation.
+   * Returns a List instance based on a single column or calculation from a DataFrame instance.
+   * @param {string} field - The column or calculation to return a list for.
    * @returns {List}
    * @example <caption>Getting a list of unique values in a column</caption>
    * let list = DataFrame.examples.titanic().list('pclass');
    * console.log(list.unique());
    */
-  list(column) {
-    let arr = []
+  list(field) {
+    let arr = [];
     for (let i = 0, len = this.count(); i < len; i++) {
       arr.push(this[i][column]);
     }
@@ -566,7 +566,7 @@ class DataFrame {
   }
 
   /**
-   * Returns descriptive statistics about the specified DataFrame object.
+   * Returns descriptive statistics about the current DataFrame instance.
    * @returns {DataFrame}
    */
   describe() {
@@ -716,7 +716,7 @@ class DataFrame {
    * let iris = DataFrame.examples.iris();
    * let corr = iris.corr();
    * console.log(corr);
-   * 
+   *
    * // Visualise
    * corr.group(
    *   g => { return { x: g.x }},
