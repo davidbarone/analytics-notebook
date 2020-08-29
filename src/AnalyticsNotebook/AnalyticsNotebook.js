@@ -12,23 +12,24 @@ var urlNotebooks = "https://[enter endpoint...]";
 var docsPath = "AnalyticsNotebook.Docs.html";
 
 function showHelp() {
-
   document.getElementById("waiting").classList.add("show");
 
   setTimeout(() => {
-    UI.layout({ id: 'root', fit: 'width' });
+    UI.layout({ id: "root", fit: "width" });
 
-    fetch('./AnalyticsNotebook.Docs.html').then((response) => {
-      return response.text();
-    }).then((html) => {
-      var parser = new DOMParser();
-      var doc = parser.parseFromString(html, 'text/html');
-      var body = doc.querySelector('body');
+    fetch("./AnalyticsNotebook.Docs.html")
+      .then((response) => {
+        return response.text();
+      })
+      .then((html) => {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
+        var body = doc.querySelector("body");
 
-      // add to root
-      UI.content(body, "root");
-      document.getElementById("waiting").classList.remove("show");
-    });
+        // add to root
+        UI.content(body, "root");
+        document.getElementById("waiting").classList.remove("show");
+      });
   });
 
   /*
@@ -50,8 +51,12 @@ function runCode() {
     code = `
 async function notebookCode() {
   ${code}
-}; notebookCode().then(r=> {
+};
+
+notebookCode().then(r=> {
   // remove the waiting css
+  document.getElementById("waiting").classList.remove("show");  
+}).catch(err => {
   document.getElementById("waiting").classList.remove("show");  
 });
 `;
@@ -313,7 +318,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (typeof message == "object") {
       consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${
         JSON && JSON.stringify ? JSON.stringify(message) : message
-        }<br /></div>`;
+      }<br /></div>`;
     } else {
       consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${message}<br /></div>`;
     }

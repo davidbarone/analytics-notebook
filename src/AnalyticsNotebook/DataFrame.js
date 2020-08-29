@@ -551,13 +551,13 @@ class DataFrame {
 
   /**
    * Returns a List instance based on a single column or calculation from a DataFrame instance.
-   * @param {string} field - The column or calculation to return a list for.
+   * @param {string} column - The column or calculation to return a list for.
    * @returns {List}
    * @example <caption>Getting a list of unique values in a column</caption>
    * let list = DataFrame.examples.titanic().list('pclass');
    * console.log(list.unique());
    */
-  list(field) {
+  list(column) {
     let arr = [];
     for (let i = 0, len = this.count(); i < len; i++) {
       arr.push(this[i][column]);
