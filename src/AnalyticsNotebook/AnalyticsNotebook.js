@@ -57,6 +57,7 @@ notebookCode().then(r=> {
   // remove the waiting css
   document.getElementById("waiting").classList.remove("show");  
 }).catch(err => {
+  console.log(err.message);
   document.getElementById("waiting").classList.remove("show");  
 });
 `;
@@ -315,6 +316,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   };
   window.onerror = function (message, url, lineNo, columnNo, error) {
+    document.getElementById("waiting").classList.remove("show");
     if (typeof message == "object") {
       consolePane.innerHTML += `<div style="color:red;">${url}: [${lineNo}, ${columnNo}]: ${error}, ${
         JSON && JSON.stringify ? JSON.stringify(message) : message
@@ -325,6 +327,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     return true;
   };
   window.onunhandledrejection = function (e) {
+    document.getElementById("waiting").classList.remove("show");
     consolePane.innerHTML += `<div style="color:red;">${e.reason}<br /></div>`;
     return true;
   };

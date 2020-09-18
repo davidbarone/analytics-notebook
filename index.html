@@ -44,9 +44,7 @@
       <div id="config">
         <div>
           <button id="run">Run</button>
-          <button id="help" style="float: right;">
-            ?
-          </button>
+          <button id="help" style="float: right">?</button>
         </div>
         <textarea
           id="code"
@@ -58,7 +56,7 @@
           <form>
             <div class="field">
               <label>Category:</label>
-              <select id="categories"> </select>
+              <select id="categories"></select>
             </div>
             <div class="field">
               <label>Notebook:</label>
@@ -98,6 +96,7 @@
         window.List = AnalyticsNotebook.List;
         window.Visual = AnalyticsNotebook.Visual;
         window.UI = AnalyticsNotebook.UI;
+        window.TextConverter = AnalyticsNotebook.TextConverter;
 
         // On startup, the div#waiting is hiding the rest of the document
         // whilst script modules load.

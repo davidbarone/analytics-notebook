@@ -23,4 +23,11 @@ import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.pairs.js";
 import "./src/AnalyticsNotebook/VisualLibrary/Visual.library.box.js";
 import "./src/AnalyticsNotebook/Extensions.js";
 import "./css/AnalyticsNotebook.css";
-export { AnalyticsNotebook, UI, DataFrame, List, Visual };
+
+// Models
+import "./src/models/linear.js";
+
+// Utilities
+import TextConverter from "./src/Utilities/TextConverter.js";
+
+export { AnalyticsNotebook, UI, DataFrame, List, Visual, TextConverter };

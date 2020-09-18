@@ -2,6 +2,7 @@ import List from "./List.js";
 import ColumnCategory from "./ColumnCategory.js";
 import JoinType from "./JoinType.js";
 import "./Extensions.js";
+import "../Utilities/TextConverter";
 
 /**
  * Provides data extraction and manipulation services.
@@ -78,6 +79,7 @@ class DataFrame {
    * Fetches data from a Url. The data must be JSON data.
    * @param {string} url - The Url to fetch data from.
    * @param {object} options - Options used for the fetch.
+   * @param {function} converter - Optional converter to use to parse text result
    * @returns {DataFrame}
    * @example <caption>Fetching data from an external API</caption>
    * UI.layout({
@@ -143,11 +145,18 @@ class DataFrame {
    *   fnValues: (c)=> { return { population: c.list("population").sum() }}
    * }).attach('bottom-left');
    */
-  static async fetch(url, options) {
+  static async fetch(url, options, converter) {
     console.log("starting read...");
     var result = await fetch(url, options);
 
-    var data = await result.json();
+    var data;
+    if (!converter) {
+      data = await result.json();
+    } else {
+      let text = await result.text();
+      data = converter(text);
+    }
+
     var count = data.length;
     console.log(`${count} rows read.`);
     return DataFrame.create(data);
